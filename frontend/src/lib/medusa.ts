@@ -1,0 +1,106 @@
+import Medusa from '@medusajs/medusa-js';
+import { MEDUSA_BACKEND_URL } from './config';
+
+const medusa = new Medusa({
+  baseUrl: MEDUSA_BACKEND_URL,
+  maxRetries: 3,
+});
+
+export default medusa;
+
+// ─── Product helpers ─────────────────────────────────────────────────────────
+
+export async function fetchProducts(params?: {
+  q?: string;
+  category_id?: string[];
+  limit?: number;
+  offset?: number;
+  sort?: string;
+}) {
+  const { products, count } = await medusa.products.list({
+    q: params?.q,
+    category_id: params?.category_id,
+    limit: params?.limit ?? 20,
+    offset: params?.offset ?? 0,
+  });
+  return { products, count };
+}
+
+export async function fetchProduct(handle: string) {
+  const { product } = await medusa.products.retrieve(handle);
+  return product;
+}
+
+export async function fetchCategories() {
+  const { product_categories } = await medusa.productCategories.list();
+  return product_categories;
+}
+
+// ─── Cart helpers ────────────────────────────────────────────────────────────
+
+export async function createCart() {
+  const { cart } = await medusa.carts.create();
+  return cart;
+}
+
+export async function getCart(cartId: string) {
+  const { cart } = await medusa.carts.retrieve(cartId);
+  return cart;
+}
+
+export async function addToCart(cartId: string, variantId: string, quantity: number) {
+  const { cart } = await medusa.carts.lineItems.create(cartId, {
+    variant_id: variantId,
+    quantity,
+  });
+  return cart;
+}
+
+export async function updateCartItem(cartId: string, lineId: string, quantity: number) {
+  const { cart } = await medusa.carts.lineItems.update(cartId, lineId, { quantity });
+  return cart;
+}
+
+export async function removeFromCart(cartId: string, lineId: string) {
+  const { cart } = await medusa.carts.update(cartId, {
+    // @ts-expect-error medusa-js doesn't expose removeItem but API supports quantity=0
+    items: [{ id: lineId, quantity: 0 }],
+  });
+  return cart;
+}
+
+export async function setCartEmail(cartId: string, email: string) {
+  const { cart } = await medusa.carts.update(cartId, { email });
+  return cart;
+}
+
+export async function completeCart(cartId: string) {
+  return medusa.carts.complete(cartId);
+}
+
+// ─── Auth helpers ────────────────────────────────────────────────────────────
+
+export async function authCreateSession(email: string, password: string) {
+  const result = await medusa.auth.authenticate({ email, password });
+  return result.customer;
+}
+
+export async function authCreateAccount(data: {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+}) {
+  // Use customer create endpoint directly
+  const { customer } = await medusa.customers.create(data);
+  return customer;
+}
+
+export async function authGetSession() {
+  try {
+    const { customer } = await medusa.auth.getSession();
+    return customer;
+  } catch {
+    return null;
+  }
+}
