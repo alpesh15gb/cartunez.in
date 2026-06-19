@@ -1,0 +1,234 @@
+networks:
+  cartunez-network:
+    name: cartunez-network
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: cartunez_postgres_data
+  redis_data:
+    name: cartunez_redis_data
+  meilisearch_data:
+    name: cartunez_meilisearch_data
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cartunez-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: cartunez
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cartunez"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - cartunez-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    logging: *default-logging
+
+  redis:
+    image: redis:7-alpine
+    container_name: cartunez-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD:-cartunez_redis_2024}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-cartunez_redis_2024}", "ping"]
+    networks:
+      - cartunez-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    logging: *default-logging
+
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: cartunez-meilisearch
+    restart: unless-stopped
+    ports:
+      - "7700:7700"
+    env_file:
+      - ./.env
+    environment:
+      MEILI_ENV: production
+      MEILI_NO_ANALYTICS: true
+    volumes:
+      - meilisearch_data:/meili_data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:7700/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - cartunez-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    logging: *default-logging
+
+  medusa:
+    build:
+      context: ./cartunez-medusa
+      dockerfile: Dockerfile
+    container_name: cartunez-medusa
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./uploads:/app/uploads
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/cartunez
+      REDIS_URL: redis://:${REDIS_PASSWORD:-cartunez_redis_2024}@redis:6379
+      MEILISEARCH_HOST: http://meilisearch:7700
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:9000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - cartunez-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    logging: *default-logging
+
+  fastapi:
+    build:
+      context: ./cartunez-api
+      dockerfile: Dockerfile
+    container_name: cartunez-fastapi
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/cartunez
+      REDIS_URL: redis://:${REDIS_PASSWORD:-cartunez_redis_2024}@redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - cartunez-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    logging: *default-logging
+
+  website:
+    build:
+      context: ./cartunez-website
+      dockerfile: Dockerfile
+    container_name: cartunez-website
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://localhost:9000
+      NEXT_PUBLIC_MEDUSA_URL: http://medusa:9000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: pk_01KVBSWHFD53JWKRBEHS43FDBJ
+      NEXT_PUBLIC_RAZORPAY_KEY_ID: ${NEXT_PUBLIC_RAZORPAY_KEY_ID:-rzp_test_Kx9mP2vL7nQ4}
+    depends_on:
+      medusa:
+        condition: service_healthy
+      fastapi:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - cartunez-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    logging: *default-logging
+
+  storefront:
+    build:
+      context: ./cartunez-storefront
+      dockerfile: Dockerfile
+    container_name: cartunez-storefront
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://localhost:9000
+      NEXT_PUBLIC_MEDUSA_URL: http://medusa:9000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: pk_01KVBSWHFD53JWKRBEHS43FDBJ
+      NEXT_PUBLIC_RAZORPAY_KEY_ID: ${NEXT_PUBLIC_RAZORPAY_KEY_ID:-rzp_test_Kx9mP2vL7nQ4}
+    depends_on:
+      medusa:
+        condition: service_healthy
+      fastapi:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - cartunez-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    logging: *default-logging
