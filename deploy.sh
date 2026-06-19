@@ -9,8 +9,10 @@ DOMAIN="cartunez.in"
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=== Cartunez Deployment ==="
-echo "Domain: $DOMAIN"
-echo "App Dir: $APP_DIR"
+DOMAIN="cartunez.in"
+# Go up two levels from backend/ to repo root
+APP_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+echo "App root: $APP_DIR"
 
 # 1. Install system dependencies
 echo "[1/7] Installing system dependencies..."
