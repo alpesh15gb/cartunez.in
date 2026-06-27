@@ -132,7 +132,7 @@ services:
     container_name: cartunez-fastapi
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8005:8000"
     environment:
       ENVIRONMENT: production
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-cartunez}
