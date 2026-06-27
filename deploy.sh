@@ -68,8 +68,17 @@ for conf in cartunez api commerce shop search; do
     fi
 done
 
-cp "$BACKEND_DIR/nginx/nginx.conf" /etc/nginx/nginx.conf
-rm -f /etc/nginx/sites-enabled/default
+# Add rate limiting zones to nginx.conf if not already present
+if ! grep -q "limit_req_zone.*api_general" /etc/nginx/nginx.conf; then
+    echo "    # Cartunez rate limiting zones" >> /etc/nginx/nginx.conf
+    echo "    limit_req_zone \$binary_remote_addr zone=api_general:10m rate=30r/s;" >> /etc/nginx/nginx.conf
+    echo "    limit_req_zone \$binary_remote_addr zone=api_auth:10m rate=5r/m;" >> /etc/nginx/nginx.conf
+    echo "    limit_req_zone \$binary_remote_addr zone=api_search:10m rate=20r/s;" >> /etc/nginx/nginx.conf
+    echo "    limit_req_zone \$binary_remote_addr zone=api_cart:10m rate=10r/s;" >> /etc/nginx/nginx.conf
+    echo "    limit_req_zone \$binary_remote_addr zone=api_webhook:10m rate=50r/s;" >> /etc/nginx/nginx.conf
+    echo "    limit_req_status 429;" >> /etc/nginx/nginx.conf
+fi
+
 nginx -t && systemctl reload nginx
 
 # 6. Start backend services
