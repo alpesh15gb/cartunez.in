@@ -1,13 +1,12 @@
-const { Medusa } = require("@medusajs/medusa");
+const start = require("@medusajs/medusa/dist/commands/start").default;
 const port = parseInt(process.env.PORT || "9000", 10);
-const host = process.env.HOST || "0.0.0.0";
+const directory = process.cwd();
 
 (async () => {
   try {
-    const app = new Medusa(process.cwd());
-    await app.listen(port, host);
+    await start({ port, directory });
   } catch (err) {
-    console.error("FATAL:", err);
+    console.error("FATAL:", err.message);
     process.exit(1);
   }
 })();
