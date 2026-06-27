@@ -96,4 +96,4 @@ EXPOSE 9000
 ENV PORT 9000
 ENV HOST 0.0.0.0
 
-CMD ["node", "start.js"]
+CMD ["sh", "-c", "npx medusa migrations run && node start.js"]
