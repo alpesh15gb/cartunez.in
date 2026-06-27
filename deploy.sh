@@ -153,40 +153,6 @@ NGINX
 
 ln -sf /etc/nginx/sites-available/cartunez /etc/nginx/sites-enabled/cartunez
 nginx -t && systemctl reload nginx
-
-# 6. Start backend services
-echo "[6/9] Starting Docker services..."
-cd "$BACKEND_DIR"
-docker compose up -d --build
-
-# 7. Run migrations
-echo "[7/9] Running database migrations..."
-sleep 15
-docker compose exec medusa node migrate.js || echo "Medusa migration skipped or already applied"
-docker compose exec fastapi alembic upgrade head || echo "FastAPI migration skipped or already applied"
-
-# 8. SSL (Let's Encrypt)
-echo "[8/9] Setting up SSL..."
-read -p "Do you want to set up SSL now? (y/n): " setup_ssl
-if [ "$setup_ssl" = "y" ]; then
-    certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --email "adnan@$DOMAIN" --redirect
-    echo "SSL configured for $DOMAIN!"
-    echo "For api.$DOMAIN, shop.$DOMAIN, commerce.$DOMAIN — run certbot again after DNS is set up:"
-    echo "  certbot --nginx -d api.$DOMAIN -d shop.$DOMAIN -d commerce.$DOMAIN --non-interactive --agree-tos --email adnan@$DOMAIN"
-else
-    echo "Skipping SSL. Run later: certbot --nginx -d $DOMAIN -d www.$DOMAIN"
-fi
-
-# 9. Install full nginx configs (with SSL references) if certs exist
-echo "[9/9] Installing full nginx configs..."
-if [ -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]; then
-    for conf in cartunez api commerce shop search; do
-        if [ -f "$BACKEND_DIR/nginx/${conf}.conf" ]; then
-            cp "$BACKEND_DIR/nginx/${conf}.conf" "/etc/nginx/sites-available/${conf}"
-            ln -sf "/etc/nginx/sites-available/${conf}" "/etc/nginx/sites-enabled/${conf}"
-        fi
-    done
-    nginx -t && systemctl reload nginx
     echo "Full SSL configs installed."
 else
     echo "SSL certs not found yet. HTTP-only config remains. Run deploy.sh again after getting certs."
