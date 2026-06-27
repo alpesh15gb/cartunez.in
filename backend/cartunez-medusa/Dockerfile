@@ -63,6 +63,9 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ENV DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cartunez
+ENV JWT_SECRET=build_placeholder_secret
+ENV COOKIE_SECRET=build_placeholder_secret
 RUN npm run build
 RUN npx medusa-admin build
 
