@@ -37,7 +37,7 @@ restart-%:
 
 # Run database migrations (Medusa)
 migrate-medusa:
-	docker compose exec medusa npm run migration:run
+	docker compose exec medusa node migrate.js
 
 # Run database migrations (FastAPI/Alembic)
 migrate-api:
@@ -52,7 +52,7 @@ seed:
 
 # Full setup (first time)
 setup:
-	@if [ ! -f .env ]; then cp .env.example .env 2>/dev/null || echo ".env already exists"; fi
+	@if [ ! -f .env ]; then echo "ERROR: .env not found. Copy .env.example to .env first." && exit 1; fi
 	docker compose build --no-cache
 	docker compose up -d postgres redis meilisearch
 	@echo "Waiting for databases to be ready..."
@@ -61,9 +61,10 @@ setup:
 	@echo "Waiting for all services to be ready..."
 	@sleep 15
 	$(MAKE) migrate
-	@echo "Setup complete! Access the site at http://localhost:3000"
-	@echo "Store at http://localhost:3001"
-	@echo "Medusa admin at http://localhost:9000/app"
+	@echo "Setup complete!"
+	@echo "Frontend:  http://localhost"
+	@echo "Admin:     http://localhost:9000/app"
+	@echo "API:       http://localhost:8000/health"
 
 # Backup database
 backup:
@@ -93,12 +94,8 @@ pull:
 update: pull build migrate restart
 	@echo "Update complete!"
 
-# Development mode (with hot reload)
-dev:
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up
-
 # Production mode
 prod:
-	docker compose -f docker-compose.yml up -d --build
+	docker compose up -d --build
 	$(MAKE) migrate
 	@echo "Production deployment complete!"

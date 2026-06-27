@@ -4,6 +4,7 @@ from app.models.analytics import ConversionEvent, PageView
 from app.models.blog import Blog, BlogAuthor, BlogCategory, BlogTag
 from app.models.bulk_enquiry import BulkEnquiry
 from app.models.dealer import Dealer
+from app.models.gallery import GalleryItem
 from app.models.installation import InstallationBooking
 from app.models.lead import Lead
 from app.models.review import Review
@@ -22,6 +23,7 @@ __all__ = [
     "VehicleVariant",
     "Dealer",
     "BulkEnquiry",
+    "GalleryItem",
     "InstallationBooking",
     "Lead",
     "SupportTicket",

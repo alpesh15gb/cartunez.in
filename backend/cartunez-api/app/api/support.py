@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
+from app.middleware.auth import require_api_key
 from app.models.support import SupportMessage, SupportTicket
 from app.schemas.support import (
     SupportMessageCreate,
@@ -25,8 +26,9 @@ async def list_tickets(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> List[SupportTicket]:
-    """List support tickets filtered by status."""
+    """List support tickets filtered by status. Requires API key."""
     result = await db.execute(
         select(SupportTicket)
         .options(selectinload(SupportTicket.messages))
@@ -42,8 +44,9 @@ async def list_tickets(
 async def get_ticket(
     ticket_id: str,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> SupportTicket:
-    """Get a support ticket with messages."""
+    """Get a support ticket with messages. Requires API key."""
     result = await db.execute(
         select(SupportTicket)
         .options(selectinload(SupportTicket.messages))
@@ -60,7 +63,7 @@ async def create_ticket(
     data: SupportTicketCreate,
     db: AsyncSession = Depends(get_db),
 ) -> SupportTicket:
-    """Create a new support ticket with an optional initial message."""
+    """Create a new support ticket. Public endpoint."""
     ticket = SupportTicket(
         customer_name=data.customer_name,
         customer_email=data.customer_email,
@@ -91,8 +94,12 @@ async def update_ticket_status(
     ticket_id: str,
     status: str = Query(..., max_length=50),
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> SupportTicket:
-    """Update the status of a support ticket."""
+    """Update the status of a support ticket. Requires API key."""
+    allowed = {"open", "in_progress", "waiting", "resolved", "closed"}
+    if status not in allowed:
+        raise HTTPException(status_code=422, detail=f"Invalid status. Allowed: {allowed}")
     result = await db.execute(
         select(SupportTicket).where(SupportTicket.id == ticket_id)
     )
@@ -114,8 +121,9 @@ async def add_message(
     ticket_id: str,
     data: SupportMessageCreate,
     db: AsyncSession = Depends(get_db),
+    api_key: str = Depends(require_api_key),
 ) -> SupportMessage:
-    """Add a message to a support ticket."""
+    """Add a message to a support ticket. Requires API key. is_staff is server-assigned."""
     result = await db.execute(
         select(SupportTicket).where(SupportTicket.id == ticket_id)
     )
@@ -127,7 +135,7 @@ async def add_message(
         ticket_id=ticket.id,
         sender_name=data.sender_name,
         sender_email=data.sender_email,
-        is_staff=data.is_staff,
+        is_staff=True,
         content=data.content,
     )
     db.add(msg)
@@ -143,8 +151,9 @@ async def add_message(
 async def list_messages(
     ticket_id: str,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> List[SupportMessage]:
-    """List all messages for a support ticket."""
+    """List all messages for a support ticket. Requires API key."""
     result = await db.execute(
         select(SupportMessage)
         .where(SupportMessage.ticket_id == ticket_id)

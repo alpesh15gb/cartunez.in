@@ -33,13 +33,16 @@ if (!jwtSecret || !cookieSecret) {
   process.exit(1);
 }
 
+const storeCors = process.env.STORE_CORS || "https://cartunez.in,https://shop.cartunez.in,http://localhost:3000,http://localhost:3001,http://localhost:5173";
+const adminCors = process.env.ADMIN_CORS || "https://cartunez.in,https://shop.cartunez.in,http://localhost:7001,http://localhost:3000,http://localhost:9000";
+
 /** @type {import('@medusajs/medusa').ConfigModule["projectConfig"]} */
 const projectConfig = {
   database_url: databaseUrl,
   database_type: "postgres",
   redis_url: redisUrl,
-  store_cors: process.env.STORE_CORS || "http://localhost:8000,https://cartunez.in,http://cartunez.in",
-  admin_cors: process.env.ADMIN_CORS || "http://localhost:7001,http://localhost:8000,https://cartunez.in,http://cartunez.in",
+  store_cors: storeCors,
+  admin_cors: adminCors,
   jwt_secret: jwtSecret,
   cookie_secret: cookieSecret,
   cookie_secure: process.env.COOKIE_SECURE === "true",

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, X, Minus, Send, MessageSquare } from 'lucide-react';
-import { FASTAPI_URL, MEDUSA_BACKEND_URL } from '../lib/config';
+import { FASTAPI_URL } from '../lib/config';
+import { formatPrice, imageUrl } from '../lib/utils';
 
 interface ProductCard {
   id: string;
@@ -24,16 +25,6 @@ const QUICK_ACTIONS = [
   'Seat Covers',
   'Dash Cameras',
 ];
-
-function formatPrice(amount: number) {
-  return `₹${(amount / 100).toLocaleString('en-IN')}.00`;
-}
-
-function imageUrl(url: string | null | undefined): string {
-  if (!url) return 'https://placehold.co/300x300/111/fff?text=Car+Tunez';
-  if (url.startsWith('http')) return url;
-  return `${MEDUSA_BACKEND_URL}${url}`;
-}
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);

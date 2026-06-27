@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.middleware.auth import require_api_key
 from app.models.vehicle import VehicleMake, VehicleModel, VehicleVariant, VehicleYear
 from app.schemas.vehicle import (
     VehicleMakeCreate,
@@ -23,7 +24,12 @@ from app.schemas.vehicle import (
 router = APIRouter(prefix="/vehicles", tags=["vehicles"])
 
 
-# ─── Makes ────────────────────────────────────────────────────────────────────
+def _escape_like(value: str) -> str:
+    """Escape LIKE wildcards in user input."""
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+# ─── Makes (public read, admin write) ─────────────────────────────────────────
 
 @router.get("/makes", response_model=List[VehicleMakeResponse])
 async def list_makes(
@@ -57,8 +63,9 @@ async def get_make(
 async def create_make(
     data: VehicleMakeCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> VehicleMake:
-    """Create a new vehicle make."""
+    """Create a new vehicle make. Requires API key."""
     make = VehicleMake(**data.model_dump())
     db.add(make)
     await db.flush()
@@ -70,8 +77,9 @@ async def create_make(
 async def delete_make(
     make_id: UUID,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> None:
-    """Delete a vehicle make."""
+    """Delete a vehicle make. Requires API key."""
     result = await db.execute(
         select(VehicleMake).where(VehicleMake.id == make_id)
     )
@@ -81,7 +89,7 @@ async def delete_make(
     await db.delete(make)
 
 
-# ─── Models ───────────────────────────────────────────────────────────────────
+# ─── Models (public read, admin write) ────────────────────────────────────────
 
 @router.get("/models", response_model=List[VehicleModelResponse])
 async def list_models(
@@ -117,8 +125,9 @@ async def get_model(
 async def create_model(
     data: VehicleModelCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> VehicleModel:
-    """Create a new vehicle model."""
+    """Create a new vehicle model. Requires API key."""
     model = VehicleModel(**data.model_dump())
     db.add(model)
     await db.flush()
@@ -126,7 +135,7 @@ async def create_model(
     return model
 
 
-# ─── Years ────────────────────────────────────────────────────────────────────
+# ─── Years (public read, admin write) ─────────────────────────────────────────
 
 @router.get("/years", response_model=List[VehicleYearResponse])
 async def list_years(
@@ -162,8 +171,9 @@ async def get_year(
 async def create_year(
     data: VehicleYearCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> VehicleYear:
-    """Create a new vehicle year entry."""
+    """Create a new vehicle year entry. Requires API key."""
     year = VehicleYear(**data.model_dump())
     db.add(year)
     await db.flush()
@@ -171,7 +181,7 @@ async def create_year(
     return year
 
 
-# ─── Variants ─────────────────────────────────────────────────────────────────
+# ─── Variants (public read, admin write) ──────────────────────────────────────
 
 @router.get("/variants", response_model=List[VehicleVariantResponse])
 async def list_variants(
@@ -207,8 +217,9 @@ async def get_variant(
 async def create_variant(
     data: VehicleVariantCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> VehicleVariant:
-    """Create a new vehicle variant."""
+    """Create a new vehicle variant. Requires API key."""
     variant = VehicleVariant(**data.model_dump())
     db.add(variant)
     await db.flush()
@@ -216,7 +227,7 @@ async def create_variant(
     return variant
 
 
-# ─── Search ───────────────────────────────────────────────────────────────────
+# ─── Search (public) ─────────────────────────────────────────────────────────
 
 @router.get("/search")
 async def search_vehicles(
@@ -234,22 +245,22 @@ async def search_vehicles(
     )
 
     if make:
-        query = query.where(VehicleMake.name.ilike(f"%{make}%"))
+        query = query.where(VehicleMake.name.ilike(f"%{_escape_like(make)}%"))
     if model:
-        query = query.where(VehicleModel.name.ilike(f"%{model}%"))
+        query = query.where(VehicleModel.name.ilike(f"%{_escape_like(model)}%"))
     if year:
         query = query.where(VehicleYear.year == year)
     if body_type:
-        query = query.where(VehicleModel.body_type.ilike(f"%{body_type}%"))
+        query = query.where(VehicleModel.body_type.ilike(f"%{_escape_like(body_type)}%"))
 
     result = await db.execute(query.limit(50))
     rows = result.all()
 
     return [
         {
-            "make": {"id": str(make.id), "name": make.name, "slug": make.slug},
+            "make": {"id": str(mk.id), "name": mk.name, "slug": mk.slug},
             "model": {"id": str(m.id), "name": m.name, "slug": m.slug, "body_type": m.body_type},
             "year": {"id": str(y.id), "year": y.year},
         }
-        for make, m, y in rows
+        for mk, m, y in rows
     ]

@@ -1,5 +1,6 @@
 """Application configuration using Pydantic settings."""
 
+import json
 from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -20,28 +21,48 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/cartunez"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@postgres:5432/cartunez"
     DATABASE_ECHO: bool = False
 
     # Redis
-    REDIS_URL: str = "redis://localhost:6379/0"
+    REDIS_URL: str = "redis://redis:6379/0"
 
     # Meilisearch
-    MEILISEARCH_HOST: str = "http://localhost:7700"
+    MEILISEARCH_HOST: str = "http://meilisearch:7700"
     MEILISEARCH_API_KEY: str = ""
+
     # Medusa
     MEDUSA_URL: str = "http://medusa:9000"
 
     # JWT
-    JWT_SECRET_KEY: str = "your-super-secret-jwt-key-change-in-production"
+    JWT_SECRET_KEY: str = ""
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "http://localhost:3001", "https://cartunez.in", "http://cartunez.in", "https://www.cartunez.in"]
+    CORS_ORIGINS: List[str] = []
 
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 60
+
+    def model_post_init(self, __context) -> None:
+        # Parse CORS_ORIGINS if it comes as a JSON string from env
+        if isinstance(self.CORS_ORIGINS, str):
+            try:
+                self.CORS_ORIGINS = json.loads(self.CORS_ORIGINS)
+            except json.JSONDecodeError:
+                self.CORS_ORIGINS = [s.strip() for s in self.CORS_ORIGINS.split(",")]
+        # Set defaults if empty
+        if not self.CORS_ORIGINS:
+            self.CORS_ORIGINS = [
+                "https://cartunez.in",
+                "https://www.cartunez.in",
+                "https://shop.cartunez.in",
+                "https://api.cartunez.in",
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://localhost:5173",
+            ]
 
 
 settings = Settings()

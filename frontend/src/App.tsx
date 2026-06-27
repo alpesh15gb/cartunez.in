@@ -10,18 +10,8 @@ import { useSearch } from './hooks/useSearch';
 import { useVehicles } from './hooks/useVehicles';
 import { useBlogPosts } from './hooks/useBlogs';
 import { useInstagramReels } from './hooks/useInstagram';
-import { MEDUSA_BACKEND_URL } from './lib/config';
+import { formatPrice, imageUrl } from './lib/utils';
 import ChatBot from './components/ChatBot';
-
-function formatPrice(amount: number) {
-  return `₹${(amount / 100).toLocaleString('en-IN')}.00`;
-}
-
-function imageUrl(url: string | null | undefined): string {
-  if (!url) return 'https://placehold.co/300x300/111/fff?text=Car+Tunez';
-  if (url.startsWith('http')) return url;
-  return `${MEDUSA_BACKEND_URL}${url}`;
-}
 
 // ─── Auth Modal ───────────────────────────────────────────────────────────────
 function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {

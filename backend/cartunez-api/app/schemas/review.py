@@ -15,12 +15,29 @@ class ReviewCreate(BaseModel):
     customer_email: str = Field(..., max_length=255)
     rating: int = Field(..., ge=1, le=5)
     title: Optional[str] = Field(None, max_length=300)
-    content: Optional[str] = None
+    content: Optional[str] = Field(None, max_length=5000)
     is_verified_purchase: bool = False
 
 
+class ReviewPublicResponse(BaseModel):
+    """Public review response — no PII (email) exposed."""
+
+    id: UUID
+    product_id: str
+    customer_name: str
+    rating: int
+    title: Optional[str] = None
+    content: Optional[str] = None
+    is_verified_purchase: bool
+    is_approved: bool
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 class ReviewResponse(BaseModel):
-    """Schema for review response."""
+    """Admin review response — includes email."""
 
     id: UUID
     product_id: str

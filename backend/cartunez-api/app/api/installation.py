@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.middleware.auth import require_api_key
 from app.models.installation import InstallationBooking
 from app.schemas.installation import (
     InstallationBookingCreate,
@@ -22,8 +23,9 @@ async def list_bookings(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> List[InstallationBooking]:
-    """List installation bookings filtered by status."""
+    """List installation bookings filtered by status. Requires API key."""
     result = await db.execute(
         select(InstallationBooking)
         .where(InstallationBooking.status == status)
@@ -38,8 +40,9 @@ async def list_bookings(
 async def get_booking(
     booking_id: str,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> InstallationBooking:
-    """Get an installation booking by ID."""
+    """Get an installation booking by ID. Requires API key."""
     result = await db.execute(
         select(InstallationBooking).where(InstallationBooking.id == booking_id)
     )
@@ -54,7 +57,7 @@ async def create_booking(
     data: InstallationBookingCreate,
     db: AsyncSession = Depends(get_db),
 ) -> InstallationBooking:
-    """Create a new installation booking."""
+    """Create a new installation booking. Public endpoint."""
     booking = InstallationBooking(**data.model_dump())
     db.add(booking)
     await db.flush()
@@ -67,8 +70,12 @@ async def update_booking_status(
     booking_id: str,
     status: str = Query(..., max_length=50),
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> InstallationBooking:
-    """Update the status of an installation booking."""
+    """Update the status of an installation booking. Requires API key."""
+    allowed = {"pending", "confirmed", "in_progress", "completed", "cancelled"}
+    if status not in allowed:
+        raise HTTPException(status_code=422, detail=f"Invalid status. Allowed: {allowed}")
     result = await db.execute(
         select(InstallationBooking).where(InstallationBooking.id == booking_id)
     )

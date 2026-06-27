@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.middleware.auth import require_api_key
 from app.models.bulk_enquiry import BulkEnquiry
 from app.schemas.bulk_enquiry import BulkEnquiryCreate, BulkEnquiryResponse
 
@@ -19,8 +20,9 @@ async def list_bulk_enquiries(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> List[BulkEnquiry]:
-    """List bulk enquiries filtered by status."""
+    """List bulk enquiries filtered by status. Requires API key."""
     result = await db.execute(
         select(BulkEnquiry)
         .where(BulkEnquiry.status == status)
@@ -35,8 +37,9 @@ async def list_bulk_enquiries(
 async def get_bulk_enquiry(
     enquiry_id: str,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> BulkEnquiry:
-    """Get a bulk enquiry by ID."""
+    """Get a bulk enquiry by ID. Requires API key."""
     result = await db.execute(
         select(BulkEnquiry).where(BulkEnquiry.id == enquiry_id)
     )
@@ -51,7 +54,7 @@ async def create_bulk_enquiry(
     data: BulkEnquiryCreate,
     db: AsyncSession = Depends(get_db),
 ) -> BulkEnquiry:
-    """Submit a new bulk enquiry."""
+    """Submit a new bulk enquiry. Public endpoint."""
     enquiry = BulkEnquiry(**data.model_dump())
     db.add(enquiry)
     await db.flush()
@@ -64,8 +67,12 @@ async def update_enquiry_status(
     enquiry_id: str,
     status: str = Query(..., max_length=50),
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> BulkEnquiry:
-    """Update the status of a bulk enquiry."""
+    """Update the status of a bulk enquiry. Requires API key."""
+    allowed = {"pending", "in_review", "quoted", "accepted", "rejected", "completed"}
+    if status not in allowed:
+        raise HTTPException(status_code=422, detail=f"Invalid status. Allowed: {allowed}")
     result = await db.execute(
         select(BulkEnquiry).where(BulkEnquiry.id == enquiry_id)
     )

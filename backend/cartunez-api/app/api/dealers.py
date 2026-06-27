@@ -9,17 +9,23 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.middleware.auth import require_api_key
 from app.models.dealer import Dealer
 from app.schemas.dealer import DealerCreate, DealerResponse, DealerUpdate
 
 router = APIRouter(prefix="/dealers", tags=["dealers"])
 
 
+def _escape_like(value: str) -> str:
+    """Escape LIKE wildcards in user input."""
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 def _haversine_distance(
     lat1: float, lon1: float, lat2: float, lon2: float
 ) -> float:
     """Calculate distance in miles between two lat/lon points."""
-    R = 3959  # Earth radius in miles
+    R = 3959
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
     dlambda = math.radians(lon2 - lon1)
@@ -39,9 +45,9 @@ async def list_dealers(
     """List dealers with optional filters."""
     query = select(Dealer).where(Dealer.is_active == True)
     if city:
-        query = query.where(Dealer.city.ilike(f"%{city}%"))
+        query = query.where(Dealer.city.ilike(f"%{_escape_like(city)}%"))
     if state:
-        query = query.where(Dealer.state.ilike(f"%{state}%"))
+        query = query.where(Dealer.state.ilike(f"%{_escape_like(state)}%"))
     if is_verified is not None:
         query = query.where(Dealer.is_verified == is_verified)
     result = await db.execute(query.offset(skip).limit(limit))
@@ -80,8 +86,6 @@ async def get_nearby_dealers(
                 "state": dealer.state,
                 "distance_miles": round(dist, 2),
                 "phone": dealer.phone,
-                "latitude": dealer.latitude,
-                "longitude": dealer.longitude,
             })
 
     nearby.sort(key=lambda d: d["distance_miles"])
@@ -105,8 +109,9 @@ async def get_dealer(
 async def create_dealer(
     data: DealerCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> Dealer:
-    """Create a new dealer."""
+    """Create a new dealer. Requires API key."""
     dealer = Dealer(**data.model_dump())
     db.add(dealer)
     await db.flush()
@@ -119,8 +124,9 @@ async def update_dealer(
     dealer_id: UUID,
     data: DealerUpdate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> Dealer:
-    """Update an existing dealer."""
+    """Update an existing dealer. Requires API key."""
     result = await db.execute(select(Dealer).where(Dealer.id == dealer_id))
     dealer = result.scalar_one_or_none()
     if not dealer:
@@ -136,8 +142,9 @@ async def update_dealer(
 async def delete_dealer(
     dealer_id: UUID,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> None:
-    """Delete a dealer."""
+    """Delete a dealer. Requires API key."""
     result = await db.execute(select(Dealer).where(Dealer.id == dealer_id))
     dealer = result.scalar_one_or_none()
     if not dealer:

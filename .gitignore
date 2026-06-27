@@ -2,6 +2,7 @@
 node_modules/
 __pycache__/
 *.pyc
+*.pyo
 .venv/
 venv/
 env/
@@ -11,15 +12,24 @@ env/
 # Docker
 docker-compose.override.yml
 
-# Environment
+# Environment files (keep .env.example)
 .env
 .env.local
+.env.development
+.env.production
 .env.*.local
+car/.env
+car/.env.local
+car/.env.development
+car/.env.production
+car/.env.*.local
 
 # Build outputs
 dist/
 build/
 *.egg
+.next/
+out/
 
 # Uploads and media
 uploads/
@@ -43,7 +53,14 @@ logs/
 htmlcov/
 .coverage
 .pytest_cache/
+.mypy_cache/
 
-# Secrets (keep .env.example)
-# *.key
-# *.pem
+# Medusa
+.medusa/
+
+# Misc
+*.key
+*.pem
+backups/
+coverage/
+.vercel/

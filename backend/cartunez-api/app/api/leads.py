@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.middleware.auth import require_api_key
 from app.models.lead import Lead
 from app.schemas.lead import LeadCreate, LeadResponse
 
@@ -20,8 +21,9 @@ async def list_leads(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> List[Lead]:
-    """List leads filtered by status and source."""
+    """List leads filtered by status and source. Requires API key."""
     query = select(Lead)
     if status:
         query = query.where(Lead.status == status)
@@ -37,8 +39,9 @@ async def list_leads(
 async def get_lead(
     lead_id: str,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> Lead:
-    """Get a lead by ID."""
+    """Get a lead by ID. Requires API key."""
     result = await db.execute(select(Lead).where(Lead.id == lead_id))
     lead = result.scalar_one_or_none()
     if not lead:
@@ -51,7 +54,7 @@ async def create_lead(
     data: LeadCreate,
     db: AsyncSession = Depends(get_db),
 ) -> Lead:
-    """Create a new lead."""
+    """Create a new lead. Public endpoint (form submissions)."""
     lead = Lead(**data.model_dump())
     db.add(lead)
     await db.flush()
@@ -64,8 +67,12 @@ async def update_lead_status(
     lead_id: str,
     status: str = Query(..., max_length=50),
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> Lead:
-    """Update the status of a lead."""
+    """Update the status of a lead. Requires API key."""
+    allowed = {"new", "contacted", "qualified", "proposal", "won", "lost"}
+    if status not in allowed:
+        raise HTTPException(status_code=422, detail=f"Invalid status. Allowed: {allowed}")
     result = await db.execute(select(Lead).where(Lead.id == lead_id))
     lead = result.scalar_one_or_none()
     if not lead:
@@ -80,8 +87,9 @@ async def update_lead_status(
 async def delete_lead(
     lead_id: str,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> None:
-    """Delete a lead."""
+    """Delete a lead. Requires API key."""
     result = await db.execute(select(Lead).where(Lead.id == lead_id))
     lead = result.scalar_one_or_none()
     if not lead:

@@ -7,13 +7,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.middleware.auth import require_api_key
 from app.models.review import Review
-from app.schemas.review import ReviewCreate, ReviewResponse
+from app.schemas.review import ReviewCreate, ReviewPublicResponse, ReviewResponse
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
 
-@router.get("", response_model=List[ReviewResponse])
+@router.get("", response_model=List[ReviewPublicResponse])
 async def list_reviews(
     product_id: str = Query(..., max_length=100),
     approved_only: bool = True,
@@ -21,7 +22,7 @@ async def list_reviews(
     limit: int = Query(50, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
 ) -> List[Review]:
-    """List reviews for a product."""
+    """List reviews for a product (public, no email exposed)."""
     query = select(Review).where(Review.product_id == product_id)
     if approved_only:
         query = query.where(Review.is_approved == True)
@@ -31,12 +32,12 @@ async def list_reviews(
     return result.scalars().all()
 
 
-@router.get("/{review_id}", response_model=ReviewResponse)
+@router.get("/{review_id}", response_model=ReviewPublicResponse)
 async def get_review(
     review_id: str,
     db: AsyncSession = Depends(get_db),
 ) -> Review:
-    """Get a review by ID."""
+    """Get a review by ID (public, no email exposed)."""
     result = await db.execute(select(Review).where(Review.id == review_id))
     review = result.scalar_one_or_none()
     if not review:
@@ -44,7 +45,7 @@ async def get_review(
     return review
 
 
-@router.post("", response_model=ReviewResponse, status_code=201)
+@router.post("", response_model=ReviewPublicResponse, status_code=201)
 async def create_review(
     data: ReviewCreate,
     db: AsyncSession = Depends(get_db),
@@ -61,8 +62,9 @@ async def create_review(
 async def approve_review(
     review_id: str,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> Review:
-    """Approve a review for public display."""
+    """Approve a review for public display. Requires API key."""
     result = await db.execute(select(Review).where(Review.id == review_id))
     review = result.scalar_one_or_none()
     if not review:
@@ -77,8 +79,9 @@ async def approve_review(
 async def delete_review(
     review_id: str,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> None:
-    """Delete a review."""
+    """Delete a review. Requires API key."""
     result = await db.execute(select(Review).where(Review.id == review_id))
     review = result.scalar_one_or_none()
     if not review:

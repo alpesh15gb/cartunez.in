@@ -49,8 +49,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-API-Key", "X-Request-ID"],
 )
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
@@ -100,7 +100,7 @@ async def validation_error_handler(request: Request, exc) -> JSONResponse:
     """422 validation error handler."""
     return JSONResponse(
         status_code=422,
-        content={"detail": "Validation error", "errors": str(exc)},
+        content={"detail": "Validation error"},
     )
 
 

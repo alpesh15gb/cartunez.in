@@ -1,13 +1,15 @@
 """Redis-based rate limiting middleware."""
 
+import logging
 import time
-from typing import Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import JSONResponse
 
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 try:
     import redis.asyncio as aioredis
@@ -64,4 +66,5 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return response
 
         except Exception:
+            logger.warning("Rate limiter Redis failure — allowing request through")
             return await call_next(request)

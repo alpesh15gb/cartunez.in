@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
+from app.middleware.auth import require_api_key
 from app.models.blog import Blog, BlogAuthor, BlogCategory, BlogTag
 from app.schemas.blog import (
     BlogAuthorCreate,
@@ -24,7 +25,7 @@ from app.schemas.blog import (
 router = APIRouter(prefix="/blogs", tags=["blogs"])
 
 
-# ─── Posts ─────────────────────────────────────────────────────────────────────
+# ─── Posts (public read, admin write) ─────────────────────────────────────────
 
 @router.get("/posts", response_model=List[BlogResponse])
 async def list_posts(
@@ -73,8 +74,9 @@ async def get_post(
 async def create_post(
     data: BlogCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> Blog:
-    """Create a new blog post."""
+    """Create a new blog post. Requires API key."""
     tag_ids = data.tag_ids
     post_data = data.model_dump(exclude={"tag_ids"})
     post = Blog(**post_data)
@@ -96,8 +98,9 @@ async def update_post(
     post_id: UUID,
     data: BlogCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> Blog:
-    """Update a blog post."""
+    """Update a blog post. Requires API key."""
     result = await db.execute(select(Blog).where(Blog.id == post_id))
     post = result.scalar_one_or_none()
     if not post:
@@ -121,8 +124,9 @@ async def update_post(
 async def delete_post(
     post_id: UUID,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> None:
-    """Delete a blog post."""
+    """Delete a blog post. Requires API key."""
     result = await db.execute(select(Blog).where(Blog.id == post_id))
     post = result.scalar_one_or_none()
     if not post:
@@ -130,7 +134,7 @@ async def delete_post(
     await db.delete(post)
 
 
-# ─── Categories ───────────────────────────────────────────────────────────────
+# ─── Categories (public read, admin write) ────────────────────────────────────
 
 @router.get("/categories", response_model=List[BlogCategoryResponse])
 async def list_categories(
@@ -145,8 +149,9 @@ async def list_categories(
 async def create_category(
     data: BlogCategoryCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> BlogCategory:
-    """Create a new blog category."""
+    """Create a new blog category. Requires API key."""
     category = BlogCategory(**data.model_dump())
     db.add(category)
     await db.flush()
@@ -154,7 +159,7 @@ async def create_category(
     return category
 
 
-# ─── Tags ─────────────────────────────────────────────────────────────────────
+# ─── Tags (public read, admin write) ──────────────────────────────────────────
 
 @router.get("/tags", response_model=List[BlogTagResponse])
 async def list_tags(
@@ -169,8 +174,9 @@ async def list_tags(
 async def create_tag(
     data: BlogTagCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> BlogTag:
-    """Create a new blog tag."""
+    """Create a new blog tag. Requires API key."""
     tag = BlogTag(**data.model_dump())
     db.add(tag)
     await db.flush()
@@ -178,7 +184,7 @@ async def create_tag(
     return tag
 
 
-# ─── Authors ──────────────────────────────────────────────────────────────────
+# ─── Authors (public read, admin write) ───────────────────────────────────────
 
 @router.get("/authors", response_model=List[BlogAuthorResponse])
 async def list_authors(
@@ -193,8 +199,9 @@ async def list_authors(
 async def create_author(
     data: BlogAuthorCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_api_key),
 ) -> BlogAuthor:
-    """Create a new blog author."""
+    """Create a new blog author. Requires API key."""
     author = BlogAuthor(**data.model_dump())
     db.add(author)
     await db.flush()
