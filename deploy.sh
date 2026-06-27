@@ -23,12 +23,12 @@ if [ ! -f "$REPO_DIR/.env" ]; then
 fi
 
 # 1. System dependencies
-echo "[1/8] Installing system dependencies..."
+echo "[1/9] Installing system dependencies..."
 apt-get update -qq
 apt-get install -y -qq nginx certbot python3-certbot-nginx curl git
 
 # 2. Docker
-echo "[2/8] Ensuring Docker is installed..."
+echo "[2/9] Ensuring Docker is installed..."
 if ! command -v docker &> /dev/null; then
     curl -fsSL https://get.docker.com | sh
 fi
@@ -37,7 +37,7 @@ if ! docker compose version &> /dev/null; then
 fi
 
 # 3. Build frontend
-echo "[3/8] Building frontend..."
+echo "[3/9] Building frontend..."
 cd "$FRONTEND_DIR"
 npm ci --silent
 if [ ! -f .env.production ]; then
@@ -52,63 +52,151 @@ fi
 npx vite build --mode production
 
 # 4. Deploy frontend build to nginx serving directory
-echo "[4/8] Deploying frontend to /var/www/cartunez..."
+echo "[4/9] Deploying frontend to /var/www/cartunez..."
 mkdir -p /var/www/cartunez/dist
 cp -r "$FRONTEND_DIR/dist/"* /var/www/cartunez/dist/
 chown -R www-data:www-data /var/www/cartunez
 
-# 5. Nginx configs
-echo "[5/8] Configuring nginx..."
-mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+# 5. Install HTTP-only nginx config first (no SSL yet)
+echo "[5/9] Configuring nginx (HTTP-only for certbot)..."
+mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled /var/www/certbot
 
-for conf in cartunez api commerce shop search; do
-    if [ -f "$BACKEND_DIR/nginx/${conf}.conf" ]; then
-        cp "$BACKEND_DIR/nginx/${conf}.conf" "/etc/nginx/sites-available/${conf}"
-        ln -sf "/etc/nginx/sites-available/${conf}" "/etc/nginx/sites-enabled/${conf}"
-    fi
-done
+# Remove old cartunez configs if they reference missing SSL certs
+rm -f /etc/nginx/sites-enabled/cartunez.conf /etc/nginx/sites-enabled/cartunez
+rm -f /etc/nginx/sites-enabled/api /etc/nginx/sites-enabled/search
+rm -f /etc/nginx/sites-enabled/commerce /etc/nginx/sites-enabled/shop
 
-# Add rate limiting zones to nginx.conf if not already present
-if ! grep -q "limit_req_zone.*api_general" /etc/nginx/nginx.conf; then
-    echo "    # Cartunez rate limiting zones" >> /etc/nginx/nginx.conf
-    echo "    limit_req_zone \$binary_remote_addr zone=api_general:10m rate=30r/s;" >> /etc/nginx/nginx.conf
-    echo "    limit_req_zone \$binary_remote_addr zone=api_auth:10m rate=5r/m;" >> /etc/nginx/nginx.conf
-    echo "    limit_req_zone \$binary_remote_addr zone=api_search:10m rate=20r/s;" >> /etc/nginx/nginx.conf
-    echo "    limit_req_zone \$binary_remote_addr zone=api_cart:10m rate=10r/s;" >> /etc/nginx/nginx.conf
-    echo "    limit_req_zone \$binary_remote_addr zone=api_webhook:10m rate=50r/s;" >> /etc/nginx/nginx.conf
-    echo "    limit_req_status 429;" >> /etc/nginx/nginx.conf
-fi
+# Write HTTP-only config for initial setup
+cat > /etc/nginx/sites-available/cartunez <<'NGINX'
+server {
+    listen 80;
+    listen [::]:80;
+    server_name cartunez.in www.cartunez.in;
 
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        allow all;
+    }
+
+    root /var/www/cartunez/dist;
+    index index.html;
+
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript image/svg+xml;
+    gzip_min_length 256;
+
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location ~* \.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2|ttf|eot)$ {
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+
+    location /store/ {
+        proxy_pass http://127.0.0.1:9000/store/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+    }
+
+    location /admin/ {
+        proxy_pass http://127.0.0.1:9000/admin/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /auth/ {
+        proxy_pass http://127.0.0.1:9000/auth/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /health {
+        proxy_pass http://127.0.0.1:9000/health;
+        proxy_set_header Host $host;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8005/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_read_timeout 30s;
+    }
+
+    location /uploads/ {
+        proxy_pass http://127.0.0.1:9000/uploads/;
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~ /\. {
+        deny all;
+    }
+}
+NGINX
+
+ln -sf /etc/nginx/sites-available/cartunez /etc/nginx/sites-enabled/cartunez
 nginx -t && systemctl reload nginx
 
 # 6. Start backend services
-echo "[6/8] Starting Docker services..."
+echo "[6/9] Starting Docker services..."
 cd "$BACKEND_DIR"
 docker compose up -d --build
 
 # 7. Run migrations
-echo "[7/8] Running database migrations..."
-sleep 10
+echo "[7/9] Running database migrations..."
+sleep 15
 docker compose exec medusa node migrate.js || echo "Medusa migration skipped or already applied"
 docker compose exec fastapi alembic upgrade head || echo "FastAPI migration skipped or already applied"
 
 # 8. SSL (Let's Encrypt)
-echo "[8/8] Setting up SSL..."
+echo "[8/9] Setting up SSL..."
 read -p "Do you want to set up SSL now? (y/n): " setup_ssl
 if [ "$setup_ssl" = "y" ]; then
-    certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" -d "api.$DOMAIN" -d "shop.$DOMAIN" -d "commerce.$DOMAIN" --non-interactive --agree-tos --email "adnan@$DOMAIN"
-    echo "SSL configured!"
+    certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --email "adnan@$DOMAIN" --redirect
+    echo "SSL configured for $DOMAIN!"
+    echo "For api.$DOMAIN, shop.$DOMAIN, commerce.$DOMAIN — run certbot again after DNS is set up:"
+    echo "  certbot --nginx -d api.$DOMAIN -d shop.$DOMAIN -d commerce.$DOMAIN --non-interactive --agree-tos --email adnan@$DOMAIN"
 else
-    echo "Skipping SSL. Run later: certbot --nginx -d $DOMAIN -d www.$DOMAIN -d api.$DOMAIN -d shop.$DOMAIN -d commerce.$DOMAIN"
+    echo "Skipping SSL. Run later: certbot --nginx -d $DOMAIN -d www.$DOMAIN"
+fi
+
+# 9. Install full nginx configs (with SSL references) if certs exist
+echo "[9/9] Installing full nginx configs..."
+if [ -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]; then
+    for conf in cartunez api commerce shop search; do
+        if [ -f "$BACKEND_DIR/nginx/${conf}.conf" ]; then
+            cp "$BACKEND_DIR/nginx/${conf}.conf" "/etc/nginx/sites-available/${conf}"
+            ln -sf "/etc/nginx/sites-available/${conf}" "/etc/nginx/sites-enabled/${conf}"
+        fi
+    done
+    nginx -t && systemctl reload nginx
+    echo "Full SSL configs installed."
+else
+    echo "SSL certs not found yet. HTTP-only config remains. Run deploy.sh again after getting certs."
 fi
 
 echo ""
 echo "=== Deployment Complete ==="
-echo "Frontend:  https://$DOMAIN"
-echo "Store:     https://shop.$DOMAIN"
-echo "Admin:     https://$DOMAIN/admin/"
-echo "API:       https://api.$DOMAIN/api/v1/health"
-echo "Commerce:  https://commerce.$DOMAIN/health"
+echo "Frontend:  http://$DOMAIN (https after SSL)"
+echo "Admin:     http://$DOMAIN/admin/"
+echo "API:       http://$DOMAIN/api/v1/health"
 echo ""
 echo "Docker services:"
 cd "$BACKEND_DIR"
