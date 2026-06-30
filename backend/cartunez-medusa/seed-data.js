@@ -94,6 +94,7 @@ async function seed() {
 
   // 4. Create Categories
   const categoriesToCreate = [
+    { name: "Alloy Wheels", handle: "alloy-wheels", description: "Premium alloy wheels from NeoWheels - ARAI certified, lifetime structural warranty." },
     { name: "Floor Mats", handle: "floor-mats", description: "Premium 7D, 3D and custom-fit cabin mats." },
     { name: "Seat Covers", handle: "seat-covers", description: "Premium leatherette custom-fit seat covers." },
     { name: "LED Lights", handle: "led-lights", description: "High power LED headlight bulbs and ambient lighting." },
