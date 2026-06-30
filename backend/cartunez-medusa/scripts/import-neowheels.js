@@ -15,7 +15,7 @@ const path = require("path");
 const https = require("https");
 const http = require("http");
 
-const DATA_FILE = path.join(__dirname, "..", "neowheels-data.json");
+const DATA_FILE = path.join(__dirname, "..", "uploads", "neowheels-data.json");
 const UPLOAD_DIR = path.join(__dirname, "..", "uploads");
 const CATEGORY_HANDLE = "alloy-wheels";
 const CATEGORY_NAME = "Alloy Wheels";
