@@ -18,7 +18,6 @@
   "dependencies": {
     "@medusajs/admin": "^7.1.18",
     "ajv": "^8.12.0",
-    "cheerio": "^1.0.0",
     "@medusajs/cache-redis": "1.8.9",
     "@medusajs/event-bus-redis": "1.8.9",
     "@medusajs/file-local": "^1.0.4",
