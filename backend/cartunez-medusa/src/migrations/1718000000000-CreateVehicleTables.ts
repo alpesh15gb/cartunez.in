@@ -6,7 +6,7 @@ export class CreateVehicleTables1718000000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       CREATE TABLE "vehicle_make" (
-        "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+        "id" uuid NOT NULL DEFAULT gen_random_uuid(),
         "name" character varying(100) NOT NULL,
         "country" character varying(50),
         "is_active" boolean NOT NULL DEFAULT true,
@@ -19,7 +19,7 @@ export class CreateVehicleTables1718000000000 implements MigrationInterface {
 
     await queryRunner.query(`
       CREATE TABLE "vehicle_model" (
-        "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+        "id" uuid NOT NULL DEFAULT gen_random_uuid(),
         "name" character varying(150) NOT NULL,
         "make_id" uuid NOT NULL,
         "body_type" character varying(50),
@@ -41,7 +41,7 @@ export class CreateVehicleTables1718000000000 implements MigrationInterface {
 
     await queryRunner.query(`
       CREATE TABLE "vehicle_year" (
-        "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+        "id" uuid NOT NULL DEFAULT gen_random_uuid(),
         "year" integer NOT NULL,
         "model_id" uuid NOT NULL,
         "is_active" boolean NOT NULL DEFAULT true,
@@ -62,7 +62,7 @@ export class CreateVehicleTables1718000000000 implements MigrationInterface {
 
     await queryRunner.query(`
       CREATE TABLE "vehicle_variant" (
-        "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+        "id" uuid NOT NULL DEFAULT gen_random_uuid(),
         "name" character varying(200) NOT NULL,
         "year_id" uuid NOT NULL,
         "engine_type" character varying(50),
@@ -86,7 +86,7 @@ export class CreateVehicleTables1718000000000 implements MigrationInterface {
 
     await queryRunner.query(`
       CREATE TABLE "product_vehicle_compatibility" (
-        "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+        "id" uuid NOT NULL DEFAULT gen_random_uuid(),
         "product_id" uuid NOT NULL,
         "vehicle_variant_id" uuid NOT NULL,
         "fitment_type" character varying(20),
