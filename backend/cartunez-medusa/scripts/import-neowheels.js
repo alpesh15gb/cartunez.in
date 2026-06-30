@@ -287,17 +287,18 @@ async function main() {
 
     // Link vehicle compatibility
     if (allCompatibleCars.size > 0) {
+      const vehicleModels = require("../dist/models/vehicle");
       const compatRepo = manager.getRepository(
-        require("../models/vehicle").ProductVehicleCompatibility
+        vehicleModels.ProductVehicleCompatibility
       );
       const vehicleVariantRepo = manager.getRepository(
-        require("../models/vehicle").VehicleVariant
+        vehicleModels.VehicleVariant
       );
       const vehicleModelRepo = manager.getRepository(
-        require("../models/vehicle").VehicleModel
+        vehicleModels.VehicleModel
       );
       const vehicleMakeRepo = manager.getRepository(
-        require("../models/vehicle").VehicleMake
+        vehicleModels.VehicleMake
       );
 
       for (const [key, car] of allCompatibleCars) {
