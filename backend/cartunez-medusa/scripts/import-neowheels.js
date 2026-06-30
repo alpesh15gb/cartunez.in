@@ -202,18 +202,16 @@ async function main() {
 
     // Create variants
     for (const v of design.variants) {
+      // Every variant MUST have a value for every product option
       const optionValues = [];
-      if (optionMap["Size"] && v.size) {
-        optionValues.push({ option_id: optionMap["Size"], value: v.size });
+      if (optionMap["Size"]) {
+        optionValues.push({ option_id: optionMap["Size"], value: v.size || "Standard" });
       }
-      if (optionMap["PCD"] && v.pcd) {
-        optionValues.push({ option_id: optionMap["PCD"], value: v.pcd });
+      if (optionMap["PCD"]) {
+        optionValues.push({ option_id: optionMap["PCD"], value: v.pcd || "Universal" });
       }
-      if (optionMap["Finish"] && v.finish) {
-        optionValues.push({ option_id: optionMap["Finish"], value: v.finish });
-      }
-      if (optionValues.length === 0 && optionMap["Variant"]) {
-        optionValues.push({ option_id: optionMap["Variant"], value: v.title });
+      if (optionMap["Finish"]) {
+        optionValues.push({ option_id: optionMap["Finish"], value: v.finish || "Standard" });
       }
 
       const variant = await productVariantService.create(product.id, {
@@ -237,7 +235,7 @@ async function main() {
         },
       });
 
-      // Download and set thumbnail image
+      // Download and set product thumbnail image
       if (v.imageUrl) {
         try {
           const ext = v.imageUrl.match(/\.(jpg|jpeg|png|webp)$/i)?.[1] || "jpg";
@@ -246,23 +244,10 @@ async function main() {
 
           await downloadImage(v.imageUrl, imgPath);
 
-          // Upload via Medusa file service
-          const fileService = container.resolve("fileService");
-          const uploadResult = await fileService.upload({
-            path: imgPath,
-            originalname: imgFilename,
-            mimetype: `image/${ext === "jpg" ? "jpeg" : ext}`,
-          });
-
-          // Update variant with image
-          await productVariantService.update(variant.id, {
-            thumbnail: uploadResult.url || `/uploads/${imgFilename}`,
-          });
-
           // Update product thumbnail (use first variant's image)
           if (!product.thumbnail) {
             await productService.update(product.id, {
-              thumbnail: uploadResult.url || `/uploads/${imgFilename}`,
+              thumbnail: `/uploads/${imgFilename}`,
             });
           }
 
