@@ -96,4 +96,4 @@ EXPOSE 9000
 ENV PORT 9000
 ENV HOST 0.0.0.0
 
-CMD ["sh", "-c", "npx medusa migrations run && npm start"]
+CMD ["sh", "-c", "npx medusa migrations run && npx medusa start"]
