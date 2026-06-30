@@ -86,6 +86,8 @@ COPY --from=builder --chown=medusa:nodejs /app/start.js ./start.js
 COPY --from=builder --chown=medusa:nodejs /app/migrate.js ./migrate.js
 COPY --from=builder --chown=medusa:nodejs /app/check-db.js ./check-db.js
 COPY --from=builder --chown=medusa:nodejs /app/build ./build
+COPY --from=builder --chown=medusa:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=medusa:nodejs /app/seed-data.js ./seed-data.js
 
 RUN mkdir -p /app/uploads && chown -R medusa:nodejs /app/uploads
 
