@@ -12,7 +12,7 @@ const fs = require("fs");
 const path = require("path");
 
 const BASE_URL = "https://www.neowheels.com";
-const OUTPUT_FILE = path.join(__dirname, "..", "uploads", "neowheels-data.json");
+const OUTPUT_FILE = "/tmp/neowheels-data.json";
 const DELAY_MS = 300; // polite delay between requests
 
 async function fetchPage(url) {
