@@ -86,11 +86,14 @@ async function parseVariantPage(url) {
     design = title;
   }
 
-  // Image URL
-  const imgSrc =
+  // Image URL - try multiple selectors
+  let imgSrc =
     $('img[src*="Upload/product"]').first().attr("src") ||
+    $('img[src*="images/Upload"]').first().attr("src") ||
     $('img[alt*="' + design + '"]').first().attr("src") ||
     "";
+  // Some images have spaces in the URL
+  imgSrc = imgSrc.replace(/\s+/g, "%20");
   const imageUrl = imgSrc.startsWith("http")
     ? imgSrc
     : imgSrc
@@ -107,7 +110,7 @@ async function parseVariantPage(url) {
   const mrpMatch = priceText.match(/MRP\s*:?\s*₹?\s*([\d,]+)/);
 
   if (saleMatch) salePrice = parseInt(saleMatch[1].replace(/,/g, ""), 10);
-  if (mrp) mrp = parseInt(mrpMatch[1].replace(/,/g, ""), 10);
+  if (mrpMatch) mrp = parseInt(mrpMatch[1].replace(/,/g, ""), 10);
 
   // Also try structured price elements
   if (!salePrice) {
