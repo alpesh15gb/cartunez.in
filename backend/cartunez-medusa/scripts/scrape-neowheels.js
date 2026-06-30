@@ -128,7 +128,7 @@ async function parseVariantPage(url, designSlug) {
   if (sizeMatch) size = sizeMatch[1];
 
   // Try to extract PCD (NxN or NxNxN pattern, not at start)
-  const pcdMatch = title.match(/\s([\d]+x[\d]+(?:x[\d.]+)?)\s/i);
+  const pcdMatch = title.match(/\s([\d.]+x[\d.]+(?:x[\d.]+)?)\s/i);
   if (pcdMatch) pcd = pcdMatch[1];
 
   // Finish is typically the last word(s) after PCD
