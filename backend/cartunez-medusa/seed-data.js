@@ -31,12 +31,12 @@ async function seed() {
   const salesChannelService = container.resolve("salesChannelService");
   // 1. Get India Region
   const regions = await regionService.list();
-  let region = regions.find(r => r.currency_code === "inr");
+  let region = regions.find(r => r.currency_code === "inr" || r.currency_code === "INR");
   if (!region) {
     console.log("India region not found. Creating region...");
     region = await regionService.create({
       name: "India",
-      currency_code: "inr",
+      currency_code: "INR",
       tax_rate: 18,
       payment_providers: ["manual"],
       fulfillment_providers: ["manual"],

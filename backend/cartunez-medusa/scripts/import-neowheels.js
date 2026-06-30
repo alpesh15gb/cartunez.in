@@ -92,7 +92,7 @@ async function main() {
 
   // Get region, sales channel, shipping profile
   const regions = await regionService.list();
-  let region = regions.find((r) => r.currency_code === "inr");
+  let region = regions.find((r) => r.currency_code === "inr" || r.currency_code === "INR");
   if (!region) {
     console.error("No INR region found. Run seed-data.js first.");
     process.exit(1);
@@ -220,7 +220,7 @@ async function main() {
         title: v.title || `${v.size} ${v.pcd} ${v.finish}`.trim(),
         prices: [
           {
-            currency_code: "inr",
+            currency_code: "INR",
             amount: rupeesToPaise(v.salePrice || 0),
             region_id: regionId,
           },
