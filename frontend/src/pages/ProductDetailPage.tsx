@@ -11,36 +11,40 @@ export default function ProductDetailPage() {
   const { addItem, adding } = useCart();
 
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [qty, setQty] = useState(1);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [showZoom, setShowZoom] = useState(false);
   const [addedFeedback, setAddedFeedback] = useState(false);
 
-  // Initialize — start with nothing selected
+  // Track selection by VALUE ID (unique) not value string (duplicated)
+  const [selectedValueIds, setSelectedValueIds] = useState<Record<string, string>>({});
+
   useEffect(() => {
     if (product) {
-      setSelectedOptions({});
+      setSelectedValueIds({});
       setSelectedImage(0);
       setQty(1);
     }
   }, [product]);
 
-  // Compute selected variant
   const allOptionsSelected = useMemo(() => {
     if (!product?.options || product.options.length === 0) return true;
-    return product.options.every(opt => selectedOptions[opt.id]);
-  }, [product, selectedOptions]);
+    return product.options.every(opt => selectedValueIds[opt.id]);
+  }, [product, selectedValueIds]);
 
   const selectedVariant = useMemo(() => {
     if (!product?.variants) return null;
-    const selectedValues = Object.values(selectedOptions).filter(Boolean);
+    const selectedValues = Object.entries(selectedValueIds).map(([optId, valId]) => {
+      const opt = product.options?.find(o => o.id === optId);
+      const val = opt?.values.find(v => v.id === valId);
+      return val?.value;
+    }).filter(Boolean);
     if (selectedValues.length === 0) return null;
     return product.variants.find(v => {
       if (!v.options) return false;
       return selectedValues.every(sv => v.options!.some(o => o.value === sv));
     }) || null;
-  }, [product, selectedOptions]);
+  }, [product, selectedValueIds]);
 
   // Fetch related products (same category)
   const categoryId = product?.categories?.[0]?.id;
@@ -193,11 +197,11 @@ export default function ProductDetailPage() {
                 <div className="flex flex-wrap gap-2">
                   {opt.values.map(val => {
                     const label = val.value || val.id;
-                    const isSelected = selectedOptions[opt.id] === label;
+                    const isSelected = selectedValueIds[opt.id] === val.id;
                     return (
                       <button
                         key={val.id}
-                        onClick={() => setSelectedOptions(prev => ({ ...prev, [opt.id]: label }))}
+                        onClick={() => setSelectedValueIds(prev => ({ ...prev, [opt.id]: val.id }))}
                         className={`px-5 py-2.5 rounded-md border text-sm font-semibold uppercase transition-all ${
                           isSelected
                             ? 'border-[#c91c1c] bg-[#c91c1c] text-white'
