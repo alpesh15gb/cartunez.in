@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Search, ShoppingCart, Heart, User, Menu, X, Plus, Minus, Check,
-  Phone, Mail, MapPin, Eye, Trash2, AlertCircle, LogOut,
+  Phone, Mail, MapPin, Trash2, AlertCircle, LogOut,
 } from 'lucide-react';
 import { useProducts, useCategories, type Product } from './hooks/useProducts';
 import { useCart } from './hooks/useCart';
 import { useAuth } from './hooks/useAuth';
 import { useSearch } from './hooks/useSearch';
 import { useVehicles } from './hooks/useVehicles';
+import { useVehicleProducts } from './hooks/useVehicleProducts';
 import { useBlogPosts } from './hooks/useBlogs';
 import { useInstagramReels } from './hooks/useInstagram';
 import { formatPrice, imageUrl } from './lib/utils';
@@ -106,9 +108,8 @@ function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 }
 
 // ─── Product Card ─────────────────────────────────────────────────────────────
-function ProductCard({ product, onQuickView, onAddToCart, inWishlist, onToggleWishlist }: {
+function ProductCard({ product, onAddToCart, inWishlist, onToggleWishlist }: {
   product: Product;
-  onQuickView: () => void;
   onAddToCart: () => void;
   inWishlist: boolean;
   onToggleWishlist: () => void;
@@ -122,28 +123,23 @@ function ProductCard({ product, onQuickView, onAddToCart, inWishlist, onToggleWi
       >
         <Heart size={18} className={inWishlist ? 'fill-red-600 text-red-600' : ''} />
       </button>
-      <div className="relative bg-gray-50 pt-[100%] overflow-hidden">
+      <Link to={`/product/${product.handle}`} onClick={() => window.scrollTo(0, 0)} className="relative bg-gray-50 pt-[100%] overflow-hidden block">
         <img
           src={imageUrl(product.thumbnail)}
           alt={product.title}
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
-          <button onClick={onQuickView} className="bg-white hover:bg-gray-100 text-black p-3 rounded-full shadow-lg transition-transform transform translate-y-4 group-hover:translate-y-0">
-            <Eye size={20} />
-          </button>
-        </div>
-      </div>
+      </Link>
       <div className="p-6 flex-grow flex flex-col justify-between">
-        <div>
+        <Link to={`/product/${product.handle}`} onClick={() => window.scrollTo(0, 0)}>
           <h3 className="text-base font-bold text-gray-900 mt-1 line-clamp-1 group-hover:text-[#c91c1c] transition-colors">
             {product.title}
           </h3>
           <p className="text-gray-500 text-xs mt-2 line-clamp-2 leading-relaxed">
             {product.description}
           </p>
-        </div>
+        </Link>
         <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
           <span className="text-base font-bold text-[#c91c1c]">
             {price > 0 ? formatPrice(price) : 'Contact'}
@@ -207,7 +203,7 @@ export default function App() {
   const [activeQuickView, setActiveQuickView] = useState<unknown>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
-  const [quickViewOption, setQuickViewOption] = useState('');
+  const [quickViewOptions, setQuickViewOptions] = useState<Record<string, string>>({});
   const [quickViewQty, setQuickViewQty] = useState(1);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -234,7 +230,7 @@ export default function App() {
   const { cart, itemCount, total, addItem, updateItem, removeItem, adding, setEmail: setCartEmail, checkout } = useCart();
   const { customer } = useAuth();
   const { results: searchResults, search: doSearch, clear: clearSearch } = useSearch();
-  const { makes, models, years, selectedMake, setSelectedMake, selectedModel, setSelectedModel, selectedYear, setSelectedYear, loading: vehicleLoading } = useVehicles();
+  const { makes, models, years, variants, selectedMake, setSelectedMake, selectedModel, setSelectedModel, selectedYear, setSelectedYear, selectedVariant, setSelectedVariant, loading: vehicleLoading, reset } = useVehicles();
   const { posts: blogPosts } = useBlogPosts(4);
   const { reels: instagramReels } = useInstagramReels(8);
 
@@ -251,14 +247,24 @@ export default function App() {
   useEffect(() => {
     if (qv) {
       setQuickViewQty(1);
-      setQuickViewOption(qv.options?.[0]?.values?.[0]?.title ?? '');
+      const initial: Record<string, string> = {};
+      for (const opt of qv.options || []) {
+        initial[opt.id] = opt.values?.[0]?.title || opt.values?.[0]?.id || '';
+      }
+      setQuickViewOptions(initial);
     }
   }, [qv]);
 
   const qvSelectedVariant = useMemo(() => {
     if (!qv?.variants) return null;
-    return qv.variants.find(v => v.title === quickViewOption || v.options?.some(o => o.value === quickViewOption));
-  }, [qv, quickViewOption]);
+    const selectedValues = Object.values(quickViewOptions).filter(Boolean);
+    if (selectedValues.length === 0) return qv.variants[0] || null;
+    return qv.variants.find(v => {
+      if (selectedValues.includes(v.title)) return true;
+      if (!v.options) return false;
+      return selectedValues.every(sv => v.options!.some(o => o.value === sv));
+    }) || qv.variants[0] || null;
+  }, [qv, quickViewOptions]);
 
   // ─── Cart checkout ───────────────────────────────────────────────────────
   const handleCheckout = useCallback(async () => {
@@ -314,12 +320,34 @@ export default function App() {
 
   // ─── Vehicle filter (Show Products button) ───────────────────────────────
   const [vehicleFiltered, setVehicleFiltered] = useState(false);
+  const [vehicleLabel, setVehicleLabel] = useState('');
+  const {
+    compatible: vCompatibleProducts,
+    other: vOtherProducts,
+    totalCount: vTotalCount,
+    loading: vProductsLoading,
+  } = useVehicleProducts(
+    vehicleFiltered
+      ? selectedVariant
+        ? { variantId: selectedVariant }
+        : selectedYear
+          ? { yearId: selectedYear }
+          : undefined
+      : undefined
+  );
+
   const handleShowVehicleProducts = useCallback(() => {
     if (selectedYear) {
+      const make = makes.find(m => m.id === selectedMake);
+      const model = models.find(m => m.id === selectedModel);
+      const year = years.find(y => y.id === selectedYear);
+      const variant = variants.find(v => v.id === selectedVariant);
+      const label = `${make?.name || ''} ${model?.name || ''} ${year?.year || ''}${variant ? ' - ' + variant.name : ''}`.trim();
+      setVehicleLabel(label);
       setVehicleFiltered(true);
       setSelectedCategory('all');
     }
-  }, [selectedYear]);
+  }, [selectedMake, selectedModel, selectedYear, selectedVariant, makes, models, years, variants]);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-red-600 selection:text-white antialiased">
@@ -457,23 +485,8 @@ export default function App() {
       </nav>
 
       {/* 4. HERO */}
-      <section className="relative bg-black overflow-hidden h-[320px] md:h-[520px] flex items-center justify-center">
-        <img src="/hero-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" loading="eager" />
-        <div className="absolute inset-0 bg-black/50"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-        <div className="relative z-10 text-center max-w-4xl px-4 flex flex-col items-center">
-          <div className="flex flex-col items-center mb-2">
-            <img src="/logo.png" alt="Car Tunez" className="h-20 w-20 object-contain rounded-xl shadow-2xl mb-4 border border-white/20 bg-black p-2" />
-            <h2 className="font-bold text-4xl md:text-7xl tracking-wider text-white leading-none drop-shadow-2xl">CAR TUNEZ</h2>
-          </div>
-          <div className="w-24 h-1 bg-[#c91c1c] my-4 rounded-full"></div>
-          <p className="text-sm md:text-xl font-medium text-gray-300 max-w-xl mx-auto uppercase tracking-[0.25em] mb-6 drop-shadow-md">
-            The World's Best Car Accessories Right At Your Doorstep
-          </p>
-          <div className="flex space-x-4">
-            <button onClick={() => { setSelectedCategory('all'); setVehicleFiltered(false); }} className="bg-[#c91c1c] hover:bg-red-700 text-white font-bold py-3 px-8 rounded shadow-lg uppercase tracking-wider text-xs md:text-sm transition-all transform hover:scale-105">Explore Collection</button>
-          </div>
-        </div>
+      <section className="relative bg-black overflow-hidden">
+        <img src="/hero-bg.png" alt="Car Tunez - Performance Meets Style" className="w-full h-auto object-cover" loading="eager" />
       </section>
 
       {/* 5. VEHICLE COMPATIBILITY FINDER */}
@@ -483,7 +496,7 @@ export default function App() {
             <span className="text-xs font-bold text-red-500 uppercase tracking-widest">FIND ACCESSORIES FOR MY CAR</span>
             <h2 className="text-2xl font-bold text-white mt-1">Select Your Vehicle</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <select value={selectedMake} onChange={e => setSelectedMake(e.target.value)} className="bg-white/10 border border-white/20 text-white rounded p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#c91c1c]">
               <option value="" className="text-black">Select Brand</option>
               {makes.map(m => <option key={m.id} value={m.id} className="text-black">{m.name}</option>)}
@@ -495,6 +508,14 @@ export default function App() {
             <select value={selectedYear} onChange={e => setSelectedYear(e.target.value)} disabled={!selectedModel || vehicleLoading.years} className="bg-white/10 border border-white/20 text-white rounded p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#c91c1c] disabled:opacity-40">
               <option value="" className="text-black">Select Year</option>
               {years.map(y => <option key={y.id} value={y.id} className="text-black">{y.year}</option>)}
+            </select>
+            <select value={selectedVariant} onChange={e => setSelectedVariant(e.target.value)} disabled={!selectedYear || vehicleLoading.variants} className="bg-white/10 border border-white/20 text-white rounded p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#c91c1c] disabled:opacity-40">
+              <option value="" className="text-black">Select Variant</option>
+              {variants.map(v => (
+                <option key={v.id} value={v.id} className="text-black">
+                  {v.name}{v.fuel_type ? ` (${v.fuel_type}` : ''}{v.transmission ? `, ${v.transmission})` : v.fuel_type ? ')' : ''}
+                </option>
+              ))}
             </select>
             <button onClick={handleShowVehicleProducts} disabled={!selectedYear} className="bg-[#c91c1c] hover:bg-red-700 disabled:bg-gray-700 text-white font-bold py-3 px-6 rounded uppercase tracking-wider text-xs transition-colors">
               Show Products
@@ -529,46 +550,113 @@ export default function App() {
       {/* 7. PRODUCTS GRID */}
       <section className="max-w-7xl mx-auto py-16 px-4 md:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center border-b border-gray-200 pb-4 mb-8">
-          <div>
-            <span className="text-xs font-bold text-red-600 uppercase tracking-widest">FROM OUR CATALOGUE</span>
-            <h2 className="text-3xl font-bold text-gray-900 mt-1">
-              {vehicleFiltered ? 'VEHICLE COMPATIBLE PRODUCTS' : categories.find(c => c.handle === selectedCategory)?.name?.toUpperCase() || 'ALL PRODUCTS'}
-            </h2>
+          <div className="flex items-center gap-3">
+            <div>
+              <span className="text-xs font-bold text-red-600 uppercase tracking-widest">FROM OUR CATALOGUE</span>
+              <h2 className="text-3xl font-bold text-gray-900 mt-1">
+                {vehicleFiltered ? `PRODUCTS FOR ${vehicleLabel}` : categories.find(c => c.handle === selectedCategory)?.name?.toUpperCase() || 'ALL PRODUCTS'}
+              </h2>
+            </div>
+            {vehicleFiltered && (
+              <button onClick={() => { setVehicleFiltered(false); reset(); }} className="text-xs text-red-600 underline whitespace-nowrap">
+                Clear filter
+              </button>
+            )}
           </div>
           <div className="flex items-center space-x-2 mt-4 md:mt-0 text-xs text-gray-500">
-            <span>{count} products found</span>
+            <span>{vehicleFiltered ? `${vCompatibleProducts.length + vOtherProducts.length} products found` : `${count} products found`}</span>
           </div>
         </div>
 
-        {productsLoading ? (
-          <div className="text-center py-20">
-            <div className="w-12 h-12 border-4 border-[#c91c1c] border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-gray-500 mt-4 text-sm">Loading products...</p>
-          </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
-            <AlertCircle size={48} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-bold text-gray-900">No Products Found</h3>
-            <p className="text-gray-500 text-sm mt-1">
-              {vehicleFiltered
-                ? 'No products found for this vehicle. Try a different year or browse all products.'
-                : 'Try a different category or check back soon.'}
-            </p>
-            <button onClick={() => { setSelectedCategory('all'); setVehicleFiltered(false); }} className="mt-4 bg-[#c91c1c] text-white px-6 py-2 rounded text-xs font-bold uppercase tracking-wider">View All</button>
-          </div>
+        {vehicleFiltered ? (
+          /* ── Vehicle-filtered mode ── */
+          vProductsLoading ? (
+            <div className="text-center py-20">
+              <div className="w-12 h-12 border-4 border-[#c91c1c] border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="text-gray-500 mt-4 text-sm">Finding compatible products...</p>
+            </div>
+          ) : vCompatibleProducts.length === 0 && vOtherProducts.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
+              <AlertCircle size={48} className="mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-bold text-gray-900">No Products Found</h3>
+              <p className="text-gray-500 text-sm mt-1">No products found for this vehicle. Try a different selection or browse all products.</p>
+              <button onClick={() => { setSelectedCategory('all'); setVehicleFiltered(false); reset(); }} className="mt-4 bg-[#c91c1c] text-white px-6 py-2 rounded text-xs font-bold uppercase tracking-wider">View All</button>
+            </div>
+          ) : (
+            <>
+              {/* Compatible products */}
+              {vCompatibleProducts.length > 0 && (
+                <div className="mb-10">
+                  <div className="flex items-center space-x-3 mb-5">
+                    <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
+                      FITS YOUR {vehicleLabel}
+                    </span>
+                    <span className="text-xs text-gray-400">{vCompatibleProducts.length} compatible</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {vCompatibleProducts.map(product => (
+                       <ProductCard
+                        key={product.id}
+                        product={product}
+                        onAddToCart={() => addToCartFromProduct(product)}
+                        inWishlist={wishlist.includes(product.id)}
+                        onToggleWishlist={() => toggleWishlist(product.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Divider */}
+              {vCompatibleProducts.length > 0 && vOtherProducts.length > 0 && (
+                <div className="border-t border-gray-200 my-8 pt-4">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">OTHER PRODUCTS</span>
+                </div>
+              )}
+
+              {/* Other products */}
+              {vOtherProducts.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {vOtherProducts.map(product => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onAddToCart={() => addToCartFromProduct(product)}
+                      inWishlist={wishlist.includes(product.id)}
+                      onToggleWishlist={() => toggleWishlist(product.id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map(product => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onQuickView={() => setActiveQuickView(product)}
-                onAddToCart={() => addToCartFromProduct(product)}
-                inWishlist={wishlist.includes(product.id)}
-                onToggleWishlist={() => toggleWishlist(product.id)}
-              />
-            ))}
-          </div>
+          /* ── Normal mode (category/browse) ── */
+          productsLoading ? (
+            <div className="text-center py-20">
+              <div className="w-12 h-12 border-4 border-[#c91c1c] border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="text-gray-500 mt-4 text-sm">Loading products...</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
+              <AlertCircle size={48} className="mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-bold text-gray-900">No Products Found</h3>
+              <p className="text-gray-500 text-sm mt-1">Try a different category or check back soon.</p>
+              <button onClick={() => { setSelectedCategory('all'); setVehicleFiltered(false); }} className="mt-4 bg-[#c91c1c] text-white px-6 py-2 rounded text-xs font-bold uppercase tracking-wider">View All</button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {products.map(product => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={() => addToCartFromProduct(product)}
+                  inWishlist={wishlist.includes(product.id)}
+                  onToggleWishlist={() => toggleWishlist(product.id)}
+                />
+              ))}
+            </div>
+          )
         )}
       </section>
 
@@ -831,9 +919,13 @@ export default function App() {
                   <div key={opt.id} className="mb-6">
                     <label className="block text-xs font-bold uppercase text-gray-500 mb-2">{opt.title}</label>
                     <div className="flex flex-wrap gap-2">
-                      {opt.values.map(val => (
-                        <button key={val.id} onClick={() => setQuickViewOption(val.title)} className={`px-4 py-2 rounded border text-xs font-semibold uppercase ${quickViewOption === val.title ? 'border-black bg-black text-white' : 'border-gray-200 hover:border-gray-400 text-gray-700'}`}>{val.title}</button>
-                      ))}
+                      {opt.values.map(val => {
+                        const label = val.title || val.id;
+                        const isSelected = quickViewOptions[opt.id] === label;
+                        return (
+                          <button key={val.id} onClick={() => setQuickViewOptions(prev => ({ ...prev, [opt.id]: label }))} className={`px-4 py-2 rounded border text-xs font-semibold uppercase ${isSelected ? 'border-black bg-black text-white' : 'border-gray-200 hover:border-gray-400 text-gray-700'}`}>{label}</button>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

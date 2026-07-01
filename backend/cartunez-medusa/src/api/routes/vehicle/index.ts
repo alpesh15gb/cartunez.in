@@ -91,6 +91,17 @@ export default (rootDirectory: string) => {
     }
   });
 
+  router.get("/vehicle/products-by-year/:yearId", async (req: MedusaRequest, res: MedusaResponse) => {
+    try {
+      const vehicleCompatibilityService = req.scope.resolve("vehicleCompatibilityService");
+      const { yearId } = req.params;
+      const products = await vehicleCompatibilityService.getProductsForYear(yearId);
+      res.json({ products });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch products for year" });
+    }
+  });
+
   router.get("/vehicle/products/:variantId", async (req: MedusaRequest, res: MedusaResponse) => {
     try {
       const vehicleCompatibilityService = req.scope.resolve("vehicleCompatibilityService");

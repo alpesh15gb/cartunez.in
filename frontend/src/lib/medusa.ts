@@ -36,6 +36,22 @@ export async function fetchCategories() {
   return product_categories;
 }
 
+// ─── Vehicle compatibility helpers ──────────────────────────────────────────
+
+export async function fetchCompatibleProductIds(variantId: string): Promise<string[]> {
+  const res = await fetch(`${MEDUSA_BACKEND_URL}/vehicle/products/${variantId}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return [...new Set<string>(data.products?.map((p: { product_id: string }) => p.product_id) || [])];
+}
+
+export async function fetchCompatibleProductIdsForYear(yearId: string): Promise<string[]> {
+  const res = await fetch(`${MEDUSA_BACKEND_URL}/vehicle/products-by-year/${yearId}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return [...new Set<string>(data.products?.map((p: { product_id: string }) => p.product_id) || [])];
+}
+
 // ─── Cart helpers ────────────────────────────────────────────────────────────
 
 export async function createCart() {

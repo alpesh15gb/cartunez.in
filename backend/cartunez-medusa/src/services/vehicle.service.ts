@@ -141,6 +141,26 @@ export class VehicleCompatibilityService extends TransactionBaseService {
       });
     });
   }
+
+  async getProductsForYear(yearId: string): Promise<any[]> {
+    return await this.atomicPhase_(async (manager) => {
+      const variantRepo = manager.getRepository(VehicleVariant);
+      const variants = await variantRepo.find({ where: { year_id: yearId } });
+      if (variants.length === 0) return [];
+
+      const variantIds = variants.map((v) => v.id);
+      const compatRepo = manager.getRepository(ProductVehicleCompatibility);
+
+      // TypeORM In() helper for multiple IDs
+      const results = await compatRepo
+        .createQueryBuilder("pvc")
+        .where("pvc.vehicle_variant_id IN (:...variantIds)", { variantIds })
+        .select(["pvc.product_id", "pvc.vehicle_variant_id", "pvc.fitment_type"])
+        .getMany();
+
+      return results;
+    });
+  }
 }
 
 export default VehicleService;

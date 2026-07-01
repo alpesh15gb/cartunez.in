@@ -9,6 +9,8 @@ export interface Product {
   description: string | null;
   options: Array<{ id: string; title: string; values: Array<{ id: string; title: string }> }>;
   variants: Array<{ id: string; title: string; prices: Array<{ amount: number }>; options?: Array<{ option_id: string; value: string }> }>;
+  images: Array<{ id: string; url: string }>;
+  categories?: Array<{ id: string; name: string; handle: string }>;
 }
 
 export interface Category {
