@@ -16,7 +16,6 @@ export default function ProductDetailPage() {
   const [showZoom, setShowZoom] = useState(false);
   const [addedFeedback, setAddedFeedback] = useState(false);
 
-  // Track selection by VALUE ID (unique) not value string (duplicated)
   const [selectedValueIds, setSelectedValueIds] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -27,24 +26,37 @@ export default function ProductDetailPage() {
     }
   }, [product]);
 
-  const allOptionsSelected = useMemo(() => {
-    if (!product?.options || product.options.length === 0) return true;
-    return product.options.every(opt => selectedValueIds[opt.id]);
-  }, [product, selectedValueIds]);
+  // Find the Finish option (the one that actually varies price/image)
+  const finishOption = useMemo(() => {
+    return product?.options?.find(o => o.title.toLowerCase() === 'finish');
+  }, [product]);
 
+  // Selected finish value string
+  const selectedFinish = useMemo(() => {
+    if (!finishOption) return null;
+    const valId = selectedValueIds[finishOption.id];
+    if (!valId) return null;
+    return finishOption.values.find(v => v.id === valId)?.value || null;
+  }, [finishOption, selectedValueIds]);
+
+  // Match variant by Finish only (Size/PCD are same across all variants)
   const selectedVariant = useMemo(() => {
     if (!product?.variants) return null;
-    const selectedValues = Object.entries(selectedValueIds).map(([optId, valId]) => {
-      const opt = product.options?.find(o => o.id === optId);
-      const val = opt?.values.find(v => v.id === valId);
-      return val?.value;
-    }).filter(Boolean);
-    if (selectedValues.length === 0) return null;
+    if (!selectedFinish) return null;
+    // Find variant whose finish option matches
     return product.variants.find(v => {
       if (!v.options) return false;
-      return selectedValues.every(sv => v.options!.some(o => o.value === sv));
+      return v.options.some(o => {
+        const opt = product.options?.find(op => op.id === o.option_id);
+        return opt?.title.toLowerCase() === 'finish' && o.value === selectedFinish;
+      });
     }) || null;
-  }, [product, selectedValueIds]);
+  }, [product, selectedFinish]);
+
+  const allOptionsSelected = useMemo(() => {
+    if (!finishOption) return true;
+    return !!selectedValueIds[finishOption.id];
+  }, [finishOption, selectedValueIds]);
 
   // Fetch related products (same category)
   const categoryId = product?.categories?.[0]?.id;
@@ -53,7 +65,6 @@ export default function ProductDetailPage() {
   );
   const related = relatedProducts.filter(p => p.id !== product?.id).slice(0, 4);
 
-  // All images: use product images, fallback to thumbnail
   const images = useMemo(() => {
     if (!product) return [];
     if (product.images && product.images.length > 0) return product.images;
@@ -77,7 +88,6 @@ export default function ProductDetailPage() {
     );
   };
 
-  // ─── Loading state ──────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -105,10 +115,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Header spacer (account for sticky header on main page) ── */}
-      <div className="h-0"></div>
-
-      {/* ── Breadcrumb ── */}
+      {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
         <nav className="flex items-center text-xs text-gray-500 space-x-1">
           <Link to="/" className="hover:text-[#c91c1c] transition-colors">HOME</Link>
@@ -125,13 +132,12 @@ export default function ProductDetailPage() {
         </nav>
       </div>
 
-      {/* ── Main Product Section ── */}
+      {/* Main Product Section */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 pb-16">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
 
-          {/* ── Left: Image Gallery ── */}
+          {/* Left: Image Gallery */}
           <div className="space-y-4">
-            {/* Main Image */}
             <div
               className="relative bg-gray-50 rounded-lg overflow-hidden aspect-square cursor-zoom-in"
               onClick={() => images.length > 0 && setShowZoom(true)}
@@ -147,7 +153,6 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Thumbnails */}
             {images.length > 1 && (
               <div className="flex space-x-2 overflow-x-auto pb-2">
                 {images.map((img, idx) => (
@@ -165,7 +170,7 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          {/* ── Right: Product Info ── */}
+          {/* Right: Product Info */}
           <div className="flex flex-col">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">{product.title}</h1>
 
@@ -176,61 +181,59 @@ export default function ProductDetailPage() {
                   {price > 0 ? formatPrice(price) : 'Contact for Price'}
                 </span>
               ) : (
-                <span className="text-lg text-gray-400 font-medium">Select all options to see price</span>
+                <span className="text-lg text-gray-400 font-medium">Select a finish to see price</span>
               )}
             </div>
 
-            {/* Divider */}
             <div className="w-full h-px bg-gray-200 my-6"></div>
 
-            {/* Description */}
             {product.description && (
               <p className="text-gray-600 text-sm leading-relaxed mb-6">{product.description}</p>
             )}
 
-            {/* Variant Options */}
-            {product.options?.map(opt => (
-              <div key={opt.id} className="mb-5">
-                <label className="block text-xs font-bold uppercase text-gray-500 mb-2 tracking-wider">
-                  {opt.title}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {opt.values.map(val => {
-                    const label = val.value || val.id;
-                    const isSelected = selectedValueIds[opt.id] === val.id;
-                    return (
-                      <button
-                        key={val.id}
-                        onClick={() => setSelectedValueIds(prev => ({ ...prev, [opt.id]: val.id }))}
-                        className={`px-5 py-2.5 rounded-md border text-sm font-semibold uppercase transition-all ${
-                          isSelected
-                            ? 'border-[#c91c1c] bg-[#c91c1c] text-white'
-                            : 'border-gray-300 hover:border-gray-500 text-gray-700'
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
+            {/* Options — each group is independent */}
+            {product.options?.map(opt => {
+              const isFinish = opt.title.toLowerCase() === 'finish';
+              return (
+                <div key={opt.id} className="mb-5">
+                  <label className="block text-xs font-bold uppercase text-gray-500 mb-2 tracking-wider">
+                    {opt.title}
+                    {!isFinish && (
+                      <span className="text-gray-400 font-normal normal-case ml-1">(same for all variants)</span>
+                    )}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {opt.values.map(val => {
+                      const label = val.value || val.id;
+                      const isSelected = selectedValueIds[opt.id] === val.id;
+                      return (
+                        <button
+                          key={val.id}
+                          onClick={() => setSelectedValueIds(prev => ({ ...prev, [opt.id]: val.id }))}
+                          className={`px-5 py-2.5 rounded-md border text-sm font-semibold uppercase transition-all ${
+                            isSelected
+                              ? 'border-[#c91c1c] bg-[#c91c1c] text-white'
+                              : 'border-gray-300 hover:border-gray-500 text-gray-700'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {/* Quantity */}
             <div className="mb-6">
               <label className="block text-xs font-bold uppercase text-gray-500 mb-2 tracking-wider">Quantity</label>
               <div className="flex items-center border border-gray-300 rounded-md w-fit">
-                <button
-                  onClick={() => setQty(q => Math.max(1, q - 1))}
-                  className="p-3 text-gray-500 hover:text-black transition-colors"
-                >
+                <button onClick={() => setQty(q => Math.max(1, q - 1))} className="p-3 text-gray-500 hover:text-black transition-colors">
                   <Minus size={16} />
                 </button>
                 <span className="w-12 text-center text-sm font-bold">{qty}</span>
-                <button
-                  onClick={() => setQty(q => q + 1)}
-                  className="p-3 text-gray-500 hover:text-black transition-colors"
-                >
+                <button onClick={() => setQty(q => q + 1)} className="p-3 text-gray-500 hover:text-black transition-colors">
                   <Plus size={16} />
                 </button>
               </div>
@@ -243,7 +246,7 @@ export default function ProductDetailPage() {
                 disabled={adding || !allOptionsSelected || !selectedVariant}
                 className="flex-grow bg-black hover:bg-[#c91c1c] text-white py-4 rounded-md text-sm font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
               >
-                {addedFeedback ? '✓ ADDED TO CART' : adding ? 'ADDING...' : !allOptionsSelected ? 'SELECT ALL OPTIONS' : 'ADD TO CART'}
+                {addedFeedback ? '✓ ADDED TO CART' : adding ? 'ADDING...' : !allOptionsSelected ? 'SELECT A FINISH' : 'ADD TO CART'}
               </button>
               <button
                 onClick={toggleWishlist}
@@ -278,7 +281,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* ── Fullscreen Image Zoom Modal ── */}
+        {/* Fullscreen Image Zoom Modal */}
         {showZoom && images.length > 0 && (
           <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setShowZoom(false)}>
             <button onClick={() => setShowZoom(false)} className="absolute top-4 right-4 text-white/80 hover:text-white z-10">
@@ -308,7 +311,7 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        {/* ── Related Products ── */}
+        {/* Related Products */}
         {related.length > 0 && (
           <div className="mt-16 pt-12 border-t border-gray-200">
             <div className="text-center mb-10">
