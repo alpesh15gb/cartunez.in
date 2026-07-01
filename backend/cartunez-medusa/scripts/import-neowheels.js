@@ -148,18 +148,6 @@ async function main() {
   for (const [designSlug, design] of Object.entries(data.designs)) {
     const productHandle = `neowheels-${designSlug}`;
 
-    if (existingHandles.has(productHandle)) {
-      const variantCount = existingVariantCounts[productHandle] || 0;
-      if (variantCount >= design.variants.length * 0.8) {
-        console.log(`  Skip (exists, ${variantCount} variants): ${design.name}`);
-        skippedCount++;
-        continue;
-      }
-      console.log(`  Resuming: ${design.name} (${variantCount}/${design.variants.length} variants)`);
-    }
-
-    console.log(`\nCreating: ${design.name} (${design.variants.length} variants)`);
-
     // Determine all unique options across variants
     const sizes = [...new Set(design.variants.map((v) => v.size).filter(Boolean))];
     const pcds = [...new Set(design.variants.map((v) => v.pcd).filter(Boolean))];
@@ -175,31 +163,39 @@ async function main() {
       options.push({ title: "Variant" });
     }
 
-    // Create product
-    const product = await productService.create({
-      title: `NeoWheels ${design.name} Alloy Wheel`,
-      description: `NeoWheels ${design.name} - premium ARAI certified alloy wheel. Available in multiple sizes, PCD configurations, and finishes. Lifetime limited structural warranty.`,
-      handle: productHandle,
-      status: "published",
-      sales_channels: [{ id: salesChannelId }],
-      is_giftcard: false,
-      discountable: false,
-      options,
-      profile_id: profileId,
-      metadata: {
-        brand: BRAND_NAME,
-        design_name: design.name,
-        source_url: `https://www.neowheels.com/product/${designSlug}`,
-        country_of_origin: "India",
-        gst_rate: 28,
-        hsn_code: "8708",
-      },
-    });
-
-    // Link to category
-    await productService.update(product.id, {
-      categories: [{ id: category.id }],
-    });
+    // Create or retrieve product
+    let product;
+    if (existingHandles.has(productHandle)) {
+      // Resume: get existing product
+      const existing = await productService.list({ handle: productHandle });
+      product = existing[0];
+      console.log(`  Resuming: ${design.name} (${product.id})`);
+    } else {
+      console.log(`\nCreating: ${design.name} (${design.variants.length} variants)`);
+      product = await productService.create({
+        title: `NeoWheels ${design.name} Alloy Wheel`,
+        description: `NeoWheels ${design.name} - premium ARAI certified alloy wheel. Available in multiple sizes, PCD configurations, and finishes. Lifetime limited structural warranty.`,
+        handle: productHandle,
+        status: "published",
+        sales_channels: [{ id: salesChannelId }],
+        is_giftcard: false,
+        discountable: false,
+        options,
+        profile_id: profileId,
+        metadata: {
+          brand: BRAND_NAME,
+          design_name: design.name,
+          source_url: `https://www.neowheels.com/product/${designSlug}`,
+          country_of_origin: "India",
+          gst_rate: 28,
+          hsn_code: "8708",
+        },
+      });
+      // Link to category
+      await productService.update(product.id, {
+        categories: [{ id: category.id }],
+      });
+    }
 
     // Get option IDs
     const dbProduct = await productService.retrieve(product.id, { relations: ["options"] });
