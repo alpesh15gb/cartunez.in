@@ -169,7 +169,8 @@ async function main() {
       // Queue download (will be done separately)
       return {
         url: img.src,
-        localPath: `/uploads/sahibacar/${filename}`,
+        localPath: path.join(IMAGES_DIR, filename),
+        servePath: `/uploads/sahibacar/${filename}`,
         filename,
       };
     });
