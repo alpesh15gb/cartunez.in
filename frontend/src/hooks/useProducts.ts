@@ -11,6 +11,7 @@ export interface Product {
   variants: Array<{ id: string; title: string; prices: Array<{ amount: number }>; options?: Array<{ option_id: string; value: string }> }>;
   images: Array<{ id: string; url: string }>;
   categories?: Array<{ id: string; name: string; handle: string }>;
+  metadata?: Record<string, any>;
 }
 
 export interface Category {

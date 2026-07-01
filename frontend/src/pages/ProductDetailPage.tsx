@@ -65,12 +65,30 @@ export default function ProductDetailPage() {
   );
   const related = relatedProducts.filter(p => p.id !== product?.id).slice(0, 4);
 
+  // Build image list: finish-specific image first, then thumbnail as fallback
   const images = useMemo(() => {
     if (!product) return [];
-    if (product.images && product.images.length > 0) return product.images;
-    if (product.thumbnail) return [{ id: 'thumb', url: product.thumbnail }];
-    return [];
-  }, [product]);
+    const result: Array<{ id: string; url: string }> = [];
+
+    // If a finish is selected, check metadata for finish-specific image
+    if (selectedFinish && product.metadata?.finish_to_image?.[selectedFinish]) {
+      result.push({ id: `finish-${selectedFinish}`, url: product.metadata.finish_to_image[selectedFinish] });
+    }
+
+    // Add product images if any
+    if (product.images && product.images.length > 0) {
+      for (const img of product.images) {
+        if (!result.some(r => r.url === img.url)) result.push(img);
+      }
+    }
+
+    // Always include thumbnail as fallback (if not already added)
+    if (product.thumbnail && !result.some(r => r.url === product.thumbnail)) {
+      result.push({ id: 'thumb', url: product.thumbnail });
+    }
+
+    return result;
+  }, [product, selectedFinish]);
 
   const price = selectedVariant?.prices?.[0]?.amount ?? 0;
 
