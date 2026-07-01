@@ -309,11 +309,15 @@ export default function App() {
     }
   }, [qvSelectedVariant, quickViewQty, addItem]);
 
-  // ─── Dynamic nav from Medusa categories ──────────────────────────────────
+  // ─── Dynamic nav from Medusa categories (only show ones with products) ──
   const navItems = useMemo(() => {
     const items = [{ label: 'HOME', cat: 'all' }];
+    // Only show categories that have products (known populated categories)
+    const populated = ['Alloy Wheels', '7D Floor Mats', 'Floor Mats', 'Car Covers', 'Bike Covers', 'Seat Covers', 'Car Accessories', 'Microfiber Cloth', 'Back Cushions'];
     for (const c of categories) {
-      items.push({ label: c.name.toUpperCase(), cat: c.handle });
+      if (populated.includes(c.name)) {
+        items.push({ label: c.name.toUpperCase(), cat: c.handle });
+      }
     }
     return items;
   }, [categories]);
@@ -474,7 +478,7 @@ export default function App() {
             {navItems.map(item => (
               <button
                 key={item.cat}
-                onClick={() => { setSelectedCategory(item.cat); setVehicleFiltered(false); }}
+                onClick={() => { setSelectedCategory(item.cat); setVehicleFiltered(false); window.scrollTo({ top: 600, behavior: 'smooth' }); }}
                 className={`py-4 transition-colors ${selectedCategory === item.cat && !vehicleFiltered ? 'text-[#c91c1c]' : 'hover:text-[#c91c1c]'}`}
               >
                 {item.label}
