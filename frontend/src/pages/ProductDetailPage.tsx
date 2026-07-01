@@ -62,9 +62,11 @@ export default function ProductDetailPage() {
     setSelectedImage(0);
   }, [selectedFinish]);
 
-  // Match variant by Finish only (Size/PCD are same across all variants)
+  // Match variant — use finish for alloy wheels, first variant for simple products
   const selectedVariant = useMemo(() => {
     if (!product?.variants) return null;
+    // Simple product with no Finish option — use first variant
+    if (!finishOption) return product.variants[0] || null;
     if (!selectedFinish) return null;
     // Find variant whose finish option matches
     return product.variants.find(v => {
@@ -74,7 +76,7 @@ export default function ProductDetailPage() {
         return opt?.title.toLowerCase() === 'finish' && o.value === selectedFinish;
       });
     }) || null;
-  }, [product, selectedFinish]);
+  }, [product, selectedFinish, finishOption]);
 
   const allOptionsSelected = useMemo(() => {
     if (!finishOption) return true;
