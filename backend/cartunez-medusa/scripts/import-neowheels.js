@@ -210,13 +210,18 @@ async function main() {
     // Create variants
     for (const v of design.variants) {
       // Skip if this variant already exists (resume support)
-      const existingVariant = await manager.query(
-        'SELECT id FROM product_variant WHERE title = $1 AND product_id = $2',
-        [v.title || `${v.size} ${v.pcd} ${v.finish}`.trim(), product.id]
-      );
-      if (existingVariant.length > 0) {
-        variantCount++;
-        continue;
+      const variantTitle = v.title || `${v.size} ${v.pcd} ${v.finish}`.trim();
+      try {
+        const existingVariant = await manager.query(
+          'SELECT id FROM product_variant WHERE title = $1 AND product_id = $2',
+          [variantTitle, product.id]
+        );
+        if (existingVariant.length > 0) {
+          variantCount++;
+          continue;
+        }
+      } catch (e) {
+        // If query fails (e.g. UUID format), skip the check and let create handle duplicates
       }
 
       // Every variant MUST have a value for every product option
@@ -231,7 +236,9 @@ async function main() {
         optionValues.push({ option_id: optionMap["Finish"], value: v.finish || "Standard" });
       }
 
-      const variant = await productVariantService.create(product.id, {
+      let variant;
+      try {
+        variant = await productVariantService.create(product.id, {
         title: v.title || `${v.size} ${v.pcd} ${v.finish}`.trim(),
         prices: [
           {
@@ -251,6 +258,13 @@ async function main() {
           source_url: v.url || null,
         },
       });
+      } catch (createErr) {
+        if (createErr.message && createErr.message.includes("already exists")) {
+          variantCount++;
+          continue;
+        }
+        throw createErr;
+      }
 
       // Download product image (skip thumbnail update - not supported in Medusa v1.20)
       if (v.imageUrl) {
@@ -293,6 +307,13 @@ async function main() {
       const vehicleMakeRepo = manager.getRepository(
         vehicleModels.VehicleMake
       );
+
+      // Get the raw UUID for product_id (Medusa uses prefixed IDs internally)
+      const productRow = await manager.query(
+        'SELECT id FROM product WHERE handle = $1',
+        [productHandle]
+      );
+      const rawProductId = productRow.length > 0 ? productRow[0].id : product.id;
 
       for (const [key, car] of allCompatibleCars) {
         try {
@@ -359,7 +380,7 @@ async function main() {
               });
               if (!existing) {
                 const entry = compatRepo.create({
-                  product_id: product.id,
+                  product_id: rawProductId,
                   vehicle_variant_id: v.id,
                   fitment_type: "exact",
                   notes: `Compatible via PCD ${design.variants[0]?.pcd || "universal"}`,
