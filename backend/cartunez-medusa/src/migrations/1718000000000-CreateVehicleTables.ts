@@ -87,7 +87,7 @@ export class CreateVehicleTables1718000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "product_vehicle_compatibility" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "product_id" uuid NOT NULL,
+        "product_id" text NOT NULL,
         "vehicle_variant_id" uuid NOT NULL,
         "fitment_type" character varying(20),
         "notes" text,
