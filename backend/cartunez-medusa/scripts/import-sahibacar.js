@@ -138,14 +138,21 @@ async function main() {
 
       if (product.price > 0) {
         try {
+          // Medusa v1 uses money_amount table
+          var priceResult = await manager.query(
+            "INSERT INTO money_amount (id, currency_code, amount, min_quantity, max_quantity, created_at, updated_at) VALUES (gen_random_uuid(), 'inr', $1, NULL, NULL, NOW(), NOW()) RETURNING id",
+            [product.price]
+          );
+          var moneyAmountId = priceResult[0].id;
+
+          // Link variant to price
           await manager.query(
-            "INSERT INTO product_variant_price (id, currency_code, amount, min_quantity, max_quantity, region_id, variant_id, created_at, updated_at) VALUES (gen_random_uuid(), 'inr', $1, NULL, NULL, $2, $3, NOW(), NOW())",
-            [product.price, regionId, variantId]
+            "INSERT INTO product_variant_money_amount (id, money_amount_id, variant_id, created_at, updated_at) VALUES (gen_random_uuid(), $1, $2, NOW(), NOW())",
+            [moneyAmountId, variantId]
           );
         } catch (priceErr) {
-          // If the price table doesn't exist, try the Medusa way
           if (priceErr.message && priceErr.message.includes("does not exist")) {
-            console.log("  Skipping price for: " + product.title + " (price table missing)");
+            console.log("  Skipping price for: " + product.title + " (table missing)");
           } else {
             throw priceErr;
           }
