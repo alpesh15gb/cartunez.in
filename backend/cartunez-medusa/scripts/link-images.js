@@ -23,14 +23,12 @@ async function main() {
   const productService = container.resolve("productService");
   const fileService = container.resolve("fileService");
 
-  // Get all products in Alloy Wheels category
+  // Get all neowheel products
   const products = await manager.query(`
-    SELECT p.id, p.handle, p.title, p.thumbnail
-    FROM product p
-    JOIN product_category_product_categories pc ON pc.product_id = p.id
-    JOIN product_category cat ON cat.id = pc.product_category_id
-    WHERE cat.handle = 'alloy-wheels'
-    ORDER BY p.handle
+    SELECT id, handle, title, thumbnail
+    FROM product
+    WHERE handle LIKE 'neowheels-%'
+    ORDER BY handle
   `);
 
   console.log(`Found ${products.length} alloy wheel products`);
