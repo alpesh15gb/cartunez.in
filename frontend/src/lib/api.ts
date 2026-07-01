@@ -60,7 +60,7 @@ export async function fetchYears(modelId?: string): Promise<VehicleYear[]> {
 }
 
 export async function fetchVariants(yearId?: string): Promise<VehicleVariant[]> {
-  const q = yearId ? `?year_id=${yearId}` : '';
+  const q = yearId ? `?vehicle_year_id=${yearId}` : '';
   return apiFetch(`/api/v1/vehicles/variants${q}`);
 }
 
