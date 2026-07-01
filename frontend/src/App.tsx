@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Search, ShoppingCart, Heart, User, Menu, X, Plus, Minus, Check,
-  Phone, Mail, MapPin, Eye, Trash2, AlertCircle, Star, LogOut,
+  Phone, Mail, MapPin, Eye, Trash2, AlertCircle, LogOut,
 } from 'lucide-react';
 import { useProducts, useCategories, type Product } from './hooks/useProducts';
 import { useCart } from './hooks/useCart';
@@ -236,7 +236,7 @@ export default function App() {
   const { results: searchResults, search: doSearch, clear: clearSearch } = useSearch();
   const { makes, models, years, selectedMake, setSelectedMake, selectedModel, setSelectedModel, selectedYear, setSelectedYear, loading: vehicleLoading } = useVehicles();
   const { posts: blogPosts } = useBlogPosts(4);
-  const { reels: instagramReels, reelsLoading } = useInstagramReels(8);
+  const { reels: instagramReels } = useInstagramReels(8);
 
   // ─── Search input handler ────────────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState('');
