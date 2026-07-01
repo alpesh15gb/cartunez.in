@@ -98,7 +98,11 @@ function extractTags(product) {
   const tags = new Set();
   if (product.product_type) tags.add(product.product_type);
   if (product.vendor) tags.add(product.vendor);
-  if (product.tags) {
+  if (Array.isArray(product.tags)) {
+    for (const tag of product.tags) {
+      if (tag) tags.add(tag.trim());
+    }
+  } else if (product.tags) {
     for (const tag of product.tags.split(",")) {
       const t = tag.trim();
       if (t) tags.add(t);
@@ -109,7 +113,8 @@ function extractTags(product) {
 
 function mapCategory(product) {
   const type = (product.product_type || "").toLowerCase();
-  const tags = (product.tags || "").toLowerCase();
+  const tagsRaw = Array.isArray(product.tags) ? product.tags.join(",") : (product.tags || "");
+  const tags = tagsRaw.toLowerCase();
 
   if (type.includes("speaker") || tags.includes("car speakers") || tags.includes("speakers")) return "Car Speakers";
   if (type.includes("stereo") || tags.includes("car stereos") || tags.includes("android frame")) return "Android Stereos";
