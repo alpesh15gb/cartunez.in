@@ -13,9 +13,9 @@
     "@medusajs/medusa-js": "^6.1.10",
     "@tailwindcss/vite": "^4.3.1",
     "lucide-react": "^1.21.0",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "react-router-dom": "6.28.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "6.20.0",
     "tailwindcss": "^4.3.1"
   },
   "devDependencies": {
