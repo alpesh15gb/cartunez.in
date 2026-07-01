@@ -26,6 +26,11 @@ export default function ProductDetailPage() {
     }
   }, [product]);
 
+  // Reset image index when finish changes
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [selectedFinish]);
+
   // Find the Finish option (the one that actually varies price/image)
   const finishOption = useMemo(() => {
     return product?.options?.find(o => o.title.toLowerCase() === 'finish');

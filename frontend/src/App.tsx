@@ -418,7 +418,7 @@ export default function App() {
             {isSearchFocused && searchResults.length > 0 && (
               <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 mt-1 rounded-md shadow-2xl z-50 text-black text-sm divide-y divide-gray-100">
                 {searchResults.map(p => (
-                  <button key={p.id} onClick={() => { setIsSearchFocused(false); setSearchQuery(''); clearSearch(); }} className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors">
+                  <Link key={p.id} to={`/product/${p.handle}`} onClick={() => { setIsSearchFocused(false); setSearchQuery(''); clearSearch(); window.scrollTo(0, 0); }} className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors block">
                     <div className="flex items-center space-x-3">
                       {p.thumbnail && <img src={imageUrl(p.thumbnail)} alt={p.title} className="w-8 h-8 object-cover rounded" />}
                       <div>
@@ -426,7 +426,7 @@ export default function App() {
                       </div>
                     </div>
                     {p.price && <div className="font-semibold text-[#c91c1c]">{p.price}</div>}
-                  </button>
+                  </Link>
                 ))}
               </div>
             )}
@@ -511,11 +511,14 @@ export default function App() {
             </select>
             <select value={selectedVariant} onChange={e => setSelectedVariant(e.target.value)} disabled={!selectedYear || vehicleLoading.variants} className="bg-white/10 border border-white/20 text-white rounded p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#c91c1c] disabled:opacity-40">
               <option value="" className="text-black">Select Variant</option>
-              {variants.map(v => (
-                <option key={v.id} value={v.id} className="text-black">
-                  {v.name}{v.fuel_type ? ` (${v.fuel_type}` : ''}{v.transmission ? `, ${v.transmission})` : v.fuel_type ? ')' : ''}
-                </option>
-              ))}
+              {variants.map(v => {
+                const parts = [v.fuel_type, v.transmission].filter(Boolean);
+                return (
+                  <option key={v.id} value={v.id} className="text-black">
+                    {v.name}{parts.length > 0 ? ` (${parts.join(', ')})` : ''}
+                  </option>
+                );
+              })}
             </select>
             <button onClick={handleShowVehicleProducts} disabled={!selectedYear} className="bg-[#c91c1c] hover:bg-red-700 disabled:bg-gray-700 text-white font-bold py-3 px-6 rounded uppercase tracking-wider text-xs transition-colors">
               Show Products

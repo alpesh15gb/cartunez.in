@@ -8,7 +8,8 @@ const PLACEHOLDER_SVG = 'data:image/svg+xml,' + encodeURIComponent(
 );
 
 export function formatPrice(amount: number): string {
-  return `\u20B9${(amount / 100).toLocaleString('en-IN')}.00`;
+  const rupees = amount / 100;
+  return `\u20B9${rupees.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
 export function imageUrl(url: string | null | undefined): string {
