@@ -137,10 +137,19 @@ async function main() {
       var variantId = variantResult[0].id;
 
       if (product.price > 0) {
-        await manager.query(
-          "INSERT INTO product_variant_price (id, currency_code, amount, min_quantity, max_quantity, region_id, variant_id, created_at, updated_at) VALUES (gen_random_uuid(), 'inr', $1, NULL, NULL, $2, $3, NOW(), NOW())",
-          [product.price, regionId, variantId]
-        );
+        try {
+          await manager.query(
+            "INSERT INTO product_variant_price (id, currency_code, amount, min_quantity, max_quantity, region_id, variant_id, created_at, updated_at) VALUES (gen_random_uuid(), 'inr', $1, NULL, NULL, $2, $3, NOW(), NOW())",
+            [product.price, regionId, variantId]
+          );
+        } catch (priceErr) {
+          // If the price table doesn't exist, try the Medusa way
+          if (priceErr.message && priceErr.message.includes("does not exist")) {
+            console.log("  Skipping price for: " + product.title + " (price table missing)");
+          } else {
+            throw priceErr;
+          }
+        }
       }
 
       if (product.images && product.images.length > 0) {
