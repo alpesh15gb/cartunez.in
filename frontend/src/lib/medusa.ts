@@ -27,7 +27,9 @@ export async function fetchProducts(params?: {
 }
 
 export async function fetchProduct(handle: string) {
-  const { product } = await medusa.products.retrieve(handle);
+  const { products } = await medusa.products.list({ q: handle, limit: 1 });
+  const product = products.find((p: any) => p.handle === handle) || products[0];
+  if (!product) throw new Error('Product not found');
   return product;
 }
 
