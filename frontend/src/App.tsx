@@ -412,7 +412,7 @@ export default function App() {
               <option value="all">ALL CATEGORIES</option>
               {categories.map(c => <option key={c.id} value={c.handle}>{c.name.toUpperCase()}</option>)}
             </select>
-            <button className="bg-[#c91c1c] hover:bg-red-700 text-white px-5 rounded-r flex items-center justify-center transition-colors">
+            <button onClick={() => handleSearchChange(searchQuery)} className="bg-[#c91c1c] hover:bg-red-700 text-white px-5 rounded-r flex items-center justify-center transition-colors">
               <Search size={18} />
             </button>
             {isSearchFocused && searchResults.length > 0 && (
