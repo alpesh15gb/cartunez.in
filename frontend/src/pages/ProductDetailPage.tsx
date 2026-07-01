@@ -17,29 +17,29 @@ export default function ProductDetailPage() {
   const [showZoom, setShowZoom] = useState(false);
   const [addedFeedback, setAddedFeedback] = useState(false);
 
-  // Initialize options when product loads
+  // Initialize — start with nothing selected
   useEffect(() => {
     if (product) {
-      const initial: Record<string, string> = {};
-      for (const opt of product.options || []) {
-        initial[opt.id] = opt.values?.[0]?.value || opt.values?.[0]?.id || '';
-      }
-      setSelectedOptions(initial);
+      setSelectedOptions({});
       setSelectedImage(0);
       setQty(1);
     }
   }, [product]);
 
   // Compute selected variant
+  const allOptionsSelected = useMemo(() => {
+    if (!product?.options || product.options.length === 0) return true;
+    return product.options.every(opt => selectedOptions[opt.id]);
+  }, [product, selectedOptions]);
+
   const selectedVariant = useMemo(() => {
     if (!product?.variants) return null;
     const selectedValues = Object.values(selectedOptions).filter(Boolean);
-    if (selectedValues.length === 0) return product.variants[0] || null;
+    if (selectedValues.length === 0) return null;
     return product.variants.find(v => {
-      if (selectedValues.includes(v.title)) return true;
       if (!v.options) return false;
       return selectedValues.every(sv => v.options!.some(o => o.value === sv));
-    }) || product.variants[0] || null;
+    }) || null;
   }, [product, selectedOptions]);
 
   // Fetch related products (same category)
@@ -167,9 +167,13 @@ export default function ProductDetailPage() {
 
             {/* Price */}
             <div className="mt-4">
-              <span className="text-3xl font-extrabold text-[#c91c1c]">
-                {price > 0 ? formatPrice(price) : 'Contact for Price'}
-              </span>
+              {selectedVariant ? (
+                <span className="text-3xl font-extrabold text-[#c91c1c]">
+                  {price > 0 ? formatPrice(price) : 'Contact for Price'}
+                </span>
+              ) : (
+                <span className="text-lg text-gray-400 font-medium">Select all options to see price</span>
+              )}
             </div>
 
             {/* Divider */}
@@ -196,7 +200,7 @@ export default function ProductDetailPage() {
                         onClick={() => setSelectedOptions(prev => ({ ...prev, [opt.id]: label }))}
                         className={`px-5 py-2.5 rounded-md border text-sm font-semibold uppercase transition-all ${
                           isSelected
-                            ? 'border-black bg-black text-white'
+                            ? 'border-[#c91c1c] bg-[#c91c1c] text-white'
                             : 'border-gray-300 hover:border-gray-500 text-gray-700'
                         }`}
                       >
@@ -232,10 +236,10 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-3 mb-8">
               <button
                 onClick={handleAddToCart}
-                disabled={adding || !selectedVariant}
-                className="flex-grow bg-black hover:bg-[#c91c1c] text-white py-4 rounded-md text-sm font-bold uppercase tracking-widest transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
+                disabled={adding || !allOptionsSelected || !selectedVariant}
+                className="flex-grow bg-black hover:bg-[#c91c1c] text-white py-4 rounded-md text-sm font-bold uppercase tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
               >
-                {addedFeedback ? '✓ ADDED TO CART' : adding ? 'ADDING...' : 'ADD TO CART'}
+                {addedFeedback ? '✓ ADDED TO CART' : adding ? 'ADDING...' : !allOptionsSelected ? 'SELECT ALL OPTIONS' : 'ADD TO CART'}
               </button>
               <button
                 onClick={toggleWishlist}
