@@ -65,11 +65,15 @@ async function main() {
     if (existingHandles[product.handle]) { skipped++; continue; }
 
     try {
+      // Replace neodrift branding with cartunez
+      var title = product.title.replace(/neodrift/gi, "Cartunez").replace(/NeoDrift/g, "Cartunez");
+      var description = (product.description || "").replace(/neodrift/gi, "Cartunez").replace(/NeoDrift/g, "Cartunez");
+
       var categoryId = product.category ? await getOrCreateCategory(product.category) : null;
 
       var productResult = await manager.query(
         "INSERT INTO product (id, title, handle, description, status, discountable, is_giftcard, metadata, created_at, updated_at) VALUES (gen_random_uuid(), $1, $2, $3, 'published', true, false, $4, NOW(), NOW()) RETURNING id",
-        [product.title, product.handle, product.description || "", JSON.stringify({ brand: product.vendor, source: "neodrift.in", source_url: product.sourceUrl, tags: product.tags })]
+        [title, product.handle, description, JSON.stringify({ brand: product.vendor, source: "neodrift.in", source_url: product.sourceUrl, tags: product.tags })]
       );
       var productId = productResult[0].id;
 
