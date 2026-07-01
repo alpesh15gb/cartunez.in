@@ -88,7 +88,7 @@ export default function ChatBot() {
       const botMsg: BotMessage = {
         id: crypto.randomUUID(),
         role: 'bot',
-        text: data.response ?? data.message ?? "I couldn't process that. Could you rephrase?",
+        text: data.reply ?? data.response ?? data.message ?? "I couldn't process that. Could you rephrase?",
         products: data.products,
         timestamp: Date.now(),
       };
