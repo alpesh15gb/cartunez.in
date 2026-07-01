@@ -26,10 +26,28 @@ export default function ProductDetailPage() {
     }
   }, [product]);
 
+  // Build complete options with values from variants
+  const optionsWithValues = useMemo(() => {
+    if (!product?.options || !product?.variants) return [];
+    return product.options.map(opt => {
+      // Collect unique values from all variants
+      const valueMap = new Map<string, string>();
+      for (const v of product.variants) {
+        for (const vo of (v as any).options || []) {
+          if (vo.option_id === opt.id) {
+            valueMap.set(vo.value, vo.id);
+          }
+        }
+      }
+      const values = Array.from(valueMap.entries()).map(([val, id]) => ({ id, value: val }));
+      return { ...opt, values };
+    });
+  }, [product]);
+
   // Find the Finish option (the one that actually varies price/image)
   const finishOption = useMemo(() => {
-    return product?.options?.find(o => o.title.toLowerCase() === 'finish');
-  }, [product]);
+    return optionsWithValues.find(o => o.title.toLowerCase() === 'finish');
+  }, [optionsWithValues]);
 
   // Selected finish value string
   const selectedFinish = useMemo(() => {
@@ -215,7 +233,7 @@ export default function ProductDetailPage() {
             )}
 
             {/* Options — each group is independent */}
-            {product.options?.map(opt => {
+            {optionsWithValues.map(opt => {
               const isFinish = opt.title.toLowerCase() === 'finish';
               return (
                 <div key={opt.id} className="mb-5">
