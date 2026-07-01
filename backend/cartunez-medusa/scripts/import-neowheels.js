@@ -127,9 +127,16 @@ async function main() {
     console.log(`Created category: ${CATEGORY_NAME}`);
   }
 
-  // Fetch existing products to avoid duplicates
+  // Fetch existing products with variant counts
   const existingProducts = await productService.list({}, { select: ["id", "handle"] });
   const existingHandles = new Set(existingProducts.map((p) => p.handle));
+
+  // Also check for products that already have variants (partially imported)
+  const existingVariantCounts = {};
+  for (const p of existingProducts) {
+    const full = await productService.retrieve(p.id, { relations: ["variants"] });
+    existingVariantCounts[p.handle] = full.variants ? full.variants.length : 0;
+  }
 
   let createdCount = 0;
   let skippedCount = 0;
@@ -142,9 +149,13 @@ async function main() {
     const productHandle = `neowheels-${designSlug}`;
 
     if (existingHandles.has(productHandle)) {
-      console.log(`  Skip (exists): ${design.name}`);
-      skippedCount++;
-      continue;
+      const variantCount = existingVariantCounts[productHandle] || 0;
+      if (variantCount >= design.variants.length * 0.8) {
+        console.log(`  Skip (exists, ${variantCount} variants): ${design.name}`);
+        skippedCount++;
+        continue;
+      }
+      console.log(`  Resuming: ${design.name} (${variantCount}/${design.variants.length} variants)`);
     }
 
     console.log(`\nCreating: ${design.name} (${design.variants.length} variants)`);
@@ -202,6 +213,16 @@ async function main() {
 
     // Create variants
     for (const v of design.variants) {
+      // Skip if this variant already exists (resume support)
+      const existingVariant = await manager.query(
+        'SELECT id FROM product_variant WHERE title = $1 AND product_id = $2',
+        [v.title || `${v.size} ${v.pcd} ${v.finish}`.trim(), product.id]
+      );
+      if (existingVariant.length > 0) {
+        variantCount++;
+        continue;
+      }
+
       // Every variant MUST have a value for every product option
       const optionValues = [];
       if (optionMap["Size"]) {
@@ -235,22 +256,13 @@ async function main() {
         },
       });
 
-      // Download and set product thumbnail image
+      // Download product image (skip thumbnail update - not supported in Medusa v1.20)
       if (v.imageUrl) {
         try {
           const ext = v.imageUrl.match(/\.(jpg|jpeg|png|webp)$/i)?.[1] || "jpg";
           const imgFilename = `${productHandle}-${variant.id.slice(-8)}.${ext}`;
           const imgPath = path.join(UPLOAD_DIR, imgFilename);
-
           await downloadImage(v.imageUrl, imgPath);
-
-          // Update product thumbnail (use first variant's image)
-          if (!product.thumbnail) {
-            await productService.update(product.id, {
-              thumbnail: `/uploads/${imgFilename}`,
-            });
-          }
-
           imageCount++;
         } catch (err) {
           console.error(`    Image error for ${v.title}: ${err.message}`);
