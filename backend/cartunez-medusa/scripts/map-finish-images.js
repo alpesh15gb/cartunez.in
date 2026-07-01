@@ -1,8 +1,8 @@
 /**
  * Map finish codes to product images in Medusa metadata.
  *
- * Reads scraped data from /tmp/neowheels-data.json, finds which uploaded image
- * belongs to which variant (by filename suffix = last 8 chars of variant ID),
+ * Queries the database for products and variants, matches uploaded images
+ * to variants by filename pattern ({handle}-{variantIdLast8}.{ext}),
  * then stores a finish_to_image mapping in each product's metadata.
  *
  * Usage: node scripts/map-finish-images.js
@@ -13,23 +13,14 @@ const loaders = require("@medusajs/medusa/dist/loaders").default;
 const fs = require("fs");
 const path = require("path");
 
-const DATA_FILE = "/tmp/neowheels-data.json";
 const UPLOAD_DIR = path.join(__dirname, "..", "uploads");
 
 async function main() {
   console.log("=== Map Finish Codes to Product Images ===\n");
 
-  if (!fs.existsSync(DATA_FILE)) {
-    console.error(`Data file not found: ${DATA_FILE}`);
-    process.exit(1);
-  }
-
-  const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-  console.log(`Loaded ${data.totalDesigns} designs from scraped data`);
-
   // Get all uploaded files
   const uploadFiles = fs.readdirSync(UPLOAD_DIR);
-  console.log(`Found ${uploadFiles.length} uploaded files\n`);
+  console.log(`Found ${uploadFiles.length} uploaded files`);
 
   // Bootstrap Medusa
   const directory = process.cwd();
@@ -39,12 +30,12 @@ async function main() {
   const { container } = await loaders({ directory, expressApp: app, isTest: false });
   const manager = container.resolve("manager");
 
-  // Get all neowheel products from DB
+  // Get all neowheel products with their variants and finish option
   const products = await manager.query(`
-    SELECT id, handle, title, metadata
-    FROM product
-    WHERE handle LIKE 'neowheels-%'
-    ORDER BY handle
+    SELECT p.id, p.handle, p.title, p.metadata
+    FROM product p
+    WHERE p.handle LIKE 'neowheels-%'
+    ORDER BY p.handle
   `);
 
   console.log(`Found ${products.length} products in database\n`);
@@ -53,15 +44,19 @@ async function main() {
   let skipped = 0;
 
   for (const product of products) {
-    const designSlug = product.handle.replace("neowheels-", "");
+    // Get variants with their Finish option value
+    const variants = await manager.query(`
+      SELECT v.id, v.title, v.metadata,
+             ov.value AS finish_value
+      FROM product_variant v
+      JOIN product_option_value ov ON ov.variant_id = v.id
+      JOIN product_option o ON o.id = ov.option_id
+      WHERE v.product_id = $1
+        AND o.title = 'Finish'
+      ORDER BY v.variant_rank
+    `, [product.id]);
 
-    // Find this design in scraped data
-    const design = data.designs?.find(d => {
-      const slug = d.name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
-      return slug === designSlug || d.handle === designSlug;
-    });
-
-    if (!design || !design.variants) {
+    if (variants.length === 0) {
       skipped++;
       continue;
     }
@@ -69,25 +64,20 @@ async function main() {
     // Build finish → image mapping
     const finishToImage = {};
 
-    for (const variant of design.variants) {
-      const finishCode = variant.finish || variant.finishCode;
+    for (const variant of variants) {
+      const finishCode = variant.finish_value;
       if (!finishCode) continue;
 
-      // The import script names images as {handle}-{variantId.slice(-8)}.{ext}
-      // We need to find the actual uploaded file
-      const variantSuffix = variant.id ? variant.id.slice(-8) : null;
-      if (!variantSuffix) continue;
+      // Import script names images as {handle}-{variantId.slice(-8)}.{ext}
+      const variantSuffix = variant.id.slice(-8);
 
       // Search for matching file
       const matchingFile = uploadFiles.find(f =>
         f.startsWith(`${product.handle}-`) && f.includes(variantSuffix)
       );
 
-      if (matchingFile) {
-        // Only use first image per finish (some finishes may have multiple variants with same image)
-        if (!finishToImage[finishCode]) {
-          finishToImage[finishCode] = `/uploads/${matchingFile}`;
-        }
+      if (matchingFile && !finishToImage[finishCode]) {
+        finishToImage[finishCode] = `/uploads/${matchingFile}`;
       }
     }
 
@@ -96,10 +86,13 @@ async function main() {
       continue;
     }
 
-    // Update product metadata with finish_to_image mapping
-    const existingMeta = product.metadata && typeof product.metadata === 'string'
-      ? JSON.parse(product.metadata)
-      : (product.metadata || {});
+    // Update product metadata
+    let existingMeta = {};
+    try {
+      existingMeta = typeof product.metadata === 'string'
+        ? JSON.parse(product.metadata)
+        : (product.metadata || {});
+    } catch { existingMeta = {}; }
 
     const updatedMeta = {
       ...existingMeta,
