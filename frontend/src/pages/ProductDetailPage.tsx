@@ -22,7 +22,7 @@ export default function ProductDetailPage() {
     if (product) {
       const initial: Record<string, string> = {};
       for (const opt of product.options || []) {
-        initial[opt.id] = opt.values?.[0]?.title || opt.values?.[0]?.id || '';
+        initial[opt.id] = opt.values?.[0]?.value || opt.values?.[0]?.id || '';
       }
       setSelectedOptions(initial);
       setSelectedImage(0);
@@ -188,7 +188,7 @@ export default function ProductDetailPage() {
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {opt.values.map(val => {
-                    const label = val.title || val.id;
+                    const label = val.value || val.id;
                     const isSelected = selectedOptions[opt.id] === label;
                     return (
                       <button

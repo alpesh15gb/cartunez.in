@@ -249,7 +249,7 @@ export default function App() {
       setQuickViewQty(1);
       const initial: Record<string, string> = {};
       for (const opt of qv.options || []) {
-        initial[opt.id] = opt.values?.[0]?.title || opt.values?.[0]?.id || '';
+        initial[opt.id] = opt.values?.[0]?.value || opt.values?.[0]?.id || '';
       }
       setQuickViewOptions(initial);
     }
@@ -920,7 +920,7 @@ export default function App() {
                     <label className="block text-xs font-bold uppercase text-gray-500 mb-2">{opt.title}</label>
                     <div className="flex flex-wrap gap-2">
                       {opt.values.map(val => {
-                        const label = val.title || val.id;
+                        const label = val.value || val.id;
                         const isSelected = quickViewOptions[opt.id] === label;
                         return (
                           <button key={val.id} onClick={() => setQuickViewOptions(prev => ({ ...prev, [opt.id]: label }))} className={`px-4 py-2 rounded border text-xs font-semibold uppercase ${isSelected ? 'border-black bg-black text-white' : 'border-gray-200 hover:border-gray-400 text-gray-700'}`}>{label}</button>
