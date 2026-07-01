@@ -30,6 +30,8 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: false,
+      target: 'es2020',
+      minify: 'terser',
     },
   }
 })
