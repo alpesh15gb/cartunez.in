@@ -141,6 +141,7 @@ services:
       MEILISEARCH_API_KEY: ${MEILISEARCH_API_KEY:-}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change_me}
       API_ADMIN_KEY: ${API_ADMIN_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
       CORS_ORIGINS: '["https://cartunez.in","https://shop.cartunez.in","http://localhost:3000","http://localhost:3001","http://localhost:5173"]'
       RATE_LIMIT_PER_MINUTE: 60
       DEBUG: "false"

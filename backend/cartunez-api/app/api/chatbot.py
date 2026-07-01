@@ -1,5 +1,6 @@
-"""Chatbot API routes for AI-powered product search and assistance."""
+"""Chatbot API routes powered by Groq LLM for product search and assistance."""
 
+import json
 import re
 from typing import List, Optional
 
@@ -13,20 +14,15 @@ from app.database import get_db
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 
-
 # ─── Schemas ──────────────────────────────────────────────────────────────────
 
 
 class ChatMessage(BaseModel):
-    """Incoming chat message from the frontend."""
-
     message: str
     session_id: str
 
 
 class ProductCard(BaseModel):
-    """Simplified product representation for chat responses."""
-
     id: str
     title: str
     handle: str
@@ -36,62 +32,45 @@ class ProductCard(BaseModel):
 
 
 class ChatAction(BaseModel):
-    """Action button the frontend can render."""
-
     label: str
     type: str
     value: str
 
 
 class ChatReply(BaseModel):
-    """Chatbot reply payload."""
-
     reply: str
     products: List[ProductCard]
     actions: List[ChatAction]
 
 
 class SearchResponse(BaseModel):
-    """Search endpoint response."""
-
     products: List[ProductCard]
     suggestions: List[str]
 
 
-# ─── Keyword Catalogue ────────────────────────────────────────────────────────
+# ─── Keyword Catalogue (fallback when LLM is unavailable) ─────────────────────
 
 CATEGORY_KEYWORDS: dict[str, list[str]] = {
     "floor mats": ["floor mats", "floor mat", "mats", "mat", "car mat", "floor liner"],
     "led lights": ["led lights", "led light", "led", "led bar", "led bulb", "led headlight", "drl"],
     "seat covers": ["seat covers", "seat cover", "seats", "seat", "upholstery", "seat protector"],
-    "dash camera": ["dash camera", "dashcam", "dash cam", "dash board camera", "car camera", "recorder"],
-    "infotainment": ["infotainment", "android screen", "touchscreen", "car stereo", "head unit", "car display"],
-    "roof rails": ["roof rails", "roof rail", "roof rack", "luggage rack", "top rack"],
-    "body cover": ["body cover", "car cover", "dust cover", "sun shade", "car shade"],
-    "steering cover": ["steering cover", "steering wheel cover", "steering", "grip cover"],
-    "mud flaps": ["mud flaps", "mud flap", "mudguard", "mud guard", "splash guard"],
-    "perfume": ["perfume", "car perfume", "air freshener", "fragrance", "car freshener"],
-    "mobile holder": ["mobile holder", "phone holder", "phone mount", "mobile mount", "car holder"],
-    "reverse camera": ["reverse camera", "parking camera", "back camera", "rear view camera", "backup camera"],
-    "sun film": ["sun film", "sun film tint", "window tint", "tint film", "privacy film"],
-    "door visor": ["door visor", "door visors", "rain guard", "window visor", "wind deflector"],
+    "dash camera": ["dash camera", "dashcam", "dash cam", "car camera", "recorder"],
+    "infotainment": ["infotainment", "android screen", "touchscreen", "car stereo", "head unit"],
+    "roof rails": ["roof rails", "roof rail", "roof rack", "luggage rack"],
+    "body cover": ["body cover", "car cover", "dust cover", "sun shade"],
+    "steering cover": ["steering cover", "steering wheel cover", "steering grip"],
+    "mud flaps": ["mud flaps", "mud flap", "mudguard", "splash guard"],
+    "perfume": ["perfume", "car perfume", "air freshener", "fragrance"],
+    "mobile holder": ["mobile holder", "phone holder", "phone mount", "mobile mount"],
+    "reverse camera": ["reverse camera", "parking camera", "rear view camera"],
+    "sun film": ["sun film", "window tint", "tint film", "privacy film"],
+    "door visor": ["door visor", "door visors", "rain guard", "window visor"],
     "alloy wheels": ["alloy wheels", "alloy wheel", "rims", "wheel", "alloy"],
     "horn": ["horn", "car horn", "multi horn", "musical horn", "air horn"],
-    "flooring": ["flooring", "flooring lamination", "lamination", "floor lamination", "5d flooring", "7d flooring"],
-    "armrest": ["armrest", "arm rest", "center armrest", "console armrest", "elbow rest"],
-    "ambient light": ["ambient light", "ambient lights", "interior light", "mood light", "rgb light"],
+    "flooring": ["flooring", "lamination", "floor lamination", "5d flooring", "7d flooring"],
+    "armrest": ["armrest", "arm rest", "center armrest", "console armrest"],
+    "ambient light": ["ambient light", "ambient lights", "interior light", "mood light"],
 }
-
-VEHICLE_NAMES = [
-    "creta", "venue", "seltos", "sonet", "carens",
-    "thar", "scorpio", "xuv700", "xuv 700", "xuv300", "xuv 300", "bolero", "thar roxx",
-    "nexon", "punch", "harrier", "safari", "altroz", "tiago", "tigor",
-    "swift", "baleno", "brezza", "alto", "wagon r", "dzire", "ertiga", "fronx",
-    "city", "amaze", "elevate", "wrv",
-    "innova", "fortuner", "gla", "glc", "gls", "hilux", "camry", "hyryder",
-    "taigun", "virtus", "kushaq", "slavia",
-    "aura", "verna", "i20", "i10", "alcazar", " Tucson",
-]
 
 GREETING_RESPONSES = [
     "Hey there! Welcome to Car Tunez. How can I help you today?",
@@ -110,7 +89,6 @@ FALLBACK_RESPONSES = [
 
 
 def _extract_category(message: str) -> Optional[str]:
-    """Match a message against known accessory categories."""
     lower = message.lower()
     for category, keywords in CATEGORY_KEYWORDS.items():
         for kw in keywords:
@@ -119,62 +97,13 @@ def _extract_category(message: str) -> Optional[str]:
     return None
 
 
-def _extract_vehicle(message: str) -> Optional[str]:
-    """Extract a vehicle name from the message."""
-    lower = message.lower()
-    for name in VEHICLE_NAMES:
-        if name in lower:
-            return name.title()
-    return None
-
-
-def _extract_price_limit(message: str) -> Optional[int]:
-    """Extract a numeric price limit from the message."""
-    patterns = [
-        r"under\s+(\d[\d,]*)",
-        r"below\s+(\d[\d,]*)",
-        r"less\s+than\s+(\d[\d,]*)",
-        r"budget\s+(?:of\s+)?(\d[\d,]*)",
-        r"within\s+(\d[\d,]*)",
-        r"max(?:imum)?\s+(\d[\d,]*)",
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, message.lower())
-        if match:
-            return int(match.group(1).replace(",", ""))
-    return None
-
-
 def _is_greeting(message: str) -> bool:
-    """Check if the message is a simple greeting."""
     greetings = {"hi", "hello", "hey", "good morning", "good evening", "good afternoon", "namaste", "yo", "sup"}
-    lower = message.lower().strip().rstrip("!.?") 
+    lower = message.lower().strip().rstrip("!.? ")
     return lower in greetings
 
 
-def _build_suggestions(category: Optional[str], vehicle: Optional[str]) -> List[str]:
-    """Generate follow-up suggestion prompts."""
-    suggestions: List[str] = []
-
-    if category:
-        other_categories = [c for c in CATEGORY_KEYWORDS if c != category]
-        for c in other_categories[:3]:
-            suggestions.append(f"Show me {c}")
-    else:
-        for c in list(CATEGORY_KEYWORDS)[:4]:
-            suggestions.append(f"Show me {c}")
-
-    if vehicle:
-        suggestions.append(f"More accessories for {vehicle}")
-    else:
-        suggestions.append("What's compatible with my car?")
-
-    suggestions.append("What's trending right now?")
-    return suggestions[:5]
-
-
 def _format_medusa_products(data: dict) -> List[ProductCard]:
-    """Transform Medusa product list into chat-friendly cards."""
     products: List[ProductCard] = []
     for p in data.get("products", []):
         price: Optional[str] = None
@@ -183,9 +112,8 @@ def _format_medusa_products(data: dict) -> List[ProductCard]:
             prices = variants[0].get("prices", [])
             if prices:
                 price_val = prices[0].get("amount", 0)
-                currency = prices[0].get("currency_code", "inr").upper()
-                price = f"{currency} {price_val / 100:.2f}" if price_val else None
-
+                if price_val:
+                    price = f"₹{price_val / 100:,.0f}"
         products.append(
             ProductCard(
                 id=p.get("id", ""),
@@ -199,62 +127,7 @@ def _format_medusa_products(data: dict) -> List[ProductCard]:
     return products
 
 
-def _build_reply(
-    message: str,
-    category: Optional[str],
-    vehicle: Optional[str],
-    price_limit: Optional[int],
-    products: List[ProductCard],
-) -> str:
-    """Construct a natural language reply."""
-    if _is_greeting(message):
-        return "Welcome to Car Tunez! We have a wide range of car accessories. What are you looking for today?"
-
-    parts: List[str] = []
-
-    if category and vehicle:
-        parts.append(f"Here are the best {category} I found for your {vehicle}.")
-    elif category:
-        parts.append(f"Here's what I found in {category}:")
-    elif vehicle:
-        parts.append(f"Here are some great accessories for your {vehicle}:")
-    else:
-        parts.append("Here's what I found:")
-
-    if price_limit:
-        parts.append(f"Filtered to items under ₹{price_limit:,}.")
-
-    count = len(products)
-    if count == 0:
-        parts.append("No exact matches, but try browsing our full catalog!")
-    elif count == 1:
-        parts.append("We have 1 product that matches.")
-    else:
-        parts.append(f"We have {count} products that match.")
-
-    return " ".join(parts)
-
-
-def _build_actions(products: List[ProductCard], category: Optional[str]) -> List[ChatAction]:
-    """Build action buttons from products and context."""
-    actions: List[ChatAction] = []
-
-    for p in products[:3]:
-        actions.append(
-            ChatAction(label=f"View {p.title[:30]}", type="link", value=f"/products/{p.handle}")
-        )
-
-    if category:
-        actions.append(
-            ChatAction(label=f"Browse all {category}", type="link", value=f"/collections/{category.replace(' ', '-')}")
-        )
-
-    actions.append(ChatAction(label="Talk to human support", type="link", value="/support"))
-    return actions[:6]
-
-
 async def _search_medusa(query: str, limit: int = 5) -> List[ProductCard]:
-    """Search products via Medusa store API."""
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(
@@ -267,45 +140,105 @@ async def _search_medusa(query: str, limit: int = 5) -> List[ProductCard]:
         return []
 
 
+def _build_suggestions(category: Optional[str], vehicle: Optional[str]) -> List[str]:
+    suggestions: List[str] = []
+    if category:
+        other_categories = [c for c in CATEGORY_KEYWORDS if c != category]
+        for c in other_categories[:3]:
+            suggestions.append(f"Show me {c}")
+    else:
+        for c in list(CATEGORY_KEYWORDS.keys())[:4]:
+            suggestions.append(f"Show me {c}")
+    if vehicle:
+        suggestions.append(f"More accessories for {vehicle}")
+    else:
+        suggestions.append("What's compatible with my car?")
+    suggestions.append("What's trending right now?")
+    return suggestions[:5]
+
+
+def _build_actions(products: List[ProductCard], category: Optional[str]) -> List[ChatAction]:
+    actions: List[ChatAction] = []
+    for p in products[:3]:
+        actions.append(
+            ChatAction(label=f"View {p.title[:30]}", type="link", value=f"/product/{p.handle}")
+        )
+    if category:
+        actions.append(
+            ChatAction(label=f"Browse all {category}", type="link", value="/")
+        )
+    actions.append(ChatAction(label="Talk to human support", type="link", value="https://wa.me/919949695030"))
+    return actions[:6]
+
+
+# ─── Groq LLM Integration ────────────────────────────────────────────────────
+
+GROQ_SYSTEM_PROMPT = """You are CarTunez's helpful car accessories assistant. You help customers find the right accessories for their cars.
+
+Your store sells these categories of products:
+- Floor Mats, LED Lights, Seat Covers, Dash Cameras, Infotainment Systems
+- Alloy Wheels, Roof Rails, Body Covers, Steering Covers, Mud Flaps
+- Car Perfume, Mobile Holders, Reverse Cameras, Sun Film, Door Visors
+- Horns, Flooring/Lamination, Armrests, Ambient Lights
+
+When a customer asks about a product:
+1. Understand what they need (category, car model, budget)
+2. Provide a helpful, friendly response
+3. Suggest relevant product categories
+
+IMPORTANT: Always respond with a JSON object in this exact format:
+{
+  "reply": "your helpful response text",
+  "search_query": "search terms for product lookup",
+  "category": "detected category or null"
+}
+
+Keep your reply concise (1-3 sentences). Be friendly and helpful.
+If the customer just says hi/hello, welcome them warmly.
+If they ask about pricing, tell them to check the product pages.
+If they ask about compatibility, mention that the site has a vehicle selector tool."""
+
+
+async def _llm_chat(message: str, groq_api_key: str) -> Optional[dict]:
+    """Call Groq LLM and parse the response."""
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {groq_api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": "llama-3.3-70b-versatile",
+                    "messages": [
+                        {"role": "system", "content": GROQ_SYSTEM_PROMPT},
+                        {"role": "user", "content": message},
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 300,
+                    "response_format": {"type": "json_object"},
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            content = data["choices"][0]["message"]["content"]
+            return json.loads(content)
+    except Exception:
+        return None
+
+
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 
 
 @router.get("/search", response_model=SearchResponse)
 async def search_products(
-    q: str = Query(..., min_length=1, description="Search query"),
+    q: str = Query(..., min_length=1),
     db: AsyncSession = Depends(get_db),
 ) -> SearchResponse:
-    """Search products via Medusa + local vehicle DB for chatbot suggestions."""
     category = _extract_category(q)
-    vehicle = _extract_vehicle(q)
-    price_limit = _extract_price_limit(q)
-
-    search_terms = q
-    if vehicle:
-        search_terms = search_terms.replace(vehicle.lower(), "").replace(vehicle, "")
-    if price_limit:
-        for pattern in [r"under\s+\d[\d,]*", r"below\s+\d[\d,]*", r"less\s+than\s+\d[\d,]*",
-                        r"budget\s+(?:of\s+)?\d[\d,]*", r"within\s+\d[\d,]*", r"max(?:imum)?\s+\d[\d,]*"]:
-            search_terms = re.sub(pattern, "", search_terms, flags=re.IGNORECASE)
-    search_terms = " ".join(search_terms.split()) or (category or "car accessories")
-
-    products = await _search_medusa(search_terms, limit=5)
-
-    if price_limit and products:
-        filtered: List[ProductCard] = []
-        for p in products:
-            if p.price:
-                try:
-                    numeric = float(re.sub(r"[^\d.]", "", p.price))
-                    if numeric <= price_limit:
-                        filtered.append(p)
-                except ValueError:
-                    filtered.append(p)
-            else:
-                filtered.append(p)
-        products = filtered
-
-    suggestions = _build_suggestions(category, vehicle)
+    products = await _search_medusa(q, limit=5)
+    suggestions = _build_suggestions(category, None)
     return SearchResponse(products=products, suggestions=suggestions)
 
 
@@ -314,16 +247,13 @@ async def chat_message(
     body: ChatMessage,
     db: AsyncSession = Depends(get_db),
 ) -> ChatReply:
-    """Process a chat message and return products, reply, and actions."""
     message = body.message.strip()
-
     if not message:
         raise HTTPException(status_code=400, detail="Message cannot be empty")
 
     category = _extract_category(message)
-    vehicle = _extract_vehicle(message)
-    price_limit = _extract_price_limit(message)
 
+    # Greeting — no LLM needed
     if _is_greeting(message):
         import random
         reply_text = random.choice(GREETING_RESPONSES)
@@ -331,36 +261,42 @@ async def chat_message(
         actions = _build_actions(products, None)
         return ChatReply(reply=reply_text, products=products, actions=actions)
 
-    search_query = message
-    if vehicle:
-        search_query = search_query.replace(vehicle.lower(), "").replace(vehicle, "")
-    search_query = " ".join(search_query.split()) or (category or "car accessories")
+    # Try Groq LLM first
+    groq_key = getattr(settings, "GROQ_API_KEY", None)
+    llm_result = None
 
-    products = await _search_medusa(search_query, limit=5)
+    if groq_key:
+        llm_result = await _llm_chat(message, groq_key)
 
-    if price_limit and products:
-        filtered_products: List[ProductCard] = []
-        for p in products:
-            if p.price:
-                try:
-                    numeric = float(re.sub(r"[^\d.]", "", p.price))
-                    if numeric <= price_limit:
-                        filtered_products.append(p)
-                except ValueError:
-                    filtered_products.append(p)
-            else:
-                filtered_products.append(p)
-        products = filtered_products
+    if llm_result:
+        reply_text = llm_result.get("reply", "Here's what I found:")
+        search_query = llm_result.get("search_query", message)
+        category = category or llm_result.get("category")
+        products = await _search_medusa(search_query, limit=5)
 
-    if not products and category:
-        products = await _search_medusa(category, limit=5)
-
-    if not products:
-        import random
-        reply_text = random.choice(FALLBACK_RESPONSES)
-        products = await _search_medusa("car accessories", limit=5)
+        if not products:
+            products = await _search_medusa("car accessories", limit=5)
+            reply_text += " Here are some popular items to browse."
     else:
-        reply_text = _build_reply(message, category, vehicle, price_limit, products)
+        # Fallback to keyword-based search
+        search_query = message
+        products = await _search_medusa(search_query, limit=5)
+
+        if not products and category:
+            products = await _search_medusa(category, limit=5)
+
+        if not products:
+            import random
+            reply_text = random.choice(FALLBACK_RESPONSES)
+            products = await _search_medusa("car accessories", limit=5)
+        else:
+            count = len(products)
+            if category:
+                reply_text = f"Here's what I found in {category}: {count} product{'s' if count != 1 else ''} match."
+            else:
+                reply_text = f"Here's what I found: {count} product{'s' if count != 1 else ''} match."
 
     actions = _build_actions(products, category)
+    suggestions = _build_suggestions(category, None)
+
     return ChatReply(reply=reply_text, products=products, actions=actions)

@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     # Medusa
     MEDUSA_URL: str = "http://medusa:9000"
 
+    # Groq LLM (for chatbot)
+    GROQ_API_KEY: str = ""
+
     # JWT
     JWT_SECRET_KEY: str = ""
     JWT_ALGORITHM: str = "HS256"
