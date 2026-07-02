@@ -1,9 +1,10 @@
 import Medusa from '@medusajs/medusa-js';
-import { MEDUSA_BACKEND_URL } from './config';
+import { MEDUSA_BACKEND_URL, PUBLISHABLE_KEY } from './config';
 
 const medusa = new Medusa({
   baseUrl: MEDUSA_BACKEND_URL,
   maxRetries: 3,
+  apiKey: PUBLISHABLE_KEY || undefined,
 });
 
 export default medusa;
@@ -27,7 +28,9 @@ export async function fetchProducts(params?: {
 }
 
 export async function fetchProduct(handle: string) {
-  const res = await fetch(`${MEDUSA_BACKEND_URL}/store/products?handle=${encodeURIComponent(handle)}&limit=1&expand=categories,variants.options,variants.prices,options`);
+  const headers: Record<string, string> = {};
+  if (PUBLISHABLE_KEY) headers['x-publishable-api-key'] = PUBLISHABLE_KEY;
+  const res = await fetch(`${MEDUSA_BACKEND_URL}/store/products?handle=${encodeURIComponent(handle)}&limit=1&expand=categories,variants.options,variants.prices,options`, { headers });
   if (!res.ok) throw new Error('Product not found');
   const data = await res.json();
   const product = data.products?.[0];
@@ -43,14 +46,18 @@ export async function fetchCategories() {
 // ─── Vehicle compatibility helpers ──────────────────────────────────────────
 
 export async function fetchCompatibleProductIds(variantId: string): Promise<string[]> {
-  const res = await fetch(`${MEDUSA_BACKEND_URL}/vehicle/products/${variantId}`);
+  const headers: Record<string, string> = {};
+  if (PUBLISHABLE_KEY) headers['x-publishable-api-key'] = PUBLISHABLE_KEY;
+  const res = await fetch(`${MEDUSA_BACKEND_URL}/vehicle/products/${variantId}`, { headers });
   if (!res.ok) return [];
   const data = await res.json();
   return [...new Set<string>(data.products?.map((p: { product_id: string }) => p.product_id) || [])];
 }
 
 export async function fetchCompatibleProductIdsForYear(yearId: string): Promise<string[]> {
-  const res = await fetch(`${MEDUSA_BACKEND_URL}/vehicle/products-by-year/${yearId}`);
+  const headers: Record<string, string> = {};
+  if (PUBLISHABLE_KEY) headers['x-publishable-api-key'] = PUBLISHABLE_KEY;
+  const res = await fetch(`${MEDUSA_BACKEND_URL}/vehicle/products-by-year/${yearId}`, { headers });
   if (!res.ok) return [];
   const data = await res.json();
   return [...new Set<string>(data.products?.map((p: { product_id: string }) => p.product_id) || [])];

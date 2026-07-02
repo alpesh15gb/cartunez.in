@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { fetchProducts } from '../lib/medusa';
+import { MEDUSA_BACKEND_URL, PUBLISHABLE_KEY } from '../lib/config';
 
 interface SearchProduct {
   id: string;
@@ -33,10 +33,12 @@ export function useSearch() {
     setState(p => ({ ...p, loading: true, error: null }));
 
     try {
-      // Try Medusa product search first (more reliable)
-      const { products } = await fetchProducts({ q: query, limit: 10 });
+      const headers: Record<string, string> = {};
+      if (PUBLISHABLE_KEY) headers['x-publishable-api-key'] = PUBLISHABLE_KEY;
+      const res = await fetch(`${MEDUSA_BACKEND_URL}/store/products?q=${encodeURIComponent(query)}&limit=10`, { headers, signal: controller.signal });
+      const data = await res.json();
       setState({
-        results: products.map((p: Record<string, unknown>) => ({
+        results: (data.products || []).map((p: Record<string, unknown>) => ({
           id: String(p.id ?? ''),
           title: String(p.title ?? ''),
           handle: String(p.handle ?? ''),

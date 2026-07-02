@@ -205,7 +205,9 @@ export default function App() {
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [quickViewOptions, setQuickViewOptions] = useState<Record<string, string>>({});
   const [quickViewQty, setQuickViewQty] = useState(1);
-  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [wishlist, setWishlist] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('cartunez_wishlist') || '[]'); } catch { return []; }
+  });
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [checkoutEmail, setCheckoutEmail] = useState('');
   const [checkoutName, setCheckoutName] = useState('');
@@ -294,7 +296,11 @@ export default function App() {
 
   // ─── Helpers ─────────────────────────────────────────────────────────────
   const toggleWishlist = useCallback((id: string) => {
-    setWishlist(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    setWishlist(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+      localStorage.setItem('cartunez_wishlist', JSON.stringify(next));
+      return next;
+    });
   }, []);
 
   const addToCartFromProduct = useCallback(async (product: { variants?: { id: string }[] }) => {
@@ -312,12 +318,8 @@ export default function App() {
   // ─── Dynamic nav from Medusa categories (only show ones with products) ──
   const navItems = useMemo(() => {
     const items = [{ label: 'HOME', cat: 'all' }];
-    // Only show categories that have products (known populated categories)
-    const populated = ['Alloy Wheels', '7D Floor Mats', 'Floor Mats', 'Car Covers', 'Bike Covers', 'Seat Covers', 'Car Accessories', 'Microfiber Cloth', 'Back Cushions'];
     for (const c of categories) {
-      if (populated.includes(c.name)) {
-        items.push({ label: c.name.toUpperCase(), cat: c.handle });
-      }
+      items.push({ label: c.name.toUpperCase(), cat: c.handle });
     }
     return items;
   }, [categories]);
