@@ -36,6 +36,7 @@ export function useSearch() {
       const headers: Record<string, string> = {};
       if (PUBLISHABLE_KEY) headers['x-publishable-api-key'] = PUBLISHABLE_KEY;
       const res = await fetch(`${MEDUSA_BACKEND_URL}/store/products?q=${encodeURIComponent(query)}&limit=10`, { headers, signal: controller.signal });
+      if (!res.ok) throw new Error('Search request failed');
       const data = await res.json();
       setState({
         results: (data.products || []).map((p: Record<string, unknown>) => ({

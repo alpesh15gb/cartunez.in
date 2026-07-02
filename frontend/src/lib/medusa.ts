@@ -89,10 +89,14 @@ export async function updateCartItem(cartId: string, lineId: string, quantity: n
 }
 
 export async function removeFromCart(cartId: string, lineId: string) {
-  const { cart } = await medusa.carts.update(cartId, {
-    // @ts-expect-error medusa-js doesn't expose removeItem but API supports quantity=0
-    items: [{ id: lineId, quantity: 0 }],
+  const headers: Record<string, string> = {};
+  if (PUBLISHABLE_KEY) headers['x-publishable-api-key'] = PUBLISHABLE_KEY;
+  const res = await fetch(`${MEDUSA_BACKEND_URL}/store/carts/${cartId}/line-items/${lineId}`, {
+    method: 'DELETE',
+    headers,
   });
+  if (!res.ok) throw new Error('Failed to remove item');
+  const { cart } = await res.json();
   return cart;
 }
 

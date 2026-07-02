@@ -1,9 +1,10 @@
 import { FASTAPI_URL } from './config';
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const { headers: callerHeaders, ...rest } = options ?? {};
   const res = await fetch(`${FASTAPI_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    ...options,
+    ...rest,
+    headers: { 'Content-Type': 'application/json', ...callerHeaders },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
+import Medusa from '@medusajs/medusa-js';
 import {
   authCreateSession,
   authCreateAccount,
   authGetSession,
 } from '../lib/medusa';
+import { MEDUSA_BACKEND_URL, PUBLISHABLE_KEY } from '../lib/config';
 
 interface Customer {
   id: string;
@@ -45,7 +47,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    // Just clear local state — medusa-js doesn't have a logout method
+    try {
+      const client = new Medusa({ baseUrl: MEDUSA_BACKEND_URL, maxRetries: 0, apiKey: PUBLISHABLE_KEY || undefined });
+      await client.auth.deleteSession();
+    } catch { /* proceed with local logout even if server call fails */ }
     setCustomer(null);
   }, []);
 

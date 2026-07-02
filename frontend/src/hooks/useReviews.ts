@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchReviews, createReview } from '../lib/api';
 import type { Review } from '../lib/api';
 
@@ -16,16 +16,21 @@ export function useReviews(productId: string | null) {
     return () => { cancelled = true; };
   }, [productId]);
 
-  const submit = async (data: {
+  const submit = useCallback(async (data: {
     customer_name: string;
     rating: number;
     title: string;
     body: string;
   }) => {
     if (!productId) return;
-    const review = await createReview({ ...data, product_id: productId });
-    setReviews(prev => [review, ...prev]);
-  };
+    try {
+      const review = await createReview({ ...data, product_id: productId });
+      setReviews(prev => [review, ...prev]);
+    } catch (e) {
+      console.error('Failed to submit review:', e);
+      throw e;
+    }
+  }, [productId]);
 
   return { reviews, loading, submit };
 }

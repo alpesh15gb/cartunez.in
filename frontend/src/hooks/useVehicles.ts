@@ -14,32 +14,40 @@ export function useVehicles() {
   const [loading, setLoading] = useState({ makes: false, models: false, years: false, variants: false });
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(p => ({ ...p, makes: true }));
-    fetchMakes().then(setMakes).catch(() => {}).finally(() => setLoading(p => ({ ...p, makes: false })));
+    fetchMakes().then(data => { if (!cancelled) setMakes(data); }).catch(() => {}).finally(() => { if (!cancelled) setLoading(p => ({ ...p, makes: false })); });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
     if (!selectedMake) { setModels([]); return; }
+    let cancelled = false;
     setLoading(p => ({ ...p, models: true }));
     setSelectedModel('');
     setSelectedYear('');
     setSelectedVariant('');
-    fetchModels(selectedMake).then(setModels).catch(() => {}).finally(() => setLoading(p => ({ ...p, models: false })));
+    fetchModels(selectedMake).then(data => { if (!cancelled) setModels(data); }).catch(() => {}).finally(() => { if (!cancelled) setLoading(p => ({ ...p, models: false })); });
+    return () => { cancelled = true; };
   }, [selectedMake]);
 
   useEffect(() => {
     if (!selectedModel) { setYears([]); return; }
+    let cancelled = false;
     setLoading(p => ({ ...p, years: true }));
     setSelectedYear('');
     setSelectedVariant('');
-    fetchYears(selectedModel).then(setYears).catch(() => {}).finally(() => setLoading(p => ({ ...p, years: false })));
+    fetchYears(selectedModel).then(data => { if (!cancelled) setYears(data); }).catch(() => {}).finally(() => { if (!cancelled) setLoading(p => ({ ...p, years: false })); });
+    return () => { cancelled = true; };
   }, [selectedModel]);
 
   useEffect(() => {
     if (!selectedYear) { setVariants([]); return; }
+    let cancelled = false;
     setLoading(p => ({ ...p, variants: true }));
     setSelectedVariant('');
-    fetchVariants(selectedYear).then(setVariants).catch(() => {}).finally(() => setLoading(p => ({ ...p, variants: false })));
+    fetchVariants(selectedYear).then(data => { if (!cancelled) setVariants(data); }).catch(() => {}).finally(() => { if (!cancelled) setLoading(p => ({ ...p, variants: false })); });
+    return () => { cancelled = true; };
   }, [selectedYear]);
 
   const reset = useCallback(() => {

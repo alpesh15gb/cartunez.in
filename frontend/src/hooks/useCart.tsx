@@ -81,20 +81,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const updateItem = useCallback(async (lineId: string, qty: number) => {
     if (!cart) return;
-    const updated = await apiUpdateCartItem(cart.id, lineId, qty);
-    setCart(updated as unknown as CartData);
+    try {
+      const updated = await apiUpdateCartItem(cart.id, lineId, qty);
+      setCart(updated as unknown as CartData);
+    } catch (e) {
+      console.error('Failed to update cart item:', e);
+      throw e;
+    }
   }, [cart]);
 
   const removeItem = useCallback(async (lineId: string) => {
     if (!cart) return;
-    const updated = await apiRemoveFromCart(cart.id, lineId);
-    setCart(updated as unknown as CartData);
+    try {
+      const updated = await apiRemoveFromCart(cart.id, lineId);
+      setCart(updated as unknown as CartData);
+    } catch (e) {
+      console.error('Failed to remove cart item:', e);
+      throw e;
+    }
   }, [cart]);
 
   const setEmail = useCallback(async (email: string) => {
     if (!cart) return;
-    const updated = await apiSetCartEmail(cart.id, email);
-    setCart(updated as unknown as CartData);
+    try {
+      const updated = await apiSetCartEmail(cart.id, email);
+      setCart(updated as unknown as CartData);
+    } catch (e) {
+      console.error('Failed to set cart email:', e);
+      throw e;
+    }
   }, [cart]);
 
   const checkout = useCallback(async () => {
