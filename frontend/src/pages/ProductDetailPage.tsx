@@ -8,7 +8,7 @@ import { imageUrl, formatPrice } from '../lib/utils';
 export default function ProductDetailPage() {
   const { handle } = useParams<{ handle: string }>();
   const { product, loading, error } = useProduct(handle || null);
-  const { addItem, adding, itemCount, total } = useCart();
+  const { addItem, adding, itemCount } = useCart();
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [qty, setQty] = useState(1);
