@@ -328,7 +328,6 @@ export default function App() {
   const {
     compatible: vCompatibleProducts,
     other: vOtherProducts,
-    totalCount: vTotalCount,
     loading: vProductsLoading,
   } = useVehicleProducts(
     vehicleFiltered
