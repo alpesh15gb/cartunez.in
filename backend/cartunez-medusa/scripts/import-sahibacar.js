@@ -118,7 +118,7 @@ async function main() {
       if (categoryId) {
         try {
           await manager.query(
-            "INSERT INTO product_category_product_categories (product_id, product_category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            "INSERT INTO product_category_product (product_id, product_category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
             [productId, categoryId]
           );
         } catch (e) {}
