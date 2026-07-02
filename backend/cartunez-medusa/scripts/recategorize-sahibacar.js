@@ -98,13 +98,13 @@ async function main() {
 
       // Remove old category links
       await manager.query(
-        "DELETE FROM product_category_product_categories WHERE product_id = $1",
+        "DELETE FROM product_category_product WHERE product_id = $1",
         [product.id]
       );
 
       // Add new category link
       await manager.query(
-        "INSERT INTO product_category_product_categories (product_id, product_category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+        "INSERT INTO product_category_product (product_id, product_category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
         [product.id, categoryId]
       );
 
