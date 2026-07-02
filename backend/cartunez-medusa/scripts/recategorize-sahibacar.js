@@ -69,7 +69,8 @@ async function main() {
       console.log("  Created category: " + catName);
     }
   }
-  console.log("Categories ready: " + Object.keys(categoryCache).length + "\n");
+  console.log("Categories ready: " + Object.keys(categoryCache).length);
+  console.log("Cache keys: " + Object.keys(categoryCache).join(", ") + "\n");
 
   // Update each product
   var updated = 0;
@@ -90,6 +91,7 @@ async function main() {
       var categoryId = categoryCache[catKey];
 
       if (!categoryId) {
+        console.error("  No category ID for '" + product.title + "' (looking up: '" + catKey + "'). Cache keys: " + Object.keys(categoryCache).slice(0, 5).join(", "));
         errors++;
         continue;
       }
