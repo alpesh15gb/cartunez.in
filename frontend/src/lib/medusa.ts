@@ -67,6 +67,7 @@ export async function fetchCompatibleProductIdsForYear(yearId: string): Promise<
 
 export async function createCart() {
   const { cart } = await medusa.carts.create({
+    region_id: 'cbeb5a25-71c9-4005-8809-032e88da0386',
     sales_channel_id: 'sc_01KWD7TRJZYS41XW60Z3CBYNTC',
   });
   return cart;
