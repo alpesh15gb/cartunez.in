@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Minus, Plus, Heart, ChevronRight, Truck, Shield, RotateCcw, X } from 'lucide-react';
+import { Minus, Plus, Heart, ChevronRight, ChevronLeft, Truck, Shield, RotateCcw, X, ShoppingCart } from 'lucide-react';
 import { useProduct, useProducts } from '../hooks/useProducts';
 import { useCart } from '../hooks/useCart';
 import { imageUrl, formatPrice } from '../lib/utils';
@@ -8,7 +8,7 @@ import { imageUrl, formatPrice } from '../lib/utils';
 export default function ProductDetailPage() {
   const { handle } = useParams<{ handle: string }>();
   const { product, loading, error } = useProduct(handle || null);
-  const { addItem, adding } = useCart();
+  const { addItem, adding, itemCount, total } = useCart();
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [qty, setQty] = useState(1);
@@ -158,6 +158,24 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="bg-black text-white py-3 px-4 md:px-8 sticky top-0 z-40 shadow-lg">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Link to="/" className="flex items-center space-x-3 text-white hover:text-[#c91c1c] transition-colors">
+            <ChevronLeft size={20} />
+            <span className="text-xs font-bold uppercase tracking-widest">Back to Shop</span>
+          </Link>
+          <Link to="/" className="flex items-center space-x-2 text-white">
+            <img src="/logo.png" alt="Car Tunez" className="h-8 w-8 object-contain rounded" />
+            <span className="font-bold text-sm tracking-wider hidden sm:inline">CAR TUNEZ</span>
+          </Link>
+          <Link to="/" className="relative text-white hover:text-[#c91c1c] transition-colors">
+            <ShoppingCart size={22} />
+            {itemCount > 0 && <span className="absolute -top-2 -right-2 bg-[#c91c1c] text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">{itemCount}</span>}
+          </Link>
+        </div>
+      </header>
+
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
         <nav className="flex items-center text-xs text-gray-500 space-x-1">
