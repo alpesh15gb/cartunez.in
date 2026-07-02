@@ -26,64 +26,39 @@ async function main() {
   }
 
   var ids = products.map(function(p) { return p.id; });
+  var ph = ids.map(function(_, i) { return "$" + (i + 1); }).join(",");
 
-  // Delete in correct order using raw SQL
-  try {
-    // Get variant IDs first
-    var variants = await manager.query(
-      "SELECT id FROM product_variant WHERE product_id IN (" + ids.map(function(_, i) { return "$" + (i + 1); }).join(",") + ")",
-      ids
-    );
-    var variantIds = variants.map(function(v) { return v.id; });
-
-    if (variantIds.length > 0) {
-      // Delete price links
-      await manager.query(
-        "DELETE FROM product_variant_money_amount WHERE variant_id IN (" + variantIds.map(function(_, i) { return "$" + (i + 1); }).join(",") + ")",
-        variantIds
-      );
-
-      // Delete money amounts
-      await manager.query(
-        "DELETE FROM money_amount WHERE id IN (SELECT money_amount_id FROM product_variant_money_amount WHERE variant_id IN (" + variantIds.map(function(_, i) { return "$" + (i + 1); }).join(",") + "))",
-        variantIds
-      );
+  // Helper to run and ignore "relation does not exist" errors
+  async function safeQuery(sql, params) {
+    try {
+      await manager.query(sql, params);
+    } catch (e) {
+      if (!e.message.includes("does not exist")) {
+        console.error("  SQL error: " + e.message);
+      }
     }
-
-    // Delete category links
-    await manager.query(
-      "DELETE FROM product_category_product WHERE product_id IN (" + ids.map(function(_, i) { return "$" + (i + 1); }).join(",") + ")",
-      ids
-    );
-
-    // Delete variants
-    await manager.query(
-      "DELETE FROM product_variant WHERE product_id IN (" + ids.map(function(_, i) { return "$" + (i + 1); }).join(",") + ")",
-      ids
-    );
-
-    // Delete images
-    await manager.query(
-      "DELETE FROM product_image WHERE product_id IN (" + ids.map(function(_, i) { return "$" + (i + 1); }).join(",") + ")",
-      ids
-    );
-
-    // Delete options
-    await manager.query(
-      "DELETE FROM product_option WHERE product_id IN (" + ids.map(function(_, i) { return "$" + (i + 1); }).join(",") + ")",
-      ids
-    );
-
-    // Delete products
-    await manager.query(
-      "DELETE FROM product WHERE id IN (" + ids.map(function(_, i) { return "$" + (i + 1); }).join(",") + ")",
-      ids
-    );
-
-    console.log("Deleted " + ids.length + " products");
-  } catch (err) {
-    console.error("Error: " + err.message);
   }
+
+  // Get variant IDs
+  var variants = await manager.query("SELECT id FROM product_variant WHERE product_id IN (" + ph + ")", ids);
+  var variantIds = variants.map(function(v) { return v.id; });
+
+  if (variantIds.length > 0) {
+    var vph = variantIds.map(function(_, i) { return "$" + (i + 1); }).join(",");
+    await safeQuery("DELETE FROM product_variant_money_amount WHERE variant_id IN (" + vph + ")", variantIds);
+    await safeQuery("DELETE FROM money_amount WHERE id IN (SELECT money_amount_id FROM product_variant_money_amount WHERE variant_id IN (" + vph + "))", variantIds);
+  }
+
+  await safeQuery("DELETE FROM product_category_product WHERE product_id IN (" + ph + ")", ids);
+  await safeQuery("DELETE FROM product_option_value_product_option WHERE product_option_id IN (SELECT id FROM product_option WHERE product_id IN (" + ph + "))", ids);
+  await safeQuery("DELETE FROM product_option WHERE product_id IN (" + ph + ")", ids);
+  await safeQuery("DELETE FROM product_variant WHERE product_id IN (" + ph + ")", ids);
+  await safeQuery("DELETE FROM product WHERE id IN (" + ph + ")", ids);
+
+  // Verify deletion
+  var remaining = await manager.query("SELECT COUNT(*) as cnt FROM product WHERE handle LIKE 'sahibacar-%'");
+  console.log("Remaining: " + remaining[0].cnt + " products");
+  console.log("Done!");
 
   process.exit(0);
 }
