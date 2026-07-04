@@ -39,24 +39,24 @@ fi
 # 3. Build frontend
 echo "[3/9] Building frontend..."
 cd "$FRONTEND_DIR"
-npm ci --silent
-if [ ! -f .env.production ]; then
-    cat > .env.production <<EOF
-VITE_MEDUSA_URL=
-VITE_API_URL=
-VITE_MEILISEARCH_URL=
-VITE_MEILISEARCH_KEY=
-VITE_MEDUSA_PUBLISHABLE_KEY=pk_01KVBSWHFD53JWKRBEHS43FDBJ
+npm install --silent
+if [ ! -f .env.local ]; then
+    cat > .env.local <<EOF
+NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_01KVBSWHFD53JWKRBEHS43FDBJ
+NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://cartunez.in
+NEXT_PUBLIC_API_URL=https://cartunez.in
+NEXT_PUBLIC_BASE_URL=https://cartunez.in
+NEXT_PUBLIC_DEFAULT_REGION=in
 EOF
 fi
-npx vite build --mode production
+NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://cartunez.in NEXT_PUBLIC_API_URL=https://cartunez.in npm run build
 
-# 4. Deploy frontend build to nginx serving directory
-echo "[4/9] Deploying frontend to /var/www/cartunez..."
-mkdir -p /var/www/cartunez/dist
-cp -r "$FRONTEND_DIR/dist/"* /var/www/cartunez/dist/
-chown -R www-data:www-data /var/www/cartunez
-
+# 4. Restart Next.js frontend server
+echo "[4/9] Restarting Next.js frontend server via PM2..."
+if ! command -v pm2 &> /dev/null; then
+    npm install -g pm2 --silent
+fi
+pm2 restart cartunez-storefront || pm2 start "npm run start" --name "cartunez-storefront"
 # 5. Install HTTP-only nginx config first (no SSL yet)
 echo "[5/9] Configuring nginx (HTTP-only for certbot)..."
 mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled /var/www/certbot
@@ -78,8 +78,6 @@ server {
         allow all;
     }
 
-    root /var/www/cartunez/dist;
-    index index.html;
 
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript image/svg+xml;
@@ -142,7 +140,11 @@ server {
     }
 
     location / {
-        try_files $uri $uri/ /index.html;
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location ~ /\. {

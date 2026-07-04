@@ -1,0 +1,238 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* ─── CSS Design Tokens ─────────────────────────────────────── */
+:root {
+  --color-brand: #c91c1c;
+  --color-brand-dark: #a51616;
+  --color-carbon: #0a0a0b;
+  --color-carbon-light: #111113;
+  --color-carbon-mid: #18181c;
+  --color-carbon-dark: #0d0d0f;
+  --color-surface: #161618;
+  --color-surface-2: #1e1e22;
+  --color-border: rgba(255,255,255,0.06);
+  --color-border-strong: rgba(255,255,255,0.12);
+  --font-display: "Barlow Condensed", sans-serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+/* ─── Base Reset ─────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--color-carbon);
+  color: #e5e7eb;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Autofill override ──────────────────────────────────────── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #111113 inset !important;
+  -webkit-text-fill-color: #e5e7eb !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
+/* Floating label behaviour */
+input:focus ~ label,
+input:not(:placeholder-shown) ~ label {
+  @apply -translate-y-2 text-xsmall-regular;
+}
+input:focus ~ label {
+  @apply left-0;
+}
+
+/* ─── No-scrollbar ───────────────────────────────────────────── */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar::-webkit-scrollbar-track { background-color: transparent; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* ─── Layout & Typography utilities ─────────────────────────── */
+@layer components {
+  .content-container {
+    @apply max-w-[1440px] w-full mx-auto px-6 lg:px-12;
+  }
+
+  /* Medusa DTC compat text sizes */
+  .text-xsmall-regular { @apply text-[10px] leading-4 font-normal; }
+  .text-small-regular  { @apply text-xs leading-5 font-normal; }
+  .text-small-semi     { @apply text-xs leading-5 font-semibold; }
+  .text-base-regular   { @apply text-sm leading-6 font-normal; }
+  .text-base-semi      { @apply text-sm leading-6 font-semibold; }
+  .text-large-regular  { @apply text-base leading-6 font-normal; }
+  .text-large-semi     { @apply text-base leading-6 font-semibold; }
+  .text-xl-regular     { @apply text-2xl leading-[36px] font-normal; }
+  .text-xl-semi        { @apply text-2xl leading-[36px] font-semibold; }
+  .text-2xl-regular    { @apply text-[30px] leading-[48px] font-normal; }
+  .text-2xl-semi       { @apply text-[30px] leading-[48px] font-semibold; }
+  .text-3xl-regular    { @apply text-[32px] leading-[44px] font-normal; }
+  .text-3xl-semi       { @apply text-[32px] leading-[44px] font-semibold; }
+
+  /* ─── Display type: Barlow Condensed ─── */
+  .font-display { font-family: var(--font-display); }
+
+  /* ─── Section label / eyebrow ─── */
+  .eyebrow {
+    @apply text-[10px] font-bold text-brand uppercase tracking-[0.2em] block;
+  }
+
+  /* ─── Premium dark inputs ─── */
+  .input-dark {
+    @apply w-full bg-white/5 border border-white/10 rounded-md px-4 py-3 text-sm
+           text-white placeholder-gray-500 outline-none
+           hover:border-white/20 focus:border-brand focus:ring-1 focus:ring-brand/40
+           transition-all duration-200 font-medium;
+  }
+
+  .select-dark {
+    @apply w-full bg-white/5 border border-white/10 rounded-md px-4 py-3 text-sm
+           text-white outline-none appearance-none
+           hover:border-white/20 focus:border-brand focus:ring-1 focus:ring-brand/40
+           transition-all duration-200 font-medium cursor-pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+  }
+
+  /* ─── Buttons ─── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+           bg-brand hover:bg-brand-dark text-white
+           text-[11px] font-bold uppercase tracking-[0.15em]
+           px-8 py-4 rounded-none
+           transition-all duration-200
+           border border-brand hover:border-brand-dark
+           shadow-[0_0_20px_rgba(201,28,28,0.25)] hover:shadow-[0_0_30px_rgba(201,28,28,0.4)];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           bg-transparent text-white border border-white/20
+           hover:bg-white hover:text-carbon hover:border-white
+           text-[11px] font-bold uppercase tracking-[0.15em]
+           px-8 py-4 rounded-none
+           transition-all duration-200;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2
+           bg-transparent text-brand border border-brand/40
+           hover:bg-brand hover:text-white hover:border-brand
+           text-[11px] font-bold uppercase tracking-[0.15em]
+           px-6 py-3 rounded-none
+           transition-all duration-200;
+  }
+
+  /* ─── Cards ─── */
+  .card-dark {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .card-dark:hover {
+    border-color: rgba(201,28,28,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+
+  /* ─── Premium Glass ─── */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .dark-glass-card {
+    background: rgba(10, 10, 11, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  .neon-glow    { box-shadow: 0 0 20px rgba(201, 28, 28, 0.4); }
+  .carbon-gradient { background: linear-gradient(135deg, #0d0d0f 0%, #0a0a0b 100%); }
+
+  .section-divider {
+    @apply border-t border-white/5;
+  }
+
+  /* ─── Premium Button (contrast) ─── */
+  .contrast-btn {
+    @apply px-4 py-2 border border-white/20 text-white hover:bg-white hover:text-carbon
+           transition-colors duration-200;
+  }
+}
+
+/* ─── Animations ─────────────────────────────────────────────── */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in-down { animation: fadeInDown 0.3s cubic-bezier(0.16,1,0.3,1) forwards; }
+.animate-fade-in-up   { animation: fadeInUp  0.4s cubic-bezier(0.16,1,0.3,1) forwards; }
+.animate-fade-in      { animation: fadeIn    0.5s ease forwards; }
+.animate-slide-left   { animation: slideInLeft 0.4s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+/* ─── Skeleton shimmer ───────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, #1a1a1e 25%, #222228 50%, #1a1a1e 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ─── Product image hover zoom ───────────────────────────────── */
+.img-zoom-container { overflow: hidden; }
+.img-zoom-container img { transition: transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94); }
+.img-zoom-container:hover img { transform: scale(1.06); }
+
+/* ─── Red accent line ────────────────────────────────────────── */
+.red-line {
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: var(--color-brand);
+}
