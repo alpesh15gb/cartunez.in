@@ -53,6 +53,35 @@ services:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-cartunez_redis_2024}", "ping"]
     networks:
       - cartunez-network
+deploy:
+      resources:
+        limits:
+          memory: 1G
+    logging: *default-logging
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_MEDUSA_URL: ${VITE_MEDUSA_URL:-http://localhost:9000}
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8005}
+        VITE_MEILISEARCH_URL: ${VITE_MEILISEARCH_URL:-http://localhost:7700}
+        VITE_MEILISEARCH_KEY: ${VITE_MEILISEARCH_KEY:-}
+        VITE_MEDUSA_PUBLISHABLE_KEY: ${VITE_MEDUSA_PUBLISHABLE_KEY:-pk_01KVBSWHFD53JWKRBEHS43FDBJ}
+    container_name: cartunez-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:8000"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      medusa:
+        condition: service_healthy
+      fastapi:
+        condition: service_healthy
+    networks:
+      - cartunez-network
     deploy:
       resources:
         limits:
