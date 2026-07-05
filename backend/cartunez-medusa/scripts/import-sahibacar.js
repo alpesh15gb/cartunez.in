@@ -165,6 +165,18 @@ async function main() {
           "UPDATE product SET thumbnail = $1 WHERE id = $2",
           [thumbUrl, productId]
         );
+        // Insert all images into product_image table
+        for (var imgIdx = 0; imgIdx < product.images.length; imgIdx++) {
+          var img = product.images[imgIdx];
+          try {
+            await manager.query(
+              "INSERT INTO product_image (id, product_id, url, rank, created_at, updated_at) VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW())",
+              [productId, img.servePath, imgIdx]
+            );
+          } catch (imgErr) {
+            console.error("  Error inserting image for '" + product.title + "': " + imgErr.message);
+          }
+        }
       }
 
       created++;

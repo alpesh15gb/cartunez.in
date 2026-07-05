@@ -15,18 +15,33 @@ type Props = {
 function getImagesForVariant(
   product: HttpTypes.StoreProduct,
   selectedVariantId?: string
-) {
-  if (!selectedVariantId || !product.variants) {
+): HttpTypes.StoreProductImage[] {
+  // Try variant-specific images first
+  if (selectedVariantId && product.variants) {
+    const variant = product.variants.find((v) => v.id === selectedVariantId)
+    if (variant?.images?.length) {
+      const variantImageIds = new Set(variant.images.map((i) => i.id))
+      const filtered = product.images?.filter((i) => variantImageIds.has(i.id)) ?? []
+      if (filtered.length > 0) return filtered
+    }
+  }
+
+  // Fall back to product-level images
+  if (product.images?.length) {
     return product.images
   }
 
-  const variant = product.variants!.find((v) => v.id === selectedVariantId)
-  if (!variant || !variant.images?.length) {
-    return product.images
+  // Last resort: construct a synthetic image from the thumbnail
+  if (product.thumbnail) {
+    return [
+      {
+        id: `thumb-${product.id}`,
+        url: product.thumbnail,
+      } as HttpTypes.StoreProductImage,
+    ]
   }
 
-  const imageIdsMap = new Map(variant.images!.map((i) => [i.id, true]))
-  return product.images?.filter((i) => imageIdsMap.has(i.id)) ?? null
+  return []
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
