@@ -64,11 +64,10 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
       args:
-        VITE_MEDUSA_URL: ${VITE_MEDUSA_URL:-http://localhost:9000}
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:8005}
-        VITE_MEILISEARCH_URL: ${VITE_MEILISEARCH_URL:-http://localhost:7700}
-        VITE_MEILISEARCH_KEY: ${VITE_MEILISEARCH_KEY:-}
-        VITE_MEDUSA_PUBLISHABLE_KEY: ${VITE_MEDUSA_PUBLISHABLE_KEY:-pk_01KVBSWHFD53JWKRBEHS43FDBJ}
+        NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${NEXT_PUBLIC_MEDUSA_BACKEND_URL:-http://localhost:9000}
+        NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-pk_01KVBSWHFD53JWKRBEHS43FDBJ}
+        NEXT_PUBLIC_DEFAULT_REGION: ${NEXT_PUBLIC_DEFAULT_REGION:-dk}
+        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-https://cartunez.in}
     container_name: cartunez-frontend
     restart: unless-stopped
     ports:
