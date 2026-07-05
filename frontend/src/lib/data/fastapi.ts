@@ -1,6 +1,6 @@
 "use server"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://cartunez.in"
+const API_URL = process.env.FASTAPI_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://fastapi:8000"
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {

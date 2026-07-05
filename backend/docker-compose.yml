@@ -75,6 +75,7 @@ services:
     environment:
       NODE_ENV: production
       MEDUSA_BACKEND_URL: http://medusa:9000
+      FASTAPI_BACKEND_URL: http://fastapi:8000
     depends_on:
       medusa:
         condition: service_healthy
