@@ -53,7 +53,7 @@ services:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-cartunez_redis_2024}", "ping"]
     networks:
       - cartunez-network
-deploy:
+    deploy:
       resources:
         limits:
           memory: 1G
