@@ -145,7 +145,7 @@ export const listProductsWithSort = async ({
   // Filter by price range
   if (minPrice !== undefined || maxPrice !== undefined) {
     filteredProducts = filteredProducts.filter((p) => {
-      const price = p.variants?.[0]?.calculated_price?.calculated_amount ?? 0
+      const price = p.variants?.[0]?.calculated_price?.calculated_amount ?? (Array.isArray((p.variants?.[0] as any)?.prices) ? (p.variants?.[0] as any).prices[0]?.amount : 0) ?? 0
       if (minPrice !== undefined && price < minPrice) return false
       if (maxPrice !== undefined && price > maxPrice) return false
       return true

@@ -26,36 +26,41 @@ function mapProduct(product: unknown): unknown {
     const mappedVariants = variants.map((variant) => {
       if (!variant || typeof variant !== "object") return variant
       const v = variant as Record<string, unknown>
-      const prices = v.prices
-      let calculatedPrice = {
-        calculated_amount: 0,
-        original_amount: 0,
-        currency_code: "inr",
-        calculated_price: {
-          price_list_type: "default",
-        },
+
+      const existing = v.calculated_price as Record<string, unknown> | null | undefined
+      const hasValid =
+        existing &&
+        typeof existing === "object" &&
+        typeof existing.calculated_amount === "number" &&
+        existing.calculated_amount > 0
+
+      if (hasValid) {
+        return v
       }
+
+      const prices = v.prices
       if (Array.isArray(prices) && prices.length > 0) {
         const primaryPrice = prices[0]
         if (primaryPrice && typeof primaryPrice === "object") {
           const pr = primaryPrice as Record<string, unknown>
-          calculatedPrice = {
-            calculated_amount: typeof pr.amount === "number" ? pr.amount : 0,
-            original_amount: typeof pr.amount === "number" ? pr.amount : 0,
-            currency_code:
-              typeof pr.currency_code === "string"
-                ? pr.currency_code.toLowerCase()
-                : "inr",
+          return {
+            ...v,
             calculated_price: {
-              price_list_type: "default",
+              calculated_amount: typeof pr.amount === "number" ? pr.amount : 0,
+              original_amount: typeof pr.amount === "number" ? pr.amount : 0,
+              currency_code:
+                typeof pr.currency_code === "string"
+                  ? pr.currency_code.toLowerCase()
+                  : "inr",
+              calculated_price: {
+                price_list_type: "default",
+              },
             },
           }
         }
       }
-      return {
-        ...v,
-        calculated_price: calculatedPrice,
-      }
+
+      return v
     })
     return {
       ...p,
