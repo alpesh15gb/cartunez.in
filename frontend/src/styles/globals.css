@@ -6,14 +6,14 @@
 :root {
   --color-brand: #c91c1c;
   --color-brand-dark: #a51616;
-  --color-carbon: #0a0a0b;
-  --color-carbon-light: #111113;
+  --color-carbon: #121214;
+  --color-carbon-light: #1e1e24;
   --color-carbon-mid: #18181c;
-  --color-carbon-dark: #0d0d0f;
-  --color-surface: #161618;
-  --color-surface-2: #1e1e22;
-  --color-border: rgba(255,255,255,0.06);
-  --color-border-strong: rgba(255,255,255,0.12);
+  --color-carbon-dark: #0b0b0c;
+  --color-surface: #f9fafb;
+  --color-surface-2: #f3f4f6;
+  --color-border: rgba(0,0,0,0.08);
+  --color-border-strong: rgba(0,0,0,0.15);
   --font-display: "Barlow Condensed", sans-serif;
   --font-sans: "Inter", sans-serif;
 }
@@ -24,8 +24,8 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background-color: var(--color-carbon);
-  color: #e5e7eb;
+  background-color: #ffffff;
+  color: #1f2937;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -40,9 +40,9 @@ textarea:-webkit-autofill:focus,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #111113 inset !important;
-  -webkit-text-fill-color: #e5e7eb !important;
-  border-color: rgba(255,255,255,0.1) !important;
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #1f2937 !important;
+  border-color: rgba(0,0,0,0.15) !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -98,18 +98,18 @@ input:focus ~ label {
     @apply text-[10px] font-bold text-brand uppercase tracking-[0.2em] block;
   }
 
-  /* ─── Premium dark inputs ─── */
+  /* ─── Light inputs ─── */
   .input-dark {
-    @apply w-full bg-white/5 border border-white/10 rounded-md px-4 py-3 text-sm
-           text-white placeholder-gray-500 outline-none
-           hover:border-white/20 focus:border-brand focus:ring-1 focus:ring-brand/40
+    @apply w-full bg-white border border-gray-200 rounded-md px-4 py-3 text-sm
+           text-gray-900 placeholder-gray-400 outline-none
+           hover:border-gray-300 focus:border-brand focus:ring-1 focus:ring-brand/40
            transition-all duration-200 font-medium;
   }
 
   .select-dark {
-    @apply w-full bg-white/5 border border-white/10 rounded-md px-4 py-3 text-sm
-           text-white outline-none appearance-none
-           hover:border-white/20 focus:border-brand focus:ring-1 focus:ring-brand/40
+    @apply w-full bg-white border border-gray-200 rounded-md px-4 py-3 text-sm
+           text-gray-900 outline-none appearance-none
+           hover:border-gray-300 focus:border-brand focus:ring-1 focus:ring-brand/40
            transition-all duration-200 font-medium cursor-pointer;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -125,14 +125,13 @@ input:focus ~ label {
            text-[11px] font-bold uppercase tracking-[0.15em]
            px-8 py-4 rounded-none
            transition-all duration-200
-           border border-brand hover:border-brand-dark
-           shadow-[0_0_20px_rgba(201,28,28,0.25)] hover:shadow-[0_0_30px_rgba(201,28,28,0.4)];
+           border border-brand hover:border-brand-dark;
   }
 
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2
-           bg-transparent text-white border border-white/20
-           hover:bg-white hover:text-carbon hover:border-white
+           bg-transparent text-gray-700 border border-gray-300
+           hover:bg-gray-900 hover:text-white hover:border-gray-900
            text-[11px] font-bold uppercase tracking-[0.15em]
            px-8 py-4 rounded-none
            transition-all duration-200;
@@ -149,43 +148,43 @@ input:focus ~ label {
 
   /* ─── Cards ─── */
   .card-dark {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
     transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   }
   .card-dark:hover {
     border-color: rgba(201,28,28,0.3);
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.08);
   }
 
-  /* ─── Premium Glass ─── */
+  /* ─── Light Glass ─── */
   .glass-card {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.06);
   }
 
   .dark-glass-card {
-    background: rgba(10, 10, 11, 0.85);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
   }
 
-  .neon-glow    { box-shadow: 0 0 20px rgba(201, 28, 28, 0.4); }
-  .carbon-gradient { background: linear-gradient(135deg, #0d0d0f 0%, #0a0a0b 100%); }
+  .neon-glow    { box-shadow: 0 0 20px rgba(201, 28, 28, 0.15); }
+  .carbon-gradient { background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); }
 
   .section-divider {
-    @apply border-t border-white/5;
+    @apply border-t border-gray-100;
   }
 
   /* ─── Premium Button (contrast) ─── */
   .contrast-btn {
-    @apply px-4 py-2 border border-white/20 text-white hover:bg-white hover:text-carbon
+    @apply px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-900 hover:text-white
            transition-colors duration-200;
   }
 }
@@ -219,7 +218,7 @@ input:focus ~ label {
 
 /* ─── Skeleton shimmer ───────────────────────────────────────── */
 .skeleton {
-  background: linear-gradient(90deg, #1a1a1e 25%, #222228 50%, #1a1a1e 75%);
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

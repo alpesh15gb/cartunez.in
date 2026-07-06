@@ -83,6 +83,7 @@ async function main() {
   var created = 0;
   var skipped = 0;
   var errors = 0;
+  var imagesInserted = 0;
 
   for (var i = 0; i < data.products.length; i++) {
     var product = data.products[i];
@@ -165,7 +166,6 @@ async function main() {
           "UPDATE product SET thumbnail = $1 WHERE id = $2",
           [thumbUrl, productId]
         );
-        // Insert all images into product_image table
         for (var imgIdx = 0; imgIdx < product.images.length; imgIdx++) {
           var img = product.images[imgIdx];
           try {
@@ -173,10 +173,13 @@ async function main() {
               "INSERT INTO product_image (id, product_id, url, rank, created_at, updated_at) VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW())",
               [productId, img.servePath, imgIdx]
             );
+            imagesInserted++;
           } catch (imgErr) {
             console.error("  Error inserting image for '" + product.title + "': " + imgErr.message);
           }
         }
+      } else {
+        console.error("  No images for product '" + product.title + "' - data integrity issue");
       }
 
       created++;
@@ -193,6 +196,7 @@ async function main() {
   console.log("Created: " + created);
   console.log("Skipped (duplicate): " + skipped);
   console.log("Errors: " + errors);
+  console.log("Images inserted: " + imagesInserted);
 
   process.exit(0);
 }

@@ -48,7 +48,7 @@ export default function SupportPage() {
   return (
     <div className="content-container py-16 max-w-2xl">
       <div className="space-y-6">
-        <div className="flex items-center gap-3 text-carbon">
+        <div className="flex items-center gap-3 text-gray-700">
           <div className="p-2 bg-brand text-white rounded-soft">
             <LifeBuoy size={20} />
           </div>
@@ -115,7 +115,7 @@ export default function SupportPage() {
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-carbon"
+                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-gray-900"
               >
                 <option value="low">Low</option>
                 <option value="normal">Normal</option>

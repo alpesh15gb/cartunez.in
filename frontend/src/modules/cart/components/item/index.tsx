@@ -63,7 +63,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
 
       <Table.Cell className="text-left">
         <Text
-          className="txt-medium-plus text-ui-fg-base"
+          className="txt-medium-plus text-gray-900"
           data-testid="product-title"
         >
           {item.product_title}
@@ -120,7 +120,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
         >
           {type === "preview" && (
             <span className="flex gap-x-1 ">
-              <Text className="text-ui-fg-muted">{item.quantity}x </Text>
+              <Text className="text-gray-400">{item.quantity}x </Text>
               <LineItemUnitPrice
                 item={item}
                 style="tight"

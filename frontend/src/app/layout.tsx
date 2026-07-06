@@ -24,8 +24,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-mode="light" className={`${barlow.variable} ${inter.variable}`}>
-      <body className="font-sans bg-carbon antialiased">
+    <html lang="en" className={`${barlow.variable} ${inter.variable}`}>
+      <body className="font-sans bg-white text-gray-900 antialiased">
         <main className="relative">{props.children}</main>
       </body>
     </html>

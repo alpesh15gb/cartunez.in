@@ -63,7 +63,7 @@ const RefinementList = ({
   return (
     <div
       className="flex flex-col gap-8 py-4 mb-8 small:min-w-[240px]
-                 border-r border-white/5 pr-8"
+                 border-r border-gray-200 pr-8"
       data-testid={dataTestId}
     >
       <div className="flex flex-col gap-3">
@@ -119,7 +119,7 @@ const RefinementList = ({
           <span className="text-[9px] font-bold text-brand uppercase tracking-widest block">
             Compatible Vehicle
           </span>
-          <span className="text-xs font-bold text-white block uppercase tracking-wide">
+          <span className="text-xs font-bold text-gray-900 block uppercase tracking-wide">
             {make} {model}
           </span>
           <button

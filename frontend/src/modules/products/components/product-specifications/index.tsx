@@ -20,13 +20,13 @@ export default function ProductSpecifications({ product }: ProductSpecifications
 
   return (
     <div className="space-y-4">
-      <h3 className="text-xs font-bold uppercase tracking-wider text-carbon">Product Specifications</h3>
+      <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500">Product Specifications</h3>
       <div className="bg-white border border-gray-150/60 rounded-2xl overflow-hidden shadow-premium">
         <div className="divide-y divide-gray-150/40">
           {specsList.map((spec, idx) => (
             <div key={idx} className="grid grid-cols-3 py-3 px-5 text-xs font-medium hover:bg-gray-50/50 transition-colors duration-250">
               <div className="text-gray-400 uppercase tracking-widest text-[9px] self-center">{spec.label}</div>
-              <div className="col-span-2 text-carbon self-center font-bold">{String(spec.value)}</div>
+              <div className="col-span-2 text-gray-900 self-center font-bold">{String(spec.value)}</div>
             </div>
           ))}
         </div>

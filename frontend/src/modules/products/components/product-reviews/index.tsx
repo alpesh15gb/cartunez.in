@@ -52,7 +52,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
         customer_name: name.trim(),
         rating,
         title: title.trim(),
-        body: body.trim(),
+        content: body.trim(),
       })
       setSuccess("Your review has been submitted for moderation. Thank you!")
       setName("")
@@ -70,7 +70,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
 
   return (
     <div className="space-y-8 border-t border-gray-100 pt-8">
-      <div className="flex items-center gap-2 text-carbon">
+      <div className="flex items-center gap-2 text-gray-700">
         <MessageSquare size={16} className="text-brand" />
         <h3 className="text-sm font-bold uppercase tracking-wider">Customer Reviews</h3>
       </div>
@@ -88,7 +88,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
               {reviews.map((review) => (
                 <div key={review.id} className="pt-4 first:pt-0 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-carbon uppercase tracking-wide">
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">
                       {review.customer_name}
                     </span>
                     <span className="text-[10px] text-gray-400 font-medium">
@@ -104,9 +104,9 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
                       />
                     ))}
                   </div>
-                  <h4 className="text-xs font-bold text-carbon">{review.title}</h4>
+                  <h4 className="text-xs font-bold text-gray-700">{review.title}</h4>
                   <p className="text-[11px] text-gray-500 leading-relaxed font-medium">
-                    {review.body}
+                    {review.content}
                   </p>
                 </div>
               ))}
@@ -120,7 +120,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
 
         {/* Right column: submit form */}
         <div className="bg-white border border-gray-150/60 rounded-2xl p-6 h-fit space-y-4 shadow-premium">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-carbon">Write A Review</h4>
+          <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900">Write A Review</h4>
 
           {success && (
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-soft text-xs font-semibold flex items-start gap-2.5">

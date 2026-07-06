@@ -136,7 +136,7 @@ export interface Review {
   customer_name: string
   rating: number
   title: string
-  body: string
+  content: string
   is_approved: boolean
   created_at: string
 }
@@ -150,7 +150,7 @@ export async function createReview(data: {
   customer_name: string
   rating: number
   title: string
-  body: string
+  content: string
 }): Promise<Review> {
   return apiFetch<Review>("/api/v1/reviews", { method: "POST", body: JSON.stringify(data) })
 }

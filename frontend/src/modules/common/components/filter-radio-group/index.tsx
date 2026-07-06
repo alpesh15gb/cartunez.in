@@ -30,7 +30,7 @@ const FilterRadioGroup = ({
               "w-3 h-3 rounded-full border flex items-center justify-center transition-colors duration-200",
               i.value === value
                 ? "border-brand bg-brand"
-                : "border-white/20 bg-transparent hover:border-white/40"
+                : "border-gray-300 bg-transparent hover:border-gray-400"
             )}>
               {i.value === value && <EllipseMiniSolid className="text-white" style={{ width: 6, height: 6 }} />}
             </div>
@@ -45,7 +45,7 @@ const FilterRadioGroup = ({
               htmlFor={i.value}
               className={clx(
                 "text-xs font-medium cursor-pointer transition-colors duration-200",
-                i.value === value ? "text-white font-semibold" : "text-gray-500 hover:text-gray-300"
+                i.value === value ? "text-gray-900 font-semibold" : "text-gray-500 hover:text-gray-700"
               )}
               data-testid="radio-label"
               data-active={i.value === value}

@@ -22,7 +22,7 @@ export default function PromoBanners() {
   ]
 
   return (
-    <section className="bg-carbon border-t border-white/5 py-4">
+    <section className="bg-white border-t border-gray-100 py-4">
       <div className="content-container">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {promos.map((promo, idx) => (
@@ -34,8 +34,8 @@ export default function PromoBanners() {
                   style={{ backgroundImage: `url('${promo.image}')` }}
                 />
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-carbon via-carbon/60 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-r from-carbon/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white/40 to-transparent" />
 
                 {/* Top tag */}
                 <div className="absolute top-6 left-6 z-10">
@@ -47,16 +47,16 @@ export default function PromoBanners() {
                 {/* Bottom content */}
                 <div className="absolute bottom-0 inset-x-0 p-8 z-10">
                   <h3
-                    className="font-display font-black uppercase text-white leading-tight mb-3"
+                    className="font-display font-black uppercase text-gray-900 leading-tight mb-3"
                     style={{ fontSize: "clamp(32px, 3vw, 48px)", letterSpacing: "-0.02em", whiteSpace: "pre-line" }}
                   >
                     {promo.title}
                   </h3>
-                  <p className="text-xs text-gray-300 font-medium leading-relaxed mb-5 max-w-xs">
+                  <p className="text-xs text-gray-500 font-medium leading-relaxed mb-5 max-w-xs">
                     {promo.desc}
                   </p>
                   <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest
-                                   text-white border-b border-brand pb-0.5
+                                   text-gray-900 border-b border-brand pb-0.5
                                    group-hover:text-brand transition-colors duration-300">
                     {promo.cta}
                     <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>

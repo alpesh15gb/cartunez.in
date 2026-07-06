@@ -34,13 +34,13 @@ const StoreTemplate = ({
   const sort = sortBy || "created_at"
 
   return (
-    <div className="bg-carbon min-h-screen">
+    <div className="bg-white min-h-screen">
       {/* Page header */}
-      <div className="border-b border-white/5 py-12">
+      <div className="border-b border-gray-100 py-12">
         <div className="content-container">
           <span className="eyebrow mb-3">Explore</span>
           <h1
-            className="font-display font-black uppercase text-white leading-none"
+            className="font-display font-black uppercase text-gray-900 leading-none"
             style={{ fontSize: "clamp(40px, 5vw, 72px)", letterSpacing: "-0.02em" }}
             data-testid="store-page-title"
           >

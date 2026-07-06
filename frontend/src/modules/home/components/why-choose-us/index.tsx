@@ -34,14 +34,14 @@ export default function WhyChooseUs() {
   ]
 
   return (
-    <section className="bg-carbon border-t border-white/5 py-24">
+    <section className="bg-white border-t border-gray-100 py-24">
       <div className="content-container">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="space-y-3">
             <span className="eyebrow">The Cartunez Edge</span>
             <h2
-              className="font-display font-black uppercase text-white leading-none"
+              className="font-display font-black uppercase text-gray-900 leading-none"
               style={{ fontSize: "clamp(36px, 4vw, 56px)", letterSpacing: "-0.02em" }}
             >
               Why Enthusiasts
@@ -49,25 +49,25 @@ export default function WhyChooseUs() {
               <span className="text-brand">Choose Us</span>
             </h2>
           </div>
-          <p className="text-sm text-gray-400 max-w-xs font-medium leading-relaxed">
+          <p className="text-sm text-gray-500 max-w-xs font-medium leading-relaxed">
             Premium service and exact fitment engineering at the core of everything we do.
           </p>
         </div>
 
         {/* Feature grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-gray-200">
           {features.map((feature, idx) => {
             const Icon = feature.icon
             return (
               <div
                 key={idx}
-                className="bg-carbon-light p-8 flex flex-col gap-6 group
-                           hover:bg-[#161618] transition-colors duration-300"
+                className="bg-white p-8 flex flex-col gap-6 group
+                           hover:bg-gray-50 transition-colors duration-300"
               >
                 {/* Stat */}
                 <div className="space-y-1">
                   <span
-                    className="font-display font-black text-white"
+                    className="font-display font-black text-gray-900"
                     style={{ fontSize: "clamp(40px, 4vw, 56px)", lineHeight: 1 }}
                   >
                     {feature.stat}
@@ -84,7 +84,7 @@ export default function WhyChooseUs() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
                     <Icon size={16} className="text-brand stroke-[1.5px] shrink-0" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-gray-900">
                       {feature.title}
                     </h3>
                   </div>

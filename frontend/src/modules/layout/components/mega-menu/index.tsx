@@ -15,7 +15,6 @@ interface MegaMenuProps {
   categories: Category[]
 }
 
-// Custom mock subcategories to populate when backend has flat structure
 const MOCK_CHILDREN: Record<string, Category[]> = {
   "android-stereos": [
     {
@@ -95,7 +94,7 @@ export default function MegaMenu({ categories }: MegaMenuProps) {
     <div className="hidden md:flex items-center gap-x-8 h-full">
       <Link
         href="/store"
-        className="text-xs font-bold tracking-widest uppercase text-gray-400 hover:text-brand transition-colors duration-300"
+        className="text-xs font-bold tracking-widest uppercase text-gray-500 hover:text-brand transition-colors duration-300"
       >
         All Products
       </Link>
@@ -114,15 +113,15 @@ export default function MegaMenu({ categories }: MegaMenuProps) {
           >
             <Link
               href={`/categories/${category.handle}`}
-              className="flex items-center gap-x-1.5 text-xs font-bold tracking-widest uppercase text-gray-400 hover:text-brand transition-colors duration-300 h-full"
+              className="flex items-center gap-x-1.5 text-xs font-bold tracking-widest uppercase text-gray-500 hover:text-brand transition-colors duration-300 h-full"
             >
               <span>{category.name}</span>
               {hasChildren && <ChevronDown size={12} className="opacity-70" />}
             </Link>
 
             {hasChildren && isHovered && customChildren && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-[640px] dark-glass-card border border-white/10 shadow-glow rounded-none p-8 z-50 animate-fade-in-down grid grid-cols-3 gap-8 backdrop-blur-xl">
-                <div className="col-span-2 grid grid-cols-2 gap-6 border-r border-white/5 pr-6">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 w-[640px] dark-glass-card border border-gray-200 shadow-lg rounded-none p-8 z-50 animate-fade-in-down grid grid-cols-3 gap-8 backdrop-blur-xl">
+                <div className="col-span-2 grid grid-cols-2 gap-6 border-r border-gray-200 pr-6">
                   {customChildren.map((child) => (
                     <div key={child.id} className="space-y-3">
                       <Link
@@ -138,7 +137,7 @@ export default function MegaMenu({ categories }: MegaMenuProps) {
                             <Link
                               key={subChild.id}
                               href={`/categories/${subChild.handle}`}
-                              className="text-xs text-gray-400 hover:text-white block font-medium transition-colors duration-200"
+                              className="text-xs text-gray-500 hover:text-gray-900 block font-medium transition-colors duration-200"
                               onClick={() => setActiveCategory(null)}
                             >
                               {subChild.name}
@@ -152,16 +151,16 @@ export default function MegaMenu({ categories }: MegaMenuProps) {
                 <div className="flex flex-col justify-between">
                   <div className="space-y-3">
                     <span className="eyebrow">Featured</span>
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider leading-snug">
+                    <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider leading-snug">
                       Custom Fit Guaranteed
                     </h4>
-                    <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
+                    <p className="text-[11px] text-gray-500 font-medium leading-relaxed">
                       Wired and designed to integrate seamlessly with your vehicle&apos;s factory dashboard and electrical setup.
                     </p>
                   </div>
                   <Link
                     href={`/categories/${category.handle}`}
-                    className="text-[10px] font-bold text-white hover:text-brand uppercase tracking-widest border-b border-white hover:border-brand pb-0.5 self-start transition-all duration-300"
+                    className="text-[10px] font-bold text-gray-900 hover:text-brand uppercase tracking-widest border-b border-gray-900 hover:border-brand pb-0.5 self-start transition-all duration-300"
                     onClick={() => setActiveCategory(null)}
                   >
                     View All Upgrades

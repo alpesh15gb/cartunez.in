@@ -83,7 +83,7 @@ export default function HeaderSearch() {
               setQuery("")
               setResults([])
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-carbon"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
           >
             <X size={14} />
           </button>
@@ -111,7 +111,7 @@ export default function HeaderSearch() {
                   </div>
                 )}
                 <div>
-                  <h4 className="text-xs font-semibold text-carbon line-clamp-1">{item.title}</h4>
+                  <h4 className="text-xs font-semibold text-gray-900 line-clamp-1">{item.title}</h4>
                 </div>
               </button>
             ))

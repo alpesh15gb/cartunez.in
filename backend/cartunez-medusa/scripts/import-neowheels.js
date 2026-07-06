@@ -142,6 +142,7 @@ async function main() {
   let skippedCount = 0;
   let variantCount = 0;
   let imageCount = 0;
+  let imageRowsInserted = 0;
   let compatibilityCount = 0;
 
   // Process each design
@@ -266,7 +267,7 @@ async function main() {
         throw createErr;
       }
 
-      // Download product image (skip thumbnail update - not supported in Medusa v1.20)
+      // Download product image and insert into product_image table
       if (v.imageUrl) {
         try {
           const ext = v.imageUrl.match(/\.(jpg|jpeg|png|webp)$/i)?.[1] || "jpg";
@@ -274,6 +275,27 @@ async function main() {
           const imgPath = path.join(UPLOAD_DIR, imgFilename);
           await downloadImage(v.imageUrl, imgPath);
           imageCount++;
+
+          // Insert into product_image table
+          const imageUrl = `/uploads/${imgFilename}`;
+          try {
+            await manager.query(
+              "INSERT INTO product_image (id, product_id, url, rank, created_at, updated_at) VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW())",
+              [product.id, imageUrl, imageRowsInserted]
+            );
+            imageRowsInserted++;
+
+            // Set product.thumbnail from the first image
+            if (!product.thumbnail) {
+              await manager.query(
+                "UPDATE product SET thumbnail = $1 WHERE id = $2",
+                [imageUrl, product.id]
+              );
+              product.thumbnail = imageUrl;
+            }
+          } catch (imgErr) {
+            console.error(`    DB image insert error for ${v.title}: ${imgErr.message}`);
+          }
         } catch (err) {
           console.error(`    Image error for ${v.title}: ${err.message}`);
         }
@@ -405,6 +427,7 @@ async function main() {
   console.log(`Products skipped (existing): ${skippedCount}`);
   console.log(`Variants created: ${variantCount}`);
   console.log(`Images downloaded: ${imageCount}`);
+  console.log(`Image DB rows inserted: ${imageRowsInserted}`);
   console.log(`Compatibility links: ${compatibilityCount}`);
   console.log(`\nRun MeiliSearch reindex: node reindex-search.js`);
 

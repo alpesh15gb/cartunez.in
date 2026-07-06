@@ -26,16 +26,16 @@ export default function InstagramReels() {
   }
 
   return (
-    <div className="bg-carbon text-white py-20 border-t border-white/5">
+    <div className="bg-gray-50 text-gray-900 py-20 border-t border-gray-200">
       <div className="content-container">
         <div className="text-center max-w-xl mx-auto space-y-2 mb-16">
           <span className="text-[10px] font-bold text-brand uppercase tracking-widest block">
             Social Feed
           </span>
-          <h2 className="text-2xl font-bold uppercase tracking-wider text-white">
+          <h2 className="text-2xl font-bold uppercase tracking-wider text-gray-900">
             Instagram Reels
           </h2>
-          <p className="text-xs text-gray-400 font-medium">
+          <p className="text-xs text-gray-500 font-medium">
             Watch our products in action and see real upgrades from our community.
           </p>
         </div>
@@ -45,7 +45,7 @@ export default function InstagramReels() {
             <div
               key={reel.id}
               onClick={() => setActiveReel(reel.shortcode)}
-              className="relative aspect-[9/16] rounded-soft overflow-hidden group cursor-pointer shadow-lg border border-white/5"
+              className="relative aspect-[9/16] rounded-soft overflow-hidden group cursor-pointer shadow-md border border-gray-200"
             >
               <img
                 src={reel.thumbnail}
@@ -53,15 +53,15 @@ export default function InstagramReels() {
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300 flex flex-col justify-between p-4 z-10">
-                <div className="self-end bg-white/10 backdrop-blur-sm border border-white/15 p-2 rounded-full text-white">
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors duration-300 flex flex-col justify-between p-4 z-10">
+                <div className="self-end bg-white/20 backdrop-blur-sm border border-white/30 p-2 rounded-full text-white">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
                 </div>
                 <div className="space-y-2">
                   <div className="w-10 h-10 bg-brand rounded-full flex items-center justify-center mx-auto shadow-lg scale-90 group-hover:scale-100 transition-transform duration-300">
                     <Play size={16} className="text-white fill-white ml-0.5" />
                   </div>
-                  <p className="text-[10px] text-gray-300 line-clamp-2 text-center leading-relaxed font-medium">
+                  <p className="text-[10px] text-gray-200 line-clamp-2 text-center leading-relaxed font-medium">
                     {reel.caption}
                   </p>
                 </div>

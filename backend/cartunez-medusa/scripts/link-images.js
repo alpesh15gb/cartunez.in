@@ -39,6 +39,7 @@ async function main() {
 
   let linkedCount = 0;
   let skippedCount = 0;
+  let imageRowsInserted = 0;
 
   for (const product of products) {
     // Extract design slug from handle: "neowheels-hydra" -> "hydra"
@@ -72,9 +73,10 @@ async function main() {
         });
 
         // Update product thumbnail
+        const thumbnailUrl = uploadResult.url || `/uploads/${thumbnailImage}`;
         await manager.query(
           `UPDATE product SET thumbnail = $1 WHERE id = $2`,
-          [uploadResult.url || `/uploads/${thumbnailImage}`, product.id]
+          [thumbnailUrl, product.id]
         );
 
         linkedCount++;
@@ -88,11 +90,38 @@ async function main() {
     } else {
       skippedCount++;
     }
+
+    // Insert all matching images into product_image table (skip if already exists)
+    const existingImages = await manager.query(
+      "SELECT url FROM product_image WHERE product_id = $1",
+      [product.id]
+    );
+    const existingUrls = new Set(existingImages.map(img => img.url));
+
+    for (let idx = 0; idx < matchingImages.length; idx++) {
+      const imgFile = matchingImages[idx];
+      const imageUrl = `/uploads/${imgFile}`;
+
+      if (existingUrls.has(imageUrl)) {
+        continue;
+      }
+
+      try {
+        await manager.query(
+          "INSERT INTO product_image (id, product_id, url, rank, created_at, updated_at) VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW())",
+          [product.id, imageUrl, idx]
+        );
+        imageRowsInserted++;
+      } catch (imgErr) {
+        console.error(`  Error inserting image row for ${product.handle}: ${imgErr.message}`);
+      }
+    }
   }
 
   console.log(`\n=== Done ===`);
-  console.log(`Linked: ${linkedCount}`);
+  console.log(`Thumbnail linked: ${linkedCount}`);
   console.log(`Skipped (already had thumbnail): ${skippedCount}`);
+  console.log(`Image rows inserted: ${imageRowsInserted}`);
 
   process.exit(0);
 }

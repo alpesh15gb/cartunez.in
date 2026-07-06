@@ -39,7 +39,7 @@ export default async function Home(props: {
       <Hero />
       <VehicleFinder />
       <PromoBanners />
-      <div className="bg-carbon py-12">
+      <div className="bg-white py-12">
         <ul className="flex flex-col gap-y-6">
           <FeaturedProducts collections={collections} region={region} />
         </ul>

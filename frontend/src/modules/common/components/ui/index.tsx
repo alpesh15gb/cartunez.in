@@ -84,8 +84,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           "inline-flex gap-2 items-center justify-center rounded transition-all duration-300 font-bold uppercase tracking-wider text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           variant === "primary" && "bg-brand text-white hover:bg-brand-dark shadow-md hover:shadow-lg",
           variant === "secondary" &&
-            "bg-transparent text-carbon border border-carbon hover:bg-carbon hover:text-white",
-          variant === "transparent" && "bg-transparent text-carbon hover:bg-gray-100",
+            "bg-transparent text-gray-700 border border-gray-300 hover:bg-gray-900 hover:text-white",
+          variant === "transparent" && "bg-transparent text-gray-700 hover:bg-gray-100",
           size === "small" && "h-8 px-3 text-sm",
           size === "medium" && "h-10 px-4",
           size === "large" && "h-12 px-6 text-lg",

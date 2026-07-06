@@ -39,15 +39,15 @@ export default function Newsletter() {
   }
 
   return (
-    <section className="bg-carbon border-t border-white/5">
+    <section className="bg-gray-50 border-t border-gray-200">
       <div className="content-container">
         <div
-          className="relative overflow-hidden border-t border-b border-white/5 py-20"
-          style={{ backgroundImage: "linear-gradient(135deg, #0d0d0f 0%, #1a0505 50%, #0d0d0f 100%)" }}
+          className="relative overflow-hidden border-t border-b border-gray-200 py-20"
+          style={{ backgroundImage: "linear-gradient(135deg, #f9fafb 0%, #fef2f2 50%, #f9fafb 100%)" }}
         >
           {/* Decorative glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-px bg-gradient-to-r from-transparent via-brand to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(201,28,28,0.08),transparent_70%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(201,28,28,0.06),transparent_70%)]" />
 
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left col */}
@@ -59,14 +59,14 @@ export default function Newsletter() {
                 </span>
               </div>
               <h2
-                className="font-display font-black uppercase text-white leading-none"
+                className="font-display font-black uppercase text-gray-900 leading-none"
                 style={{ fontSize: "clamp(40px, 5vw, 72px)", letterSpacing: "-0.02em" }}
               >
                 JOIN THE
                 <br />
                 <span className="text-brand">CREW</span>
               </h2>
-              <p className="text-sm text-gray-400 font-medium leading-relaxed max-w-sm">
+              <p className="text-sm text-gray-500 font-medium leading-relaxed max-w-sm">
                 Early access to new product drops. Custom fitment alerts for your car.
                 Subscriber-only deals you won&apos;t find anywhere else.
               </p>
@@ -77,12 +77,12 @@ export default function Newsletter() {
                   {[1, 2, 3, 4].map((i) => (
                     <div
                       key={i}
-                      className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 border-2 border-carbon"
+                      className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 border-2 border-white"
                     />
                   ))}
                 </div>
-                <span className="text-xs text-gray-400 font-medium">
-                  <span className="text-white font-bold">2,400+</span> enthusiasts already subscribed
+                <span className="text-xs text-gray-500 font-medium">
+                  <span className="text-gray-900 font-bold">2,400+</span> enthusiasts already subscribed
                 </span>
               </div>
             </div>
@@ -90,14 +90,14 @@ export default function Newsletter() {
             {/* Right col — form */}
             <div>
               {status === "success" ? (
-                <div className="border border-emerald-900/50 bg-emerald-950/30 p-8 space-y-3">
-                  <CheckCircle size={24} className="text-emerald-400" />
-                  <p className="text-sm text-emerald-300 font-semibold leading-relaxed">{message}</p>
+                <div className="border border-emerald-200 bg-emerald-50 p-8 space-y-3">
+                  <CheckCircle size={24} className="text-emerald-500" />
+                  <p className="text-sm text-emerald-700 font-semibold leading-relaxed">{message}</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {status === "error" && (
-                    <div className="flex items-start gap-3 bg-red-950/30 border border-red-900/50 p-4 text-xs text-red-400 font-semibold">
+                    <div className="flex items-start gap-3 bg-red-50 border border-red-200 p-4 text-xs text-red-600 font-semibold">
                       <AlertCircle size={14} className="mt-0.5 shrink-0" />
                       <span>{message}</span>
                     </div>
@@ -137,7 +137,7 @@ export default function Newsletter() {
                       </>
                     )}
                   </button>
-                  <p className="text-[10px] text-gray-600 font-medium">
+                  <p className="text-[10px] text-gray-400 font-medium">
                     No spam. Unsubscribe at any time.
                   </p>
                 </form>

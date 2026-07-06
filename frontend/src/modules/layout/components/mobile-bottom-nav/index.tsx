@@ -16,7 +16,7 @@ export default function MobileBottomNav() {
   ]
 
   return (
-    <div className="fixed bottom-0 inset-x-0 bg-carbon/95 backdrop-blur-lg border-t border-white/5 z-50 md:hidden shadow-glow safe-bottom">
+    <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-lg border-t border-gray-200 z-50 md:hidden safe-bottom">
       <div className="flex items-center justify-around h-16">
         {navItems.map((item) => {
           const Icon = item.icon
@@ -26,7 +26,7 @@ export default function MobileBottomNav() {
               key={item.label}
               href={item.href}
               className={`flex flex-col items-center justify-center w-full h-full text-center transition-colors duration-300 ${
-                isActive ? "text-brand" : "text-gray-400 hover:text-white"
+                isActive ? "text-brand" : "text-gray-400 hover:text-gray-900"
               }`}
             >
               <Icon size={20} className={isActive ? "stroke-[2.5px]" : "stroke-2"} />

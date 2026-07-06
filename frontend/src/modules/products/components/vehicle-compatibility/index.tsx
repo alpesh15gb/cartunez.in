@@ -78,7 +78,6 @@ export default function VehicleCompatibility({ product }: VehicleCompatibilityPr
 
     const searchStr = `${product.title} ${product.description || ""} ${product.subtitle || ""}`.toLowerCase()
     
-    // Check if the model name or make name is mentioned in the product text
     const isCompatible = 
       searchStr.includes(makeName.toLowerCase()) || 
       searchStr.includes(modelName.toLowerCase()) ||
@@ -94,10 +93,10 @@ export default function VehicleCompatibility({ product }: VehicleCompatibilityPr
   }, [selectedMake, selectedModel, selectedYear])
 
   return (
-    <div className="bg-[#111113] border border-white/5 p-6 rounded-none space-y-4">
-      <div className="flex items-center gap-2 text-white">
+    <div className="bg-gray-50 border border-gray-200 p-6 rounded-none space-y-4">
+      <div className="flex items-center gap-2 text-gray-900">
         <Car size={16} className="text-brand" />
-        <h3 className="text-xs font-bold uppercase tracking-wider text-white">Check Vehicle Compatibility</h3>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-gray-900">Check Vehicle Compatibility</h3>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
@@ -107,9 +106,9 @@ export default function VehicleCompatibility({ product }: VehicleCompatibilityPr
           disabled={loading.makes}
           className="select-dark py-2.5 px-3 text-[11px] font-semibold"
         >
-          <option value="" className="bg-carbon">Make</option>
+          <option value="" className="bg-white">Make</option>
           {makes.map((make) => (
-            <option key={make.id} value={make.id} className="bg-carbon">
+            <option key={make.id} value={make.id} className="bg-white text-gray-900">
               {make.name}
             </option>
           ))}
@@ -121,9 +120,9 @@ export default function VehicleCompatibility({ product }: VehicleCompatibilityPr
           disabled={!selectedMake || loading.models}
           className="select-dark py-2.5 px-3 text-[11px] font-semibold"
         >
-          <option value="" className="bg-carbon">Model</option>
+          <option value="" className="bg-white">Model</option>
           {models.map((model) => (
-            <option key={model.id} value={model.id} className="bg-carbon">
+            <option key={model.id} value={model.id} className="bg-white text-gray-900">
               {model.name}
             </option>
           ))}
@@ -135,9 +134,9 @@ export default function VehicleCompatibility({ product }: VehicleCompatibilityPr
           disabled={!selectedModel || loading.years}
           className="select-dark py-2.5 px-3 text-[11px] font-semibold"
         >
-          <option value="" className="bg-carbon">Year</option>
+          <option value="" className="bg-white">Year</option>
           {years.map((y) => (
-            <option key={y.id} value={y.id} className="bg-carbon">
+            <option key={y.id} value={y.id} className="bg-white text-gray-900">
               {y.year}
             </option>
           ))}
@@ -152,20 +151,20 @@ export default function VehicleCompatibility({ product }: VehicleCompatibilityPr
       ) : (
         <>
           {compatibility === "compatible" && (
-            <div className="bg-emerald-950/20 border border-emerald-900/50 text-emerald-400 px-4 py-3 rounded-none text-xs font-semibold flex items-start gap-2.5">
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-none text-xs font-semibold flex items-start gap-2.5">
               <CheckCircle size={16} className="shrink-0 mt-0.5" />
               <div>
                 <span className="block font-bold">Guaranteed Fit!</span>
-                <span className="text-[10px] text-emerald-500 font-medium">This accessory is compatible with your selected vehicle.</span>
+                <span className="text-[10px] text-emerald-600 font-medium">This accessory is compatible with your selected vehicle.</span>
               </div>
             </div>
           )}
           {compatibility === "unknown" && (
-            <div className="bg-amber-950/20 border border-amber-900/50 text-amber-400 px-4 py-3 rounded-none text-xs font-semibold flex items-start gap-2.5">
+            <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-none text-xs font-semibold flex items-start gap-2.5">
               <AlertTriangle size={16} className="shrink-0 mt-0.5" />
               <div>
                 <span className="block font-bold">Verify Compatibility</span>
-                <span className="text-[10px] text-amber-500 font-medium">Please verify model variant details with support to ensure exact fit.</span>
+                <span className="text-[10px] text-amber-600 font-medium">Please verify model variant details with support to ensure exact fit.</span>
               </div>
             </div>
           )}

@@ -58,12 +58,12 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           </Suspense>
         </div>
       </div>
-      <div className="border-t border-white/5 py-20">
+      <div className="border-t border-gray-100 py-20">
         <div className="content-container">
           <div className="space-y-2 mb-12">
             <span className="eyebrow">Recommendations</span>
             <h2
-              className="font-display font-black uppercase text-white leading-none"
+              className="font-display font-black uppercase text-gray-900 leading-none"
               style={{ fontSize: "clamp(32px, 4vw, 52px)", letterSpacing: "-0.02em" }}
             >
               Related Accessories

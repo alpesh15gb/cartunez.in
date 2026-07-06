@@ -88,7 +88,7 @@ export default function BookInstallationPage() {
   return (
     <div className="content-container py-16 max-w-2xl">
       <div className="space-y-6">
-        <div className="flex items-center gap-3 text-carbon">
+        <div className="flex items-center gap-3 text-gray-700">
           <div className="p-2 bg-brand text-white rounded-soft">
             <Wrench size={20} />
           </div>
@@ -155,7 +155,7 @@ export default function BookInstallationPage() {
               <select
                 value={serviceType}
                 onChange={(e) => setServiceType(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-carbon"
+                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-gray-900"
               >
                 <option value="Android Stereo Fitment">Android Stereo Fitment</option>
                 <option value="7D Mat Installation">7D Mat Installation</option>
@@ -174,7 +174,7 @@ export default function BookInstallationPage() {
                 required
                 value={preferredDate}
                 onChange={(e) => setPreferredDate(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-carbon"
+                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-gray-900"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -182,7 +182,7 @@ export default function BookInstallationPage() {
               <select
                 value={preferredTime}
                 onChange={(e) => setPreferredTime(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-carbon"
+                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-gray-900"
               >
                 <option value="morning">Morning (9 AM - 12 PM)</option>
                 <option value="afternoon">Afternoon (12 PM - 4 PM)</option>
@@ -197,7 +197,7 @@ export default function BookInstallationPage() {
               <select
                 value={selectedMake}
                 onChange={(e) => setSelectedMake(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-carbon"
+                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-gray-900"
               >
                 <option value="">Choose Make</option>
                 {makes.map((m) => (
@@ -213,7 +213,7 @@ export default function BookInstallationPage() {
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
                 disabled={!selectedMake}
-                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-carbon disabled:opacity-50"
+                className="w-full bg-white border border-gray-200 rounded-soft px-3 py-2.5 text-xs outline-none focus:border-brand transition-all duration-200 font-semibold text-gray-900 disabled:opacity-50"
               >
                 <option value="">Choose Model</option>
                 {models.map((m) => (

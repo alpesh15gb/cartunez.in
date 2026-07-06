@@ -19,18 +19,18 @@ export default async function Nav() {
 
   return (
     <div className="sticky top-0 inset-x-0 z-50 group">
-      <header className="relative h-20 mx-auto border-b duration-300 bg-carbon-dark/95 border-white/10 backdrop-blur-md text-white shadow-glow">
-        <nav className="content-container txt-xsmall-plus text-gray-300 flex items-center justify-between w-full h-full text-small-regular gap-x-4">
+      <header className="relative h-20 mx-auto border-b duration-300 bg-white/95 border-gray-200 backdrop-blur-md text-gray-900">
+        <nav className="content-container txt-xsmall-plus text-gray-500 flex items-center justify-between w-full h-full text-small-regular gap-x-4">
           <div className="flex items-center gap-x-4 flex-1 md:flex-initial">
             <div className="md:hidden">
               <SideMenu regions={regions} locales={locales} currentLocale={currentLocale} />
             </div>
             <LocalizedClientLink
               href="/"
-              className="txt-compact-xlarge-plus hover:text-white uppercase font-extrabold tracking-tighter"
+              className="txt-compact-xlarge-plus hover:text-brand uppercase font-extrabold tracking-tighter"
               data-testid="nav-store-link"
             >
-              <span className="text-brand">Car</span><span className="text-white">Tunez</span>
+              <span className="text-brand">Car</span><span className="text-gray-900">Tunez</span>
             </LocalizedClientLink>
           </div>
 
@@ -44,7 +44,7 @@ export default async function Nav() {
             </div>
             <div className="hidden small:flex items-center gap-x-4 h-full">
               <LocalizedClientLink
-                className="hover:text-brand text-xs font-semibold uppercase tracking-wider text-gray-300 transition-colors duration-300"
+                className="hover:text-brand text-xs font-semibold uppercase tracking-wider text-gray-500 transition-colors duration-300"
                 href="/account"
                 data-testid="nav-account-link"
               >
@@ -54,7 +54,7 @@ export default async function Nav() {
             <Suspense
               fallback={
                 <LocalizedClientLink
-                  className="hover:text-brand flex gap-2 text-xs font-semibold uppercase tracking-wider text-gray-300 transition-colors duration-300"
+                  className="hover:text-brand flex gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500 transition-colors duration-300"
                   href="/cart"
                   data-testid="nav-cart-link"
                 >

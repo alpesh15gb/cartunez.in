@@ -26,7 +26,6 @@ export default function VehicleFinder() {
   const [error, setError] = useState("")
   const router = useRouter()
 
-  // Load makes
   useEffect(() => {
     setLoading((prev) => ({ ...prev, makes: true }))
     setError("")
@@ -39,7 +38,6 @@ export default function VehicleFinder() {
       .finally(() => setLoading((prev) => ({ ...prev, makes: false })))
   }, [])
 
-  // Load models on make selection
   useEffect(() => {
     if (!selectedMake) {
       setModels([])
@@ -56,7 +54,6 @@ export default function VehicleFinder() {
     setSelectedYear("")
   }, [selectedMake])
 
-  // Load years on model selection
   useEffect(() => {
     if (!selectedModel) {
       setYears([])
@@ -89,35 +86,35 @@ export default function VehicleFinder() {
 
   return (
     <div className="content-container -mt-16 relative z-30">
-      <div className="dark-glass-card text-white rounded-xl p-8 shadow-glow border border-white/10">
+      <div className="dark-glass-card text-gray-900 rounded-xl p-8 shadow-lg border border-gray-200">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-brand rounded-lg neon-glow">
+          <div className="p-2 bg-brand rounded-lg">
             <Car size={20} className="text-white" />
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold uppercase tracking-wider">Find Accessories For Your Car</h3>
-            <p className="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5">Select your vehicle details to check compatibility</p>
+            <p className="text-[10px] sm:text-xs text-gray-500 font-medium mt-0.5">Select your vehicle details to check compatibility</p>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-950/40 border border-red-900/50 text-red-400 px-4 py-2.5 rounded-soft text-xs font-semibold mb-6 flex items-center gap-2">
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2.5 rounded-soft text-xs font-semibold mb-6 flex items-center gap-2">
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Select Make</label>
+            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Select Make</label>
             <select
               value={selectedMake}
               onChange={(e) => setSelectedMake(e.target.value)}
               disabled={loading.makes}
-              className="bg-white/5 border border-white/10 hover:border-brand/40 rounded-lg px-4 py-3.5 text-xs outline-none focus:border-brand focus:ring-1 focus:ring-brand font-medium text-white transition-all duration-300 disabled:opacity-30"
+              className="bg-white border border-gray-200 hover:border-brand/40 rounded-lg px-4 py-3.5 text-xs outline-none focus:border-brand focus:ring-1 focus:ring-brand font-medium text-gray-900 transition-all duration-300 disabled:opacity-30"
             >
               <option value="">Choose Manufacturer</option>
               {makes.map((make) => (
-                <option key={make.id} value={make.id} className="bg-carbon text-white">
+                <option key={make.id} value={make.id} className="bg-white text-gray-900">
                   {make.name}
                 </option>
               ))}
@@ -125,16 +122,16 @@ export default function VehicleFinder() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Select Model</label>
+            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Select Model</label>
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
               disabled={!selectedMake || loading.models}
-              className="bg-white/5 border border-white/10 hover:border-brand/40 rounded-lg px-4 py-3.5 text-xs outline-none focus:border-brand focus:ring-1 focus:ring-brand font-medium text-white transition-all duration-300 disabled:opacity-30"
+              className="bg-white border border-gray-200 hover:border-brand/40 rounded-lg px-4 py-3.5 text-xs outline-none focus:border-brand focus:ring-1 focus:ring-brand font-medium text-gray-900 transition-all duration-300 disabled:opacity-30"
             >
               <option value="">Choose Model</option>
               {models.map((model) => (
-                <option key={model.id} value={model.id} className="bg-carbon text-white">
+                <option key={model.id} value={model.id} className="bg-white text-gray-900">
                   {model.name}
                 </option>
               ))}
@@ -142,16 +139,16 @@ export default function VehicleFinder() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Select Year</label>
+            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Select Year</label>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
               disabled={!selectedModel || loading.years}
-              className="bg-white/5 border border-white/10 hover:border-brand/40 rounded-lg px-4 py-3.5 text-xs outline-none focus:border-brand focus:ring-1 focus:ring-brand font-medium text-white transition-all duration-300 disabled:opacity-30"
+              className="bg-white border border-gray-200 hover:border-brand/40 rounded-lg px-4 py-3.5 text-xs outline-none focus:border-brand focus:ring-1 focus:ring-brand font-medium text-gray-900 transition-all duration-300 disabled:opacity-30"
             >
               <option value="">Choose Year</option>
               {years.map((y) => (
-                <option key={y.id} value={y.id} className="bg-carbon text-white">
+                <option key={y.id} value={y.id} className="bg-white text-gray-900">
                   {y.year}
                 </option>
               ))}

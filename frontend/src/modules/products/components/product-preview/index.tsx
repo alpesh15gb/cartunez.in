@@ -18,12 +18,12 @@ export default async function ProductPreview({
   return (
     <LocalizedClientLink
       href={`/products/${product.handle}`}
-      className="group flex flex-col h-full bg-[#111113] border border-white/5
+      className="group flex flex-col h-full bg-white border border-gray-200
                  hover:border-brand/30 transition-all duration-400 overflow-hidden"
       data-testid="product-link"
     >
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-[#0d0d0f] img-zoom-container">
+      <div className="relative aspect-square overflow-hidden bg-gray-50 img-zoom-container">
         <Thumbnail
           thumbnail={product.thumbnail}
           images={product.images}
@@ -49,17 +49,17 @@ export default async function ProductPreview({
             {((product.metadata || {}).brand as string) || "Cartunez"}
           </span>
           <h3
-            className="text-xs sm:text-sm font-bold text-gray-200 line-clamp-2 leading-snug
-                       group-hover:text-white transition-colors duration-200"
+            className="text-xs sm:text-sm font-bold text-gray-700 line-clamp-2 leading-snug
+                       group-hover:text-gray-900 transition-colors duration-200"
             data-testid="product-title"
           >
             {product.title}
           </h3>
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-white/5">
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           <div>{cheapestPrice && <PreviewPrice price={cheapestPrice} />}</div>
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider
                            group-hover:text-brand transition-colors duration-200">
             ₹
           </span>

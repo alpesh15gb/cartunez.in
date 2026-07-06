@@ -25,14 +25,14 @@ export default async function ProductRail({
   }
 
   return (
-    <section className="bg-carbon border-t border-white/5 py-20">
+    <section className="bg-white border-t border-gray-100 py-20">
       <div className="content-container">
         {/* Section header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
           <div className="space-y-2">
             <span className="eyebrow">Featured Collection</span>
             <h2
-              className="font-display font-black uppercase text-white leading-none"
+              className="font-display font-black uppercase text-gray-900 leading-none"
               style={{ fontSize: "clamp(32px, 4vw, 52px)", letterSpacing: "-0.02em" }}
             >
               {collection.title}

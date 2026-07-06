@@ -11,28 +11,28 @@ export default async function Footer() {
   const productCategories = await listCategories();
 
   return (
-    <footer className="bg-carbon-dark border-t border-white/5 w-full text-gray-300 py-16">
+    <footer className="bg-gray-50 border-t border-gray-200 w-full text-gray-500 py-16">
       <div className="content-container flex flex-col w-full">
-        <div className="flex flex-col gap-y-8 md:flex-row items-start justify-between pb-12 border-b border-white/5">
+        <div className="flex flex-col gap-y-8 md:flex-row items-start justify-between pb-12 border-b border-gray-200">
           <div className="space-y-4">
             <LocalizedClientLink
               href="/"
-              className="text-xl text-white hover:text-brand uppercase font-black tracking-tighter"
+              className="text-xl text-gray-900 hover:text-brand uppercase font-black tracking-tighter"
             >
               <span className="text-brand">Car</span>Tunez
             </LocalizedClientLink>
-            <p className="text-xs text-gray-400 max-w-xs leading-relaxed font-semibold">
+            <p className="text-xs text-gray-500 max-w-xs leading-relaxed font-semibold">
               Premium automotive customizations and upgrades. Engineered for exact fitment and high performance.
             </p>
           </div>
           <div className="text-small-regular gap-12 md:gap-x-20 grid grid-cols-2 sm:grid-cols-3">
             {productCategories && productCategories?.length > 0 && (
               <div className="flex flex-col gap-y-4">
-                <span className="text-[10px] font-bold text-white uppercase tracking-widest block">
+                <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest block">
                   Categories
                 </span>
                 <ul
-                  className="grid grid-cols-1 gap-2 text-xs text-gray-400 font-semibold"
+                  className="grid grid-cols-1 gap-2 text-xs text-gray-500 font-semibold"
                   data-testid="footer-categories"
                 >
                   {productCategories?.slice(0, 6).map((c) => {
@@ -61,11 +61,11 @@ export default async function Footer() {
             )}
             {collections && collections.length > 0 && (
               <div className="flex flex-col gap-y-4">
-                <span className="text-[10px] font-bold text-white uppercase tracking-widest block">
+                <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest block">
                   Collections
                 </span>
                 <ul
-                  className="grid grid-cols-1 gap-2 text-xs text-gray-400 font-semibold"
+                  className="grid grid-cols-1 gap-2 text-xs text-gray-500 font-semibold"
                 >
                   {collections?.slice(0, 6).map((c) => (
                     <li key={c.id}>
@@ -81,8 +81,8 @@ export default async function Footer() {
               </div>
             )}
             <div className="flex flex-col gap-y-4">
-              <span className="text-[10px] font-bold text-white uppercase tracking-widest block">Support & Help</span>
-              <ul className="grid grid-cols-1 gap-y-2 text-xs text-gray-400 font-semibold">
+              <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest block">Support & Help</span>
+              <ul className="grid grid-cols-1 gap-y-2 text-xs text-gray-500 font-semibold">
                 <li>
                   <LocalizedClientLink
                     href="/book-installation"
@@ -111,11 +111,11 @@ export default async function Footer() {
             </div>
           </div>
         </div>
-        <div className="flex w-full mt-12 justify-between items-center text-xs text-gray-500 font-semibold uppercase tracking-wider">
+        <div className="flex w-full mt-12 justify-between items-center text-xs text-gray-400 font-semibold uppercase tracking-wider">
           <Text className="text-[10px]">
             © {new Date().getFullYear()} Cartunez. All rights reserved.
           </Text>
-          <span className="text-[9px] text-gray-600">Premium Performance Styling</span>
+          <span className="text-[9px] text-gray-400">Premium Performance Styling</span>
         </div>
       </div>
     </footer>
