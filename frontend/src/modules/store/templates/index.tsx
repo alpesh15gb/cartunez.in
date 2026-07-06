@@ -54,7 +54,7 @@ const StoreTemplate = ({
         className="flex flex-col small:flex-row small:items-start py-8 content-container gap-8"
         data-testid="category-container"
       >
-        <RefinementList sortBy={sort} />
+        <RefinementList sortBy={sort} hideOptionsPicker />
         <div className="w-full">
           <Suspense fallback={<SkeletonProductGrid />}>
             <PaginatedProducts
