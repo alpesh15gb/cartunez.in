@@ -2,6 +2,7 @@
 
 import React, { useState } from "react"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 import { ChevronDown } from "lucide-react"
 
 interface Category {
@@ -86,6 +87,7 @@ const MOCK_CHILDREN: Record<string, Category[]> = {
 
 export default function MegaMenu({ categories }: MegaMenuProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const { countryCode } = useParams()
   const parentCategories = categories.filter(
     (cat) => !(cat as unknown as Record<string, unknown>).parent_category_id && !(cat as unknown as Record<string, unknown>).parent_category
   )
@@ -93,7 +95,7 @@ export default function MegaMenu({ categories }: MegaMenuProps) {
   return (
     <div className="hidden md:flex items-center gap-x-8 h-full">
       <Link
-        href="/store"
+        href={`/${countryCode}/store`}
         className="text-xs font-bold tracking-widest uppercase text-gray-500 hover:text-brand transition-colors duration-300"
       >
         All Products
@@ -112,7 +114,7 @@ export default function MegaMenu({ categories }: MegaMenuProps) {
             onMouseLeave={() => setActiveCategory(null)}
           >
             <Link
-              href={`/categories/${category.handle}`}
+              href={`/${countryCode}/categories/${category.handle}`}
               className="flex items-center gap-x-1.5 text-xs font-bold tracking-widest uppercase text-gray-500 hover:text-brand transition-colors duration-300 h-full"
             >
               <span>{category.name}</span>
@@ -125,7 +127,7 @@ export default function MegaMenu({ categories }: MegaMenuProps) {
                   {customChildren.map((child) => (
                     <div key={child.id} className="space-y-3">
                       <Link
-                        href={`/categories/${child.handle}`}
+                        href={`/${countryCode}/categories/${child.handle}`}
                         className="text-[11px] font-bold text-brand uppercase tracking-widest block hover:text-brand-dark transition-colors duration-200"
                         onClick={() => setActiveCategory(null)}
                       >
@@ -136,7 +138,7 @@ export default function MegaMenu({ categories }: MegaMenuProps) {
                           {child.category_children.map((subChild) => (
                             <Link
                               key={subChild.id}
-                              href={`/categories/${subChild.handle}`}
+                              href={`/${countryCode}/categories/${subChild.handle}`}
                               className="text-xs text-gray-500 hover:text-gray-900 block font-medium transition-colors duration-200"
                               onClick={() => setActiveCategory(null)}
                             >
@@ -159,7 +161,7 @@ export default function MegaMenu({ categories }: MegaMenuProps) {
                     </p>
                   </div>
                   <Link
-                    href={`/categories/${category.handle}`}
+                    href={`/${countryCode}/categories/${category.handle}`}
                     className="text-[10px] font-bold text-gray-900 hover:text-brand uppercase tracking-widest border-b border-gray-900 hover:border-brand pb-0.5 self-start transition-all duration-300"
                     onClick={() => setActiveCategory(null)}
                   >

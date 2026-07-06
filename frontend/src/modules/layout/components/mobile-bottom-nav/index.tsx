@@ -2,17 +2,18 @@
 
 import React from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useParams } from "next/navigation"
 import { Home, Compass, ShoppingCart, User } from "lucide-react"
 
 export default function MobileBottomNav() {
   const pathname = usePathname()
+  const { countryCode } = useParams()
 
   const navItems = [
-    { label: "Home", href: "/", icon: Home },
-    { label: "Shop", href: "/store", icon: Compass },
-    { label: "Cart", href: "/cart", icon: ShoppingCart },
-    { label: "Account", href: "/account", icon: User },
+    { label: "Home", href: `/${countryCode}`, icon: Home },
+    { label: "Shop", href: `/${countryCode}/store`, icon: Compass },
+    { label: "Cart", href: `/${countryCode}/cart`, icon: ShoppingCart },
+    { label: "Account", href: `/${countryCode}/account`, icon: User },
   ]
 
   return (
