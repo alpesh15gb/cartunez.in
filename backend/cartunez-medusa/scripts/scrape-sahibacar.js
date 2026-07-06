@@ -251,7 +251,7 @@ async function main() {
   let skipped = 0;
 
   const products = rawProducts.map(p => {
-    const handle = `sahibacar-${p.id}-${p.handle}`;
+    const handle = p.handle;
     const images = (p.images || []).map((img, idx) => {
       const ext = (img.src.match(/\.(jpg|jpeg|png|webp|gif)/i) || [".jpg"])[0];
       const filename = `${handle}-${idx + 1}${ext}`;

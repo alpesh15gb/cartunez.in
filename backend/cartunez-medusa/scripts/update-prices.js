@@ -35,7 +35,7 @@ async function main() {
   // Build a map of scraped product handle -> price
   var priceMap = {};
   data.products.forEach(function(p) {
-    var handle = "sahibacar-" + p.id + "-" + p.handle;
+    var handle = p.handle;
     if (p.price > 0) {
       priceMap[handle] = p.price;
     }
@@ -48,7 +48,7 @@ async function main() {
     SELECT pv.id AS variant_id, p.handle, p.id AS product_id
     FROM product_variant pv
     JOIN product p ON p.id = pv.product_id
-    WHERE p.handle LIKE 'sahibacar-%'
+    WHERE p.metadata->>'source' = 'sahibacar.in'
   `);
 
   var updated = 0;

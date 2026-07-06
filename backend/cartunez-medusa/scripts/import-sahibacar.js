@@ -74,7 +74,7 @@ async function main() {
   }
 
   var existingProducts = await manager.query(
-    "SELECT handle FROM product WHERE handle LIKE 'sahibacar-%'"
+    "SELECT handle FROM product WHERE metadata->>'source' = 'sahibacar.in'"
   );
   var existingHandles = {};
   existingProducts.forEach(function(p) { existingHandles[p.handle] = true; });
