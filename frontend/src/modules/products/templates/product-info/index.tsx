@@ -21,7 +21,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
         <div>
           <span className="red-line mb-4" />
           <h1
-            className="font-display font-black uppercase text-white leading-tight"
+            className="font-display font-black uppercase text-gray-900 leading-tight"
             style={{ fontSize: "clamp(28px, 3vw, 44px)", letterSpacing: "-0.02em" }}
             data-testid="product-title"
           >
@@ -30,7 +30,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
         </div>
 
         <p
-          className="text-sm text-gray-400 font-medium leading-relaxed whitespace-pre-line"
+          className="text-sm text-gray-500 font-medium leading-relaxed whitespace-pre-line"
           data-testid="product-description"
         >
           {product.description}
