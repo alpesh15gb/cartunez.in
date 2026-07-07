@@ -40,7 +40,7 @@ const StoreTemplate = ({
         <div className="content-container">
           <span className="eyebrow mb-3">Explore</span>
           <h1
-            className="font-display font-black uppercase text-gray-900 leading-none"
+            className="text-h1 text-gray-950"
             style={{ fontSize: "clamp(40px, 5vw, 72px)", letterSpacing: "-0.02em" }}
             data-testid="store-page-title"
           >

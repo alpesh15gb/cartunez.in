@@ -67,7 +67,7 @@ const RefinementList = ({
       data-testid={dataTestId}
     >
       <div className="flex flex-col gap-3">
-        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Sort By</span>
+        <span className="text-label text-gray-500">Sort By</span>
         <SortProducts
           sortBy={sortBy}
           setQueryParams={setQueryParams}
@@ -77,7 +77,7 @@ const RefinementList = ({
 
       {/* Brand Filter */}
       <div className="flex flex-col gap-3">
-        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Brand</span>
+        <span className="text-label text-gray-500">Brand</span>
         <select
           value={brand}
           onChange={(e) => setQueryParams("brand", e.target.value)}
@@ -94,7 +94,7 @@ const RefinementList = ({
 
       {/* Price Filter */}
       <div className="flex flex-col gap-3">
-        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Price Range (₹)</span>
+        <span className="text-label text-gray-500">Price Range (₹)</span>
         <div className="grid grid-cols-2 gap-2">
           <input
             type="number"

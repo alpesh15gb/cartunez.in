@@ -6,16 +6,24 @@
 :root {
   --color-brand: #c91c1c;
   --color-brand-dark: #a51616;
+  --color-brand-soft: #fff1f1;
+  --color-ink: #111827;
+  --color-muted: #4b5563;
+  --color-subtle: #6b7280;
   --color-carbon: #121214;
   --color-carbon-light: #1e1e24;
   --color-carbon-mid: #18181c;
   --color-carbon-dark: #0b0b0c;
-  --color-surface: #f9fafb;
-  --color-surface-2: #f3f4f6;
-  --color-border: rgba(0,0,0,0.08);
-  --color-border-strong: rgba(0,0,0,0.15);
+  --color-surface: #fafafa;
+  --color-surface-2: #f4f5f7;
+  --color-border: rgba(17,24,39,0.09);
+  --color-border-strong: rgba(17,24,39,0.16);
+  --radius-card: 18px;
+  --radius-control: 12px;
+  --shadow-card: 0 14px 45px rgba(17, 24, 39, 0.06);
+  --shadow-card-hover: 0 22px 70px rgba(17, 24, 39, 0.11);
   --font-display: "Barlow Condensed", sans-serif;
-  --font-sans: "Inter", sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* ─── Base Reset ─────────────────────────────────────────────── */
@@ -72,23 +80,40 @@ input:focus ~ label {
 /* ─── Layout & Typography utilities ─────────────────────────── */
 @layer components {
   .content-container {
-    @apply max-w-[1440px] w-full mx-auto px-6 lg:px-12;
+    @apply max-w-[1480px] w-full mx-auto px-4 sm:px-6 lg:px-10 xl:px-12;
   }
 
+  .narrow-container {
+    @apply max-w-[1180px] w-full mx-auto px-4 sm:px-6 lg:px-10;
+  }
+
+  /* Production typography hierarchy */
+  .text-display        { @apply text-[42px] sm:text-[56px] lg:text-[72px] leading-[0.92] font-black tracking-[-0.04em]; }
+  .text-h1             { @apply text-[34px] sm:text-[44px] lg:text-[56px] leading-[1.02] font-black tracking-[-0.035em]; }
+  .text-h2             { @apply text-[28px] sm:text-[36px] lg:text-[44px] leading-[1.08] font-extrabold tracking-[-0.025em]; }
+  .text-h3             { @apply text-xl sm:text-2xl leading-tight font-bold tracking-[-0.015em]; }
+  .text-h4             { @apply text-base sm:text-lg leading-snug font-bold; }
+  .text-body-lg        { @apply text-base sm:text-lg leading-7 font-normal; }
+  .text-body           { @apply text-sm leading-6 font-normal; }
+  .text-body-sm        { @apply text-xs leading-5 font-medium; }
+  .text-caption        { @apply text-[11px] leading-4 font-semibold tracking-wide; }
+  .text-label          { @apply text-[10px] leading-4 font-bold uppercase tracking-[0.16em]; }
+  .text-price          { @apply text-2xl sm:text-3xl leading-none font-black tracking-[-0.03em]; }
+
   /* Medusa DTC compat text sizes */
-  .text-xsmall-regular { @apply text-[10px] leading-4 font-normal; }
+  .text-xsmall-regular { @apply text-[11px] leading-4 font-normal; }
   .text-small-regular  { @apply text-xs leading-5 font-normal; }
   .text-small-semi     { @apply text-xs leading-5 font-semibold; }
   .text-base-regular   { @apply text-sm leading-6 font-normal; }
   .text-base-semi      { @apply text-sm leading-6 font-semibold; }
-  .text-large-regular  { @apply text-base leading-6 font-normal; }
-  .text-large-semi     { @apply text-base leading-6 font-semibold; }
-  .text-xl-regular     { @apply text-2xl leading-[36px] font-normal; }
-  .text-xl-semi        { @apply text-2xl leading-[36px] font-semibold; }
-  .text-2xl-regular    { @apply text-[30px] leading-[48px] font-normal; }
-  .text-2xl-semi       { @apply text-[30px] leading-[48px] font-semibold; }
-  .text-3xl-regular    { @apply text-[32px] leading-[44px] font-normal; }
-  .text-3xl-semi       { @apply text-[32px] leading-[44px] font-semibold; }
+  .text-large-regular  { @apply text-base leading-7 font-normal; }
+  .text-large-semi     { @apply text-base leading-7 font-semibold; }
+  .text-xl-regular     { @apply text-xl leading-8 font-normal; }
+  .text-xl-semi        { @apply text-xl leading-8 font-semibold; }
+  .text-2xl-regular    { @apply text-2xl leading-9 font-normal; }
+  .text-2xl-semi       { @apply text-2xl leading-9 font-semibold; }
+  .text-3xl-regular    { @apply text-3xl leading-10 font-normal; }
+  .text-3xl-semi       { @apply text-3xl leading-10 font-semibold; }
 
   /* ─── Display type: Barlow Condensed ─── */
   .font-display { font-family: var(--font-display); }
@@ -100,16 +125,16 @@ input:focus ~ label {
 
   /* ─── Light inputs ─── */
   .input-dark {
-    @apply w-full bg-white border border-gray-200 rounded-md px-4 py-3 text-sm
-           text-gray-900 placeholder-gray-400 outline-none
-           hover:border-gray-300 focus:border-brand focus:ring-1 focus:ring-brand/40
+    @apply w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm
+           text-gray-900 placeholder-gray-400 outline-none shadow-sm
+           hover:border-gray-300 focus:border-brand focus:ring-4 focus:ring-brand/10
            transition-all duration-200 font-medium;
   }
 
   .select-dark {
-    @apply w-full bg-white border border-gray-200 rounded-md px-4 py-3 text-sm
-           text-gray-900 outline-none appearance-none
-           hover:border-gray-300 focus:border-brand focus:ring-1 focus:ring-brand/40
+    @apply w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm
+           text-gray-900 outline-none appearance-none shadow-sm
+           hover:border-gray-300 focus:border-brand focus:ring-4 focus:ring-brand/10
            transition-all duration-200 font-medium cursor-pointer;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
     background-repeat: no-repeat;

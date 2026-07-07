@@ -1,66 +1,71 @@
+"use client"
+
 import { HttpTypes } from "@medusajs/types"
-import { Container } from "@modules/common/components/ui"
 import Image from "next/image"
+import { useMemo, useState } from "react"
+import { ImageIcon } from "lucide-react"
 
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
 }
 
 const ImageGallery = ({ images }: ImageGalleryProps) => {
-  if (!images.length) {
+  const galleryImages = useMemo(
+    () => images.filter((image) => Boolean(image.url)),
+    [images]
+  )
+  const [activeIndex, setActiveIndex] = useState(0)
+  const activeImage = galleryImages[activeIndex]
+
+  if (!galleryImages.length) {
     return (
-      <div className="flex items-start relative">
-        <div className="flex flex-col flex-1 small:mx-16 gap-y-4">
-          <Container className="relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle flex items-center justify-center">
-            <div className="text-ui-fg-subtle flex flex-col items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-16 h-16"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z"
-                />
-              </svg>
-              <span className="text-sm">No images available</span>
-            </div>
-          </Container>
+      <div className="relative flex aspect-square min-h-[320px] w-full items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+        <div className="flex flex-col items-center gap-3 text-gray-400">
+          <ImageIcon size={42} strokeWidth={1.5} />
+          <span className="text-body-sm uppercase tracking-widest">No images available</span>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex items-start relative">
-      <div className="flex flex-col flex-1 small:mx-16 gap-y-4">
-        {images.map((image, index) => {
-          return (
-            <Container
-              key={image.id}
-              className="relative aspect-[29/34] w-full overflow-hidden bg-ui-bg-subtle"
-              id={image.id}
-            >
-              {!!image.url && (
-                <Image
-                  src={image.url}
-                  priority={index <= 2 ? true : false}
-                  className="absolute inset-0 rounded-rounded"
-                  alt={`Product image ${index + 1}`}
-                  fill
-                  sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
-                  style={{
-                    objectFit: "cover",
-                  }}
-                />
-              )}
-            </Container>
-          )
-        })}
+    <div className="flex w-full flex-col-reverse gap-4 lg:flex-row lg:gap-5">
+      <div className="flex gap-3 overflow-x-auto pb-1 lg:w-20 lg:flex-col lg:overflow-visible lg:pb-0">
+        {galleryImages.map((image, index) => (
+          <button
+            key={image.id || image.url}
+            type="button"
+            aria-label={`View product image ${index + 1}`}
+            onClick={() => setActiveIndex(index)}
+            className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border bg-gray-50 transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/15 lg:h-20 lg:w-20 ${
+              activeIndex === index
+                ? "border-brand shadow-sm"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <Image
+              src={image.url!}
+              alt={`Product thumbnail ${index + 1}`}
+              fill
+              sizes="80px"
+              className="object-cover"
+            />
+          </button>
+        ))}
+      </div>
+
+      <div className="group relative aspect-square min-h-[320px] flex-1 overflow-hidden rounded-xl border border-gray-200 bg-gray-50 shadow-sm">
+        <Image
+          src={activeImage.url!}
+          priority
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+          alt={`Product image ${activeIndex + 1}`}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 58vw, 780px"
+        />
+        <div className="pointer-events-none absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-gray-700 shadow-sm backdrop-blur">
+          {activeIndex + 1} / {galleryImages.length}
+        </div>
       </div>
     </div>
   )

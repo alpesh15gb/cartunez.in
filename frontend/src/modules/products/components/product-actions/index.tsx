@@ -141,7 +141,7 @@ export default function ProductActions({
 
   return (
     <>
-      <div className="flex flex-col gap-y-2" ref={actionsRef}>
+      <div className="flex flex-col gap-y-5" ref={actionsRef}>
         <div>
           {(product.variants?.length ?? 0) > 1 && (
             <div className="flex flex-col gap-y-4">
@@ -166,6 +166,21 @@ export default function ProductActions({
 
         <ProductPrice product={product} variant={selectedVariant} />
 
+        <div
+          className={
+            inStock
+              ? "flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-800"
+              : "flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-800"
+          }
+        >
+          <span>{inStock ? "Ready to dispatch" : "Currently unavailable"}</span>
+          <span
+            className={inStock ? "h-2 w-2 rounded-full bg-emerald-500" : "h-2 w-2 rounded-full bg-rose-500"}
+            aria-hidden="true"
+          />
+        </div>
+
+
         <Button
           onClick={handleAddToCart}
           disabled={
@@ -176,7 +191,7 @@ export default function ProductActions({
             !isValidVariant
           }
           variant="primary"
-          className="w-full h-10"
+          className="h-12 w-full rounded-xl text-xs shadow-md hover:-translate-y-0.5 hover:shadow-lg"
           isLoading={isAdding}
           data-testid="add-product-button"
         >

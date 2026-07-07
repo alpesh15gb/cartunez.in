@@ -18,40 +18,43 @@ export default function ProductPrice({
   const selectedPrice = variant ? variantPrice : cheapestPrice
 
   if (!selectedPrice) {
-    return <div className="block w-32 h-9 bg-gray-100 animate-pulse" />
+    return <div className="skeleton block h-11 w-40 rounded-lg" />
   }
 
   return (
-    <div className="flex flex-col text-gray-900">
-      <span
-        className={clx("text-xl-semi", {
-          "text-ui-fg-interactive": selectedPrice.price_type === "sale",
-        })}
-      >
-        {!variant && "From "}
+    <div className="flex flex-col gap-2 text-gray-900">
+      <span className="text-label text-gray-500">Price</span>
+      <div className="flex flex-wrap items-end gap-3">
         <span
-          data-testid="product-price"
-          data-value={selectedPrice.calculated_price_number}
+          className={clx("text-price text-gray-950", {
+            "text-brand": selectedPrice.price_type === "sale",
+          })}
         >
-          {selectedPrice.calculated_price}
-        </span>
-      </span>
-      {selectedPrice.price_type === "sale" && (
-        <>
-          <p>
-            <span className="text-gray-400">Original: </span>
-            <span
-              className="line-through text-gray-500"
-              data-testid="original-product-price"
-              data-value={selectedPrice.original_price_number}
-            >
-              {selectedPrice.original_price}
-            </span>
-          </p>
-          <span className="text-ui-fg-interactive">
-            -{selectedPrice.percentage_diff}%
+          {!variant && <span className="mr-1 text-base font-semibold text-gray-500">From</span>}
+          <span
+            data-testid="product-price"
+            data-value={selectedPrice.calculated_price_number}
+          >
+            {selectedPrice.calculated_price}
           </span>
-        </>
+        </span>
+        {selectedPrice.price_type === "sale" && (
+          <span className="mb-1 rounded-full bg-brand/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-brand">
+            Save {selectedPrice.percentage_diff}%
+          </span>
+        )}
+      </div>
+      {selectedPrice.price_type === "sale" && (
+        <p className="text-body-sm text-gray-500">
+          Original: {" "}
+          <span
+            className="line-through"
+            data-testid="original-product-price"
+            data-value={selectedPrice.original_price_number}
+          >
+            {selectedPrice.original_price}
+          </span>
+        </p>
       )}
     </div>
   )

@@ -34,47 +34,64 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   return (
     <>
-      <div
-        className="content-container flex flex-col small:flex-row small:items-start py-12 relative gap-8"
-        data-testid="product-container"
-      >
-        <div className="flex flex-col small:sticky small:top-32 small:max-w-[320px] w-full gap-y-6">
-          <ProductInfo product={product} />
-          <ProductSpecifications product={product} />
-          <ProductTabs product={product} />
+      <div className="bg-white">
+        <div
+          className="content-container grid gap-8 py-8 lg:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.8fr)] lg:gap-12 lg:py-12"
+          data-testid="product-container"
+        >
+          <div className="min-w-0">
+            <ImageGallery images={images} />
+          </div>
+
+          <aside className="lg:sticky lg:top-28 lg:self-start">
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-premium sm:p-6 lg:p-7">
+              <ProductInfo product={product} />
+              <div className="mt-6 border-t border-gray-100 pt-6">
+                <Suspense
+                  fallback={
+                    <ProductActions disabled={true} product={product} region={region} />
+                  }
+                >
+                  <ProductActionsWrapper id={product.id} region={region} />
+                </Suspense>
+              </div>
+              <div className="mt-6 space-y-5 border-t border-gray-100 pt-6">
+                <VehicleCompatibility product={product} />
+                <ProductOnboardingCta />
+              </div>
+            </div>
+          </aside>
         </div>
-        <div className="block w-full relative small:px-8 img-zoom-container">
-          <ImageGallery images={images} />
-        </div>
-        <div className="flex flex-col small:sticky small:top-32 small:max-w-[320px] w-full gap-y-6">
-          <VehicleCompatibility product={product} />
-          <ProductOnboardingCta />
-          <Suspense
-            fallback={
-              <ProductActions disabled={true} product={product} region={region} />
-            }
-          >
-            <ProductActionsWrapper id={product.id} region={region} />
-          </Suspense>
+
+        <div className="content-container grid gap-8 pb-12 lg:grid-cols-[minmax(0,1fr)_420px] lg:pb-16">
+          <div className="space-y-8">
+            <ProductSpecifications product={product} />
+            <ProductTabs product={product} />
+          </div>
+          <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
+            <div className="space-y-2">
+              <span className="eyebrow">Confidence</span>
+              <h2 className="text-h3 text-gray-900">Fitment-first support</h2>
+              <p className="text-body text-gray-600">
+                Every upgrade is checked for vehicle integration, installation requirements, and long-term use before dispatch.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="border-t border-gray-100 py-20">
+
+      <div className="border-t border-gray-100 py-14 lg:py-20">
         <div className="content-container">
-          <div className="space-y-2 mb-12">
+          <div className="mb-8 space-y-2 lg:mb-10">
             <span className="eyebrow">Recommendations</span>
-            <h2
-              className="font-display font-black uppercase text-gray-900 leading-none"
-              style={{ fontSize: "clamp(32px, 4vw, 52px)", letterSpacing: "-0.02em" }}
-            >
-              Related Accessories
-            </h2>
+            <h2 className="text-h2 text-gray-900">Related Accessories</h2>
           </div>
           <Suspense fallback={<SkeletonRelatedProducts />}>
             <RelatedProducts product={product} countryCode={countryCode} />
           </Suspense>
         </div>
       </div>
-      <div className="content-container my-12">
+      <div className="content-container mb-16">
         <ProductReviews productId={product.id} />
       </div>
     </>
