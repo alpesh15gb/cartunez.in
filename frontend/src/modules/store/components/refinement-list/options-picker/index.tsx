@@ -2,8 +2,8 @@
 
 import * as Accordion from "@radix-ui/react-accordion"
 import { useEffect, useState } from "react"
+import { ChevronDown } from "lucide-react"
 
-import { ChevronDownMini } from "@medusajs/icons"
 import { sdk } from "@lib/config"
 import { HttpTypes } from "@medusajs/types"
 import clsx from "clsx"
@@ -57,7 +57,8 @@ const OptionsPicker = ({
   return (
     <div className="flex flex-col gap-y-4">
       <div className="flex items-center justify-between px-1">
-        <span className="txt-compact-small-plus text-ui-fg-subtle">
+        <span className="label flex items-center gap-2">
+          <span className="w-4 h-px bg-gray-300" />
           Options
         </span>
       </div>
@@ -65,7 +66,7 @@ const OptionsPicker = ({
         type="multiple"
         value={openItems}
         onValueChange={(values) => setOpenItems(values as string[])}
-        className="flex flex-col gap-y-3 pr-6"
+        className="flex flex-col gap-y-2"
       >
         {options.map((option) => {
           const values =
@@ -101,32 +102,30 @@ const OptionsPicker = ({
             <Accordion.Item
               key={option.id}
               value={option.id}
-              className="overflow-hidden"
+              className="overflow-hidden rounded-[var(--radius-md)] border border-gray-200 bg-white shadow-sm transition-all duration-200 data-[state=open]:border-[var(--color-brand)]/15"
             >
               <Accordion.Header>
-                <Accordion.Trigger className="flex w-full items-center justify-between py-3 text-left">
+                <Accordion.Trigger className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-gray-50/50 transition-colors duration-150">
                   <div className="flex items-center gap-2">
-                    <span className="txt-compact-small-plus text-ui-fg-base">
+                    <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                       {option.title || "Option"}
                     </span>
-                    <span className="txt-compact-small-plus text-ui-fg-muted">
-                      ({selectedCount})
-                    </span>
-                  </div>
-                  <span
-                    className={clsx(
-                      "flex h-7 w-7 items-center justify-center text-ui-fg-muted transition-transform duration-150",
-                      {
-                        "rotate-180": isOpen,
-                      }
+                    {selectedCount > 0 && (
+                      <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[var(--color-brand)]/10 text-[9px] font-bold text-[var(--color-brand)]">
+                        {selectedCount}
+                      </span>
                     )}
-                  >
-                    <ChevronDownMini />
-                  </span>
+                  </div>
+                  <ChevronDown
+                    className={clsx(
+                      "w-4 h-4 text-gray-400 transition-transform duration-200",
+                      { "rotate-180": isOpen }
+                    )}
+                  />
                 </Accordion.Trigger>
               </Accordion.Header>
-              <Accordion.Content className="pb-4 pt-1">
-                <div className="flex flex-wrap gap-2">
+              <Accordion.Content className="pb-4 pt-1 px-4">
+                <div className="flex flex-wrap gap-2 pt-2">
                   {values.map((value) => {
                     const isSelected = selectedValueIds.includes(value.id)
 
@@ -135,11 +134,11 @@ const OptionsPicker = ({
                         key={value.id}
                         onClick={() => toggleValue(value.id)}
                         className={clsx(
-                          "border-ui-border-base border text-small-regular h-10 rounded-rounded px-3 flex items-center transition-colors duration-150",
+                          "inline-flex items-center h-9 px-3.5 rounded-[var(--radius-sm)] text-[10px] font-bold uppercase tracking-wider transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/15",
                           {
-                            "border-ui-border-interactive text-ui-fg-base":
+                            "bg-[var(--color-brand)] text-white shadow-sm border border-[var(--color-brand)]":
                               isSelected,
-                            "text-ui-fg-muted hover:text-ui-fg-base":
+                            "bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:text-gray-900 hover:bg-gray-50":
                               !isSelected,
                           }
                         )}

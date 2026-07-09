@@ -49,6 +49,25 @@ class DealerUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
+class DealerEnquiryCreate(BaseModel):
+    """Schema for dealer partnership enquiry from storefront."""
+
+    business_name: str = Field(..., max_length=200)
+    contact_name: str = Field(..., max_length=200)
+    email: str = Field(..., max_length=200)
+    phone: str = Field(..., max_length=50)
+    city: str = Field(..., max_length=100)
+    state: str = Field(..., max_length=100)
+    business_type: str = Field(..., max_length=100)
+    message: Optional[str] = None
+
+
+class DealerEnquiryResponse(BaseModel):
+    """Schema for dealer enquiry response."""
+
+    id: str
+
+
 class DealerResponse(BaseModel):
     """Schema for dealer response."""
 

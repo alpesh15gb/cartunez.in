@@ -63,7 +63,7 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
 
   const currentInfo = useMemo(() => {
     if (!billingAddress) {
-      return "No billing address"
+      return <span className="text-gray-400">No billing address</span>
     }
 
     const country =
@@ -72,19 +72,19 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
       )?.label || billingAddress.country_code?.toUpperCase()
 
     return (
-      <div className="flex flex-col font-semibold" data-testid="current-info">
-        <span>
+      <div className="flex flex-col text-sm text-gray-900" data-testid="current-info">
+        <span className="font-medium">
           {billingAddress.first_name} {billingAddress.last_name}
         </span>
-        <span>{billingAddress.company}</span>
-        <span>
+        {billingAddress.company && <span className="text-gray-500">{billingAddress.company}</span>}
+        <span className="text-gray-500">
           {billingAddress.address_1}
           {billingAddress.address_2 ? `, ${billingAddress.address_2}` : ""}
         </span>
-        <span>
+        <span className="text-gray-500">
           {billingAddress.postal_code}, {billingAddress.city}
         </span>
-        <span>{country}</span>
+        <span className="text-gray-500">{country}</span>
       </div>
     )
   }, [billingAddress, regionOptions])

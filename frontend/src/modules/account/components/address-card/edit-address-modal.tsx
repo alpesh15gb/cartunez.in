@@ -1,11 +1,10 @@
-"use client"
+﻿"use client"
 
 import {
   deleteCustomerAddress,
   updateCustomerAddress,
 } from "@lib/data/customer"
 import useToggleState from "@lib/hooks/use-toggle-state"
-import { PencilSquare as Edit, Trash } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import CountrySelect from "@modules/checkout/components/country-select"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
@@ -14,6 +13,7 @@ import Modal from "@modules/common/components/modal"
 import { Button, Heading, Text, clx } from "@modules/common/components/ui"
 import Spinner from "@modules/common/icons/spinner"
 import React, { useActionState, useEffect, useState } from "react"
+import { MapPin, Pencil, Trash2 } from "lucide-react"
 
 type EditAddressProps = {
   region: HttpTypes.StoreRegion
@@ -63,29 +63,33 @@ const EditAddress: React.FC<EditAddressProps> = ({
     <>
       <div
         className={clx(
-          "border rounded-rounded p-5 min-h-[220px] h-full w-full flex flex-col justify-between transition-colors",
+          "rounded-[var(--radius-lg)] border p-5 min-h-[220px] h-full w-full flex flex-col justify-between transition-all duration-200 bg-white",
           {
-            "border-gray-900": isActive,
+            "border-[var(--color-brand)] ring-1 ring-[var(--color-brand)]": isActive,
+            "border-gray-200 hover:border-gray-300 hover:shadow-sm": !isActive,
           }
         )}
         data-testid="address-container"
       >
         <div className="flex flex-col">
-          <Heading
-            className="text-left text-base-semi"
-            data-testid="address-name"
-          >
-            {address.first_name} {address.last_name}
-          </Heading>
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin size={14} className="text-gray-400" />
+            <Heading
+              className="text-left text-base font-semibold text-gray-900"
+              data-testid="address-name"
+            >
+              {address.first_name} {address.last_name}
+            </Heading>
+          </div>
           {address.company && (
             <Text
-              className="txt-compact-small text-ui-fg-base"
+              className="text-sm text-gray-500"
               data-testid="address-company"
             >
               {address.company}
             </Text>
           )}
-          <Text className="flex flex-col text-left text-base-regular mt-2">
+          <Text className="flex flex-col text-left text-sm text-gray-500 mt-1 leading-relaxed">
             <span data-testid="address-address">
               {address.address_1}
               {address.address_2 && <span>, {address.address_2}</span>}
@@ -99,21 +103,25 @@ const EditAddress: React.FC<EditAddressProps> = ({
             </span>
           </Text>
         </div>
-        <div className="flex items-center gap-x-4">
+        <div className="flex items-center gap-x-3 mt-4 pt-4 border-t border-gray-100">
           <button
-            className="text-small-regular text-ui-fg-base flex items-center gap-x-2"
+            className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-[var(--color-brand)] transition-colors"
             onClick={open}
             data-testid="address-edit-button"
           >
-            <Edit />
+            <Pencil size={12} />
             Edit
           </button>
           <button
-            className="text-small-regular text-ui-fg-base flex items-center gap-x-2"
+            className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-rose-600 transition-colors"
             onClick={removeAddress}
             data-testid="address-delete-button"
           >
-            {removing ? <Spinner /> : <Trash />}
+            {removing ? (
+              <Spinner />
+            ) : (
+              <Trash2 size={12} />
+            )}
             Remove
           </button>
         </div>
@@ -121,13 +129,12 @@ const EditAddress: React.FC<EditAddressProps> = ({
 
       <Modal isOpen={state} close={close} data-testid="edit-address-modal">
         <Modal.Title>
-          <Heading className="mb-2">Edit address</Heading>
+          <Heading className="text-lg font-bold text-gray-900 mb-2">Edit address</Heading>
         </Modal.Title>
         <form action={formAction}>
-          <input type="hidden" name="addressId" value={address.id} />
           <Modal.Body>
-            <div className="grid grid-cols-1 gap-y-2">
-              <div className="grid grid-cols-2 gap-x-2">
+            <div className="grid grid-cols-1 gap-y-4">
+              <div className="grid grid-cols-2 gap-x-3">
                 <Input
                   label="First name"
                   name="first_name"
@@ -167,7 +174,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 defaultValue={address.address_2 || undefined}
                 data-testid="address-2-input"
               />
-              <div className="grid grid-cols-[144px_1fr] gap-x-2">
+              <div className="grid grid-cols-[144px_1fr] gap-x-3">
                 <Input
                   label="Postal code"
                   name="postal_code"
@@ -209,7 +216,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
               />
             </div>
             {formState.error && (
-              <div className="text-rose-500 text-small-regular py-2">
+              <div className="text-rose-500 text-sm py-2">
                 {formState.error}
               </div>
             )}
@@ -220,12 +227,12 @@ const EditAddress: React.FC<EditAddressProps> = ({
                 type="reset"
                 variant="secondary"
                 onClick={close}
-                className="h-10"
+                className="h-10 rounded-[var(--radius-sm)]"
                 data-testid="cancel-button"
               >
                 Cancel
               </Button>
-              <SubmitButton data-testid="save-button">Save</SubmitButton>
+              <SubmitButton data-testid="save-button" className="rounded-[var(--radius-sm)]">Save</SubmitButton>
             </div>
           </Modal.Footer>
         </form>

@@ -63,7 +63,7 @@ export async function fetchYears(modelId?: string): Promise<VehicleYear[]> {
 }
 
 export async function fetchVariants(yearId?: string): Promise<VehicleVariant[]> {
-  const q = yearId ? `?year_id=${yearId}` : ""
+  const q = yearId ? `?vehicle_year_id=${yearId}` : ""
   return apiFetch<VehicleVariant[]>(`/api/v1/vehicles/variants${q}`)
 }
 
@@ -196,7 +196,7 @@ export async function submitBulkEnquiry(data: {
   quantity: number
   message?: string
 }): Promise<{ id: string }> {
-  return apiFetch<{ id: string }>("/api/v1/bulk-enquiry/enquiries", { method: "POST", body: JSON.stringify(data) })
+  return apiFetch<{ id: string }>("/api/v1/bulk-enquiries", { method: "POST", body: JSON.stringify(data) })
 }
 
 export async function submitDealerEnquiry(data: {

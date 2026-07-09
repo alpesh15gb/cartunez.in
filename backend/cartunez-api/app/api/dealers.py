@@ -11,7 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.middleware.auth import require_api_key
 from app.models.dealer import Dealer
-from app.schemas.dealer import DealerCreate, DealerResponse, DealerUpdate
+from app.models.lead import Lead
+from app.schemas.dealer import DealerCreate, DealerEnquiryCreate, DealerEnquiryResponse, DealerResponse, DealerUpdate
 
 router = APIRouter(prefix="/dealers", tags=["dealers"])
 
@@ -138,6 +139,28 @@ async def update_dealer(
     return dealer
 
 
+# --- Dealer Enquiries (public) ------------------------------------------------
+
+@router.post("/enquiries", response_model=DealerEnquiryResponse, status_code=201)
+async def submit_dealer_enquiry(
+    data: DealerEnquiryCreate,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Submit a dealer partnership enquiry (public endpoint)."""
+    # Store as a Lead
+    lead = Lead(
+        name=data.contact_name,
+        email=data.email,
+        phone=data.phone,
+        source="dealer_enquiry",
+        notes=f"Business: {data.business_name}, Type: {data.business_type}, City: {data.city}, State: {data.state}" + (f". Message: {data.message}" if data.message else ""),
+    )
+    db.add(lead)
+    await db.flush()
+    await db.refresh(lead)
+    return {"id": str(lead.id)}
+
+
 @router.delete("/{dealer_id}", status_code=204)
 async def delete_dealer(
     dealer_id: UUID,
@@ -150,3 +173,5 @@ async def delete_dealer(
     if not dealer:
         raise HTTPException(status_code=404, detail="Dealer not found")
     await db.delete(dealer)
+
+

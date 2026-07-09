@@ -18,7 +18,6 @@ export default async function RelatedProducts({
     return null
   }
 
-  // edit this function to define your related products logic
   const queryParams: HttpTypes.StoreProductListParams = {}
   if (region?.id) {
     queryParams.region_id = region.id
@@ -47,23 +46,20 @@ export default async function RelatedProducts({
   }
 
   return (
-    <div className="product-page-constraint">
-      <div className="flex flex-col items-center text-center mb-16">
-        <span className="text-base-regular text-gray-500 mb-6">
-          Related products
-        </span>
-        <p className="text-2xl-regular text-gray-700 max-w-lg">
-          You might also want to check out these products.
-        </p>
+    <div className="relative">
+      <div className="flex gap-6 overflow-x-auto pb-6 no-scrollbar snap-x snap-mandatory -mx-4 sm:-mx-6 lg:-mx-10 xl:-mx-12 px-4 sm:px-6 lg:px-10 xl:px-12">
+        {products.map((product) => (
+          <div
+            key={product.id}
+            className="min-w-[260px] sm:min-w-[280px] lg:min-w-[300px] max-w-[300px] flex-shrink-0 snap-start"
+          >
+            <Product region={region} product={product} />
+          </div>
+        ))}
       </div>
 
-      <ul className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-x-6 gap-y-8">
-        {products.map((product) => (
-          <li key={product.id}>
-            <Product region={region} product={product} />
-          </li>
-        ))}
-      </ul>
+      <div className="pointer-events-none absolute right-0 top-0 bottom-6 w-24 bg-gradient-to-l from-gray-50 to-transparent" />
+      <div className="pointer-events-none absolute left-0 top-0 bottom-6 w-24 bg-gradient-to-r from-gray-50 to-transparent" />
     </div>
   )
 }

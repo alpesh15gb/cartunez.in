@@ -47,22 +47,24 @@ const AddAddress = ({
   return (
     <>
       <button
-        className="border border-ui-border-base rounded-rounded p-5 min-h-[220px] h-full w-full flex flex-col justify-between"
+        className="border-2 border-dashed border-gray-200 rounded-[var(--radius-lg)] p-6 min-h-[220px] h-full w-full flex flex-col items-center justify-center gap-3 hover:border-gray-400 hover:bg-gray-50/50 transition-all duration-200 group"
         onClick={open}
         data-testid="add-address-button"
       >
-        <span className="text-base-semi">New address</span>
-        <Plus />
+        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-[var(--color-brand)]/10 transition-colors duration-200">
+          <Plus className="text-gray-400 group-hover:text-[var(--color-brand)] transition-colors duration-200" />
+        </div>
+        <span className="text-sm font-semibold text-gray-600 group-hover:text-gray-900 transition-colors duration-200">New address</span>
       </button>
 
       <Modal isOpen={state} close={close} data-testid="add-address-modal">
         <Modal.Title>
-          <Heading className="mb-2">Add address</Heading>
+          <Heading className="text-lg font-bold text-gray-900 mb-2">Add address</Heading>
         </Modal.Title>
         <form action={formAction}>
           <Modal.Body>
-            <div className="flex flex-col gap-y-2">
-              <div className="grid grid-cols-2 gap-x-2">
+            <div className="flex flex-col gap-y-3">
+              <div className="grid grid-cols-2 gap-x-3">
                 <Input
                   label="First name"
                   name="first_name"
@@ -97,7 +99,7 @@ const AddAddress = ({
                 autoComplete="address-line2"
                 data-testid="address-2-input"
               />
-              <div className="grid grid-cols-[144px_1fr] gap-x-2">
+              <div className="grid grid-cols-[144px_1fr] gap-x-3">
                 <Input
                   label="Postal code"
                   name="postal_code"
@@ -135,7 +137,7 @@ const AddAddress = ({
             </div>
             {formState.error && (
               <div
-                className="text-rose-500 text-small-regular py-2"
+                className="text-rose-500 text-sm py-2"
                 data-testid="address-error"
               >
                 {formState.error}
@@ -148,12 +150,12 @@ const AddAddress = ({
                 type="reset"
                 variant="secondary"
                 onClick={close}
-                className="h-10"
+                className="h-10 rounded-[var(--radius-sm)]"
                 data-testid="cancel-button"
               >
                 Cancel
               </Button>
-              <SubmitButton data-testid="save-button">Save</SubmitButton>
+              <SubmitButton data-testid="save-button" className="rounded-[var(--radius-sm)]">Save</SubmitButton>
             </div>
           </Modal.Footer>
         </form>

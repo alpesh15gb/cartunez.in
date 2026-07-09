@@ -2,7 +2,7 @@
 
 import repeat from "@lib/util/repeat"
 import { HttpTypes } from "@medusajs/types"
-import { Table, clx } from "@modules/common/components/ui"
+import { clx } from "@modules/common/components/ui"
 
 import Item from "@modules/cart/components/item"
 import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
@@ -17,33 +17,31 @@ const ItemsPreviewTemplate = ({ cart }: ItemsTemplateProps) => {
 
   return (
     <div
-      className={clx({
-        "pl-[1px] overflow-y-scroll overflow-x-hidden no-scrollbar max-h-[420px]":
+      className={clx("", {
+        "overflow-y-auto overflow-x-hidden no-scrollbar max-h-[360px] -mr-1 pr-1":
           hasOverflow,
       })}
     >
-      <Table>
-        <Table.Body data-testid="items-table">
-          {items
-            ? items
-                .sort((a, b) => {
-                  return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
-                })
-                .map((item) => {
-                  return (
-                    <Item
-                      key={item.id}
-                      item={item}
-                      type="preview"
-                      currencyCode={cart.currency_code}
-                    />
-                  )
-                })
-            : repeat(5).map((i) => {
-                return <SkeletonLineItem key={i} />
-              })}
-        </Table.Body>
-      </Table>
+      <div className="divide-y divide-gray-100" data-testid="items-table">
+        {items
+          ? items
+              .sort((a, b) => {
+                return (a.created_at ?? "") > (b.created_at ?? "") ? -1 : 1
+              })
+              .map((item) => {
+                return (
+                  <Item
+                    key={item.id}
+                    item={item}
+                    type="preview"
+                    currencyCode={cart.currency_code}
+                  />
+                )
+              })
+          : repeat(5).map((i) => {
+              return <SkeletonLineItem key={i} />
+            })}
+      </div>
     </div>
   )
 }

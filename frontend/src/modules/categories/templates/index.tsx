@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
-import InteractiveLink from "@modules/common/components/interactive-link"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -51,72 +50,109 @@ export default function CategoryTemplate({
 
   getParents(category)
 
+  const reversedParents = [...parents].reverse()
+
   return (
-    <div
-      className="flex flex-col small:flex-row small:items-start py-6 content-container"
-      data-testid="category-container"
-    >
-      <RefinementList
-        sortBy={sort}
-        data-testid="sort-by-container"
-        hideOptionsPicker
-      />
-      <div className="w-full">
-        <div className="flex flex-row mb-8 text-h3 gap-4">
-          {parents &&
-            parents.map((parent) => (
-              <span key={parent.id} className="text-ui-fg-subtle">
-                <LocalizedClientLink
-                  className="mr-4 hover:text-black"
-                  href={`/categories/${parent.handle}`}
-                  data-testid="sort-by-link"
-                >
-                  {parent.name}
-                </LocalizedClientLink>
-                /
-              </span>
-            ))}
-          <h1 data-testid="category-page-title">{category.name}</h1>
-        </div>
-        {category.description && (
-          <div className="mb-8 text-base-regular">
-            <p>{category.description}</p>
-          </div>
-        )}
-        {category.category_children && (
-          <div className="mb-8 text-base-large">
-            <ul className="grid grid-cols-1 gap-2">
-              {category.category_children?.map((c) => (
-                <li key={c.id}>
-                  <InteractiveLink href={`/categories/${c.handle}`}>
-                    {c.name}
-                  </InteractiveLink>
-                </li>
+    <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
+      {/* -- Premium Header -- */}
+      <div className="border-b border-gray-100 bg-white py-16 sm:py-20">
+        <div className="content-container">
+          {/* Breadcrumb */}
+          {reversedParents.length > 0 && (
+            <nav className="flex items-center gap-2 text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-5">
+              <LocalizedClientLink href="/" className="hover:text-gray-900 transition-colors duration-200">Home</LocalizedClientLink>
+              <span className="text-gray-300">/</span>
+              <LocalizedClientLink href="/store" className="hover:text-gray-900 transition-colors duration-200">Store</LocalizedClientLink>
+              {reversedParents.map((parent) => (
+                <span key={parent.id} className="flex items-center gap-2">
+                  <span className="text-gray-300">/</span>
+                  <LocalizedClientLink
+                    href={"/categories/" + parent.handle}
+                    className="hover:text-gray-900 transition-colors duration-200"
+                    data-testid="sort-by-link"
+                  >
+                    {parent.name}
+                  </LocalizedClientLink>
+                </span>
               ))}
-            </ul>
+              <span className="text-gray-300">/</span>
+              <span className="text-gray-900 font-semibold">{category.name}</span>
+            </nav>
+          )}
+
+          <div className="space-y-3">
+            <h1
+              className="text-h1 text-gray-950"
+              style={{ fontSize: "clamp(40px, 5vw, 72px)", letterSpacing: "-0.02em" }}
+              data-testid="category-page-title"
+            >
+              {category.name}
+            </h1>
+            {category.description && (
+              <p className="text-sm text-gray-500 font-medium leading-relaxed max-w-2xl">
+                {category.description}
+              </p>
+            )}
           </div>
-        )}
-        <Suspense
-          fallback={
-            <SkeletonProductGrid
-              numberOfProducts={category.products?.length ?? 8}
+        </div>
+      </div>
+
+      {/* -- Subcategories -- */}
+      {category.category_children && category.category_children.length > 0 && (
+        <div className="border-b border-gray-100 bg-white">
+          <div className="content-container py-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400 mr-2">Browse:</span>
+              {category.category_children?.map((c) => (
+                <LocalizedClientLink
+                  key={c.id}
+                  href={"/categories/" + c.handle}
+                  className="inline-flex items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-[11px] font-bold text-gray-700 transition-all duration-200 hover:border-brand hover:text-brand hover:bg-brand/5"
+                >
+                  {c.name}
+                </LocalizedClientLink>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* -- Content -- */}
+      <div
+        className="flex flex-col small:flex-row small:items-start py-12 content-container gap-10"
+        data-testid="category-container"
+      >
+        <div className="w-full small:w-72 shrink-0">
+          <div className="sticky top-32 space-y-6">
+            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-4">Filters</h3>
+              <RefinementList sortBy={sort} data-testid="sort-by-container" hideOptionsPicker />
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <Suspense
+            fallback={
+              <SkeletonProductGrid
+                numberOfProducts={category.products?.length ?? 8}
+              />
+            }
+          >
+            <PaginatedProducts
+              sortBy={sort}
+              page={pageNumber}
+              categoryId={category.id}
+              countryCode={countryCode}
+              optionValueIds={optionValueIds}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              brand={brand}
+              make={make}
+              model={model}
+              year={year}
             />
-          }
-        >
-          <PaginatedProducts
-            sortBy={sort}
-            page={pageNumber}
-            categoryId={category.id}
-            countryCode={countryCode}
-            optionValueIds={optionValueIds}
-            minPrice={minPrice}
-            maxPrice={maxPrice}
-            brand={brand}
-            make={make}
-            model={model}
-            year={year}
-          />
-        </Suspense>
+          </Suspense>
+        </div>
       </div>
     </div>
   )

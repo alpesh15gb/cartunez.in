@@ -1,39 +1,24 @@
-# Dependencies
+# dependencies
 node_modules/
-__pycache__/
-*.pyc
-*.pyo
-.venv/
-venv/
-env/
-*.egg-info/
-.eggs/
+.pnp
+.pnp.js
 
-# Docker
-docker-compose.override.yml
-
-# Environment files (keep .env.example)
+# env
 .env
 .env.local
-.env.development
-.env.production
-.env.*.local
-car/.env
-car/.env.local
-car/.env.development
-car/.env.production
-car/.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Build outputs
-dist/
-build/
-*.egg
+# next.js
 .next/
 out/
 
-# Uploads and media
-uploads/
-media/
+# build artifacts
+frontend/build_out.txt
+frontend/build_err.txt
+frontend/build_log.txt
+frontend/tsconfig.tsbuildinfo
 
 # IDE
 .vscode/
@@ -45,22 +30,14 @@ media/
 .DS_Store
 Thumbs.db
 
-# Logs
+# temp/script files
+write_side_menu.py
+write_sm_part1.js
+write_*
+temp_test.txt
+
+# uploads
+uploads/
+
+# misc
 *.log
-logs/
-
-# Test
-htmlcov/
-.coverage
-.pytest_cache/
-.mypy_cache/
-
-# Medusa
-.medusa/
-
-# Misc
-*.key
-*.pem
-backups/
-coverage/
-.vercel/

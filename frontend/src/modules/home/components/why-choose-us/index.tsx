@@ -34,11 +34,14 @@ export default function WhyChooseUs() {
   ]
 
   return (
-    <section className="bg-white border-t border-gray-100 py-24">
-      <div className="content-container">
+    <section className="relative bg-white border-t border-gray-100 py-24 sm:py-28">
+      {/* Subtle background decoration */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(201,28,28,0.03),transparent_60%)] pointer-events-none" />
+
+      <div className="content-container relative z-10">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-          <div className="space-y-3">
+          <div className="space-y-4">
             <span className="eyebrow">The Cartunez Edge</span>
             <h2
               className="font-display font-black uppercase text-gray-900 leading-none"
@@ -54,16 +57,24 @@ export default function WhyChooseUs() {
           </p>
         </div>
 
-        {/* Feature grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-gray-200">
+        {/* Feature grid — premium cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {features.map((feature, idx) => {
             const Icon = feature.icon
             return (
               <div
                 key={idx}
-                className="bg-white p-8 flex flex-col gap-6 group
-                           hover:bg-gray-50 transition-colors duration-300"
+                className="relative bg-white rounded-[var(--radius-lg)]
+                           border border-gray-200/80
+                           p-8 flex flex-col gap-6
+                           transition-all duration-500 ease-out
+                           group
+                           hover:-translate-y-1 hover:border-brand/15 hover:shadow-[var(--shadow-card-hover)]"
               >
+                {/* Top accent bar */}
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-0 rounded-full bg-brand
+                                 transition-all duration-500 ease-out group-hover:w-2/3" />
+
                 {/* Stat */}
                 <div className="space-y-1">
                   <span
@@ -72,18 +83,21 @@ export default function WhyChooseUs() {
                   >
                     {feature.stat}
                   </span>
-                  <span className="text-[10px] font-bold text-brand uppercase tracking-widest block">
+                  <span className="text-[10px] font-bold text-brand uppercase tracking-[0.15em] block">
                     {feature.statLabel}
                   </span>
                 </div>
 
                 {/* Divider */}
-                <span className="red-line group-hover:w-full transition-all duration-500" />
+                <span className="block w-10 h-0.5 bg-brand transition-all duration-500 ease-out group-hover:w-16" />
 
                 {/* Content */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <Icon size={16} className="text-brand stroke-[1.5px] shrink-0" />
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-sm)]
+                                    bg-brand/5 group-hover:bg-brand/10 transition-colors duration-500">
+                      <Icon size={14} className="text-brand" strokeWidth={1.5} />
+                    </div>
                     <h3 className="text-xs font-bold uppercase tracking-wider text-gray-900">
                       {feature.title}
                     </h3>

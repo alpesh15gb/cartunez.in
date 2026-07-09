@@ -9,7 +9,7 @@ import { HttpTypes } from "@medusajs/types"
 const Review = ({ cart }: { cart: HttpTypes.StoreCart }) => {
   const searchParams = useSearchParams()
 
-  const isOpen = searchParams.get("step") === "review"
+  const isOpen = searchParams?.get("step") === "review"
 
   const paidByGiftcard = !!(
     (cart as unknown as Record<string, unknown>)?.gift_cards && ((cart as unknown as Record<string, unknown>)?.gift_cards as unknown[])?.length > 0 && cart?.total === 0

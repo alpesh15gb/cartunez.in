@@ -1,6 +1,8 @@
 import React from "react"
 
-import UnderlineLink from "@modules/common/components/interactive-link"
+import { ArrowUpRightMini } from "@medusajs/icons"
+import { Text } from "@modules/common/components/ui"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 import AccountNav from "../components/account-nav"
 import { HttpTypes } from "@medusajs/types"
@@ -15,24 +17,37 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className="flex-1 small:py-12" data-testid="account-page">
-      <div className="flex-1 content-container h-full max-w-5xl mx-auto bg-white flex flex-col">
-        <div className="grid grid-cols-1  small:grid-cols-[240px_1fr] py-12">
-          <div>{customer && <AccountNav customer={customer} />}</div>
-          <div className="flex-1">{children}</div>
-        </div>
-        <div className="flex flex-col small:flex-row items-end justify-between small:border-t border-gray-200 py-12 gap-8">
-          <div>
-            <h3 className="text-h4 mb-4">Got questions?</h3>
-            <span className="text-body">
-              You can find frequently asked questions and answers on our
-              customer service page.
-            </span>
+    <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen" data-testid="account-page">
+      <div className="content-container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 lg:gap-12">
+          {/* Sidebar / Mobile Tabs */}
+          <div className="lg:sticky lg:top-24 lg:self-start">
+            {customer && <AccountNav customer={customer} />}
           </div>
-          <div>
-            <UnderlineLink href="/customer-service">
+
+          {/* Main Content Area */}
+          <div className="min-h-[60vh]">{children}</div>
+        </div>
+
+        {/* Footer Section */}
+        <div className="mt-16 pt-10 border-t border-gray-100">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-1.5">
+                Got questions?
+              </h3>
+              <Text className="text-gray-500 text-sm">
+                You can find frequently asked questions and answers on our
+                customer service page.
+              </Text>
+            </div>
+            <LocalizedClientLink
+              href="/customer-service"
+              className="group inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-brand)] hover:text-[var(--color-brand)]/80 transition-colors duration-200"
+            >
               Customer Service
-            </UnderlineLink>
+              <ArrowUpRightMini className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
+            </LocalizedClientLink>
           </div>
         </div>
       </div>

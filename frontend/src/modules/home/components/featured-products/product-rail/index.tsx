@@ -37,19 +37,20 @@ export default async function ProductRail({
             >
               {collection.title}
             </h2>
+            <div className="w-10 h-[3px] bg-[var(--color-brand)] mt-3" />
           </div>
           <Link
             href={`/collections/${collection.handle}`}
-            className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest
-                       text-gray-400 hover:text-brand transition-colors duration-300 group"
+            className="group inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest
+                       text-gray-400 hover:text-[var(--color-brand)] transition-all duration-300 border-b border-transparent hover:border-[var(--color-brand)]/30 pb-0.5"
           >
             <span>View All</span>
-            <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+            <span className="inline-block transition-transform duration-300 group-hover:translate-x-1.5 group-hover:-translate-y-0.5">→</span>
           </Link>
         </div>
 
         {/* Product grid */}
-        <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
           {pricedProducts.map((product) => (
             <li key={product.id}>
               <ProductPreview product={product} region={region} isFeatured />

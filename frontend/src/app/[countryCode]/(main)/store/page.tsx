@@ -1,3 +1,4 @@
+import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
 
 import { parseOptionValueIds } from "@lib/util/product-option-filters"
@@ -5,6 +6,7 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import StoreTemplate from "@modules/store/templates"
 
 export const metadata: Metadata = {
+  alternates: { canonical: `${getBaseURL()}/store` },
   title: "Store",
   description: "Explore all of our products.",
 }
@@ -46,3 +48,4 @@ export default async function StorePage(props: Params) {
     />
   )
 }
+

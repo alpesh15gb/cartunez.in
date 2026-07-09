@@ -12,6 +12,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
 import { useRouter } from "next/navigation"
+import { ShoppingCart, Zap, CheckCircle, XCircle } from "lucide-react"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -38,7 +39,8 @@ export default function ProductActions({
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
-  const countryCode = useParams().countryCode as string
+  const params = useParams()
+  const countryCode = (params?.countryCode ?? '') as string
 
   // If there is only 1 variant, preselect the options
   useEffect(() => {
@@ -76,7 +78,7 @@ export default function ProductActions({
   }, [product.variants, options])
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams?.toString() ?? '')
     const value = isValidVariant ? selectedVariant?.id : null
 
     if (params.get("v_id") === value) {
@@ -90,6 +92,7 @@ export default function ProductActions({
     }
 
     router.replace(pathname + "?" + params.toString())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVariant, isValidVariant])
 
   // check if the selected variant is in stock
@@ -139,12 +142,37 @@ export default function ProductActions({
     }
   }
 
+  const handleBuyNow = async () => {
+    if (!selectedVariant?.id) return
+    setIsAdding(true)
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity: 1,
+        countryCode,
+      })
+      router.push(`/${countryCode}/cart`)
+    } catch (e) {
+      console.error("Buy now failed:", e)
+    } finally {
+      setIsAdding(false)
+    }
+  }
+
+  const getButtonLabel = () => {
+    if (!selectedVariant && !Object.keys(options).length) return "Select variant"
+    if (!isValidVariant) return "Select options"
+    if (!inStock) return "Out of stock"
+    return "Add to cart"
+  }
+
   return (
     <>
-      <div className="flex flex-col gap-y-5" ref={actionsRef}>
+      <div className="flex flex-col gap-y-6" ref={actionsRef}>
+        {/* ── Option/Variant Selectors ── */}
         <div>
           {(product.variants?.length ?? 0) > 1 && (
-            <div className="flex flex-col gap-y-4">
+            <div className="flex flex-col gap-y-5">
               {(product.options || []).map((option) => {
                 return (
                   <div key={option.id}>
@@ -164,23 +192,42 @@ export default function ProductActions({
           )}
         </div>
 
+        {/* ── Premium Price Display ── */}
         <ProductPrice product={product} variant={selectedVariant} />
 
+        {/* ── Stock Indicator ── */}
         <div
-          className={
+          className={`flex items-center justify-between rounded-xl border px-5 py-3.5 text-xs font-bold ${
             inStock
-              ? "flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-800"
-              : "flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-800"
-          }
+              ? "border-emerald-200 bg-gradient-to-r from-emerald-50 to-emerald-50/60 text-emerald-800"
+              : "border-rose-200 bg-gradient-to-r from-rose-50 to-rose-50/60 text-rose-800"
+          }`}
         >
-          <span>{inStock ? "Ready to dispatch" : "Currently unavailable"}</span>
+          <div className="flex items-center gap-2.5">
+            <div className={`flex h-6 w-6 items-center justify-center rounded-full ${
+              inStock ? "bg-emerald-100" : "bg-rose-100"
+            }`}>
+              {inStock ? (
+                <CheckCircle size={14} className="text-emerald-600" />
+              ) : (
+                <XCircle size={14} className="text-rose-600" />
+              )}
+            </div>
+            <span className="text-[11px] font-bold uppercase tracking-wider">
+              {inStock ? "Ready to dispatch" : "Currently unavailable"}
+            </span>
+          </div>
           <span
-            className={inStock ? "h-2 w-2 rounded-full bg-emerald-500" : "h-2 w-2 rounded-full bg-rose-500"}
+            className={`flex h-2.5 w-2.5 rounded-full ${
+              inStock
+                ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                : "bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]"
+            }`}
             aria-hidden="true"
           />
         </div>
 
-
+        {/* ── Add to Cart Button ── */}
         <Button
           onClick={handleAddToCart}
           disabled={
@@ -191,16 +238,42 @@ export default function ProductActions({
             !isValidVariant
           }
           variant="primary"
-          className="h-12 w-full rounded-xl text-xs shadow-md hover:-translate-y-0.5 hover:shadow-lg"
+          className="group relative h-14 w-full overflow-hidden rounded-2xl bg-gradient-to-r from-brand to-brand/90 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-brand/25 transition-all duration-300 hover:shadow-xl hover:shadow-brand/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:shadow-none"
           isLoading={isAdding}
           data-testid="add-product-button"
         >
-          {!selectedVariant && !options
-            ? "Select variant"
-            : !inStock || !isValidVariant
-            ? "Out of stock"
-            : "Add to cart"}
+          {isAdding ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              <span>Adding...</span>
+            </span>
+          ) : (
+            <span className="flex items-center justify-center gap-3">
+              <ShoppingCart size={18} strokeWidth={2} className="transition-transform duration-300 group-hover:scale-110" />
+              <span>{getButtonLabel()}</span>
+            </span>
+          )}
         </Button>
+
+        {/* ── Buy Now Button ── */}
+        <Button
+          onClick={handleBuyNow}
+          disabled={
+            !inStock ||
+            !selectedVariant ||
+            !!disabled ||
+            isAdding ||
+            !isValidVariant
+          }
+          variant="secondary"
+          className="group relative h-13 w-full overflow-hidden rounded-2xl border-2 border-gray-900 bg-transparent text-xs font-bold uppercase tracking-wider text-gray-900 transition-all duration-300 hover:bg-gray-900 hover:text-white disabled:opacity-50"
+        >
+          <span className="flex items-center justify-center gap-2.5">
+            <Zap size={16} strokeWidth={2.5} className="transition-transform duration-300 group-hover:scale-110" />
+            <span>Buy Now</span>
+          </span>
+        </Button>
+
         <MobileActions
           product={product}
           variant={selectedVariant}

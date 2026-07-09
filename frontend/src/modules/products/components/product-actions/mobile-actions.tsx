@@ -3,8 +3,7 @@ import { Button, clx } from "@modules/common/components/ui"
 import React, { Fragment, useMemo } from "react"
 
 import useToggleState from "@lib/hooks/use-toggle-state"
-import ChevronDown from "@modules/common/icons/chevron-down"
-import X from "@modules/common/icons/x"
+import { ChevronDown, X } from "lucide-react"
 
 import { getProductPrice } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
@@ -63,33 +62,35 @@ const MobileActions: React.FC<MobileActionsProps> = ({
           as={Fragment}
           show={show}
           enter="ease-in-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
+          enterFrom="opacity-0 translate-y-4"
+          enterTo="opacity-100 translate-y-0"
           leave="ease-in duration-300"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+          leaveFrom="opacity-100 translate-y-0"
+          leaveTo="opacity-0 translate-y-4"
         >
           <div
-            className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200"
+            className="bg-white/95 backdrop-blur-lg flex flex-col gap-y-3 justify-center items-center p-4 h-full w-full border-t border-gray-200 shadow-[0_-8px_30px_rgba(15,23,42,0.06)]"
             data-testid="mobile-actions"
           >
-            <div className="flex items-center gap-x-2">
-              <span data-testid="mobile-title">{product.title}</span>
-              <span>—</span>
+            <div className="flex items-center gap-x-3">
+              <span className="text-sm font-bold text-gray-900" data-testid="mobile-title">{product.title}</span>
+              <span className="text-gray-300">|</span>
               {selectedPrice ? (
-                <div className="flex items-end gap-x-2 text-ui-fg-base">
+                <div className="flex items-end gap-x-2">
                   {selectedPrice.price_type === "sale" && (
                     <p>
-                      <span className="line-through text-small-regular">
+                      <span className="line-through text-[11px] text-gray-400">
                         {selectedPrice.original_price}
                       </span>
                     </p>
                   )}
                   <span
-                    className={clx({
-                      "text-ui-fg-interactive":
-                        selectedPrice.price_type === "sale",
-                    })}
+                    className={clx(
+                      "text-sm font-bold",
+                      selectedPrice.price_type === "sale"
+                        ? "text-[var(--color-brand)]"
+                        : "text-gray-900"
+                    )}
                   >
                     {selectedPrice.calculated_price}
                   </span>
@@ -98,28 +99,30 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                 <div></div>
               )}
             </div>
-            <div className={clx("grid grid-cols-2 w-full gap-x-4", {
+            <div className={clx("grid grid-cols-2 w-full gap-x-3", {
               "!grid-cols-1": isSimple
             })}>
-              {!isSimple && <Button
-                onClick={open}
-                variant="secondary"
-                className="w-full"
-                data-testid="mobile-actions-button"
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>
-                    {variant
-                      ? Object.values(options).join(" / ")
-                      : "Select Options"}
-                  </span>
-                  <ChevronDown />
-                </div>
-              </Button>}
+              {!isSimple && (
+                <Button
+                  onClick={open}
+                  variant="secondary"
+                  className="w-full h-11 rounded-[var(--radius-sm)] text-[11px]"
+                  data-testid="mobile-actions-button"
+                >
+                  <div className="flex items-center justify-between w-full gap-2">
+                    <span className="truncate text-[10px]">
+                      {variant
+                        ? Object.values(options).join(" / ")
+                        : "Select Options"}
+                    </span>
+                    <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+                  </div>
+                </Button>
+              )}
               <Button
                 onClick={handleAddToCart}
                 disabled={!inStock || !variant}
-                className="w-full"
+                className="w-full h-11 rounded-[var(--radius-sm)] text-[11px]"
                 isLoading={isAdding}
                 data-testid="mobile-cart-button"
               >
@@ -144,34 +147,35 @@ const MobileActions: React.FC<MobileActionsProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-gray-700 bg-opacity-75 backdrop-blur-sm" />
+            <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" />
           </Transition.Child>
 
           <div className="fixed bottom-0 inset-x-0">
-            <div className="flex min-h-full h-full items-center justify-center text-center">
+            <div className="flex min-h-full h-full items-end justify-center text-center">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
+                enterFrom="opacity-0 translate-y-8"
+                enterTo="opacity-100 translate-y-0"
                 leave="ease-in duration-200"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-8"
               >
                 <Dialog.Panel
-                  className="w-full h-full transform overflow-hidden text-left flex flex-col gap-y-3"
+                  className="w-full transform overflow-hidden text-left flex flex-col gap-y-4 bg-white rounded-t-[var(--radius-xl)] shadow-xl"
                   data-testid="mobile-actions-modal"
                 >
-                  <div className="w-full flex justify-end pr-6">
+                  <div className="flex items-center justify-between px-6 pt-6 pb-2 border-b border-gray-100">
+                    <span className="text-sm font-bold text-gray-900">Select Options</span>
                     <button
                       onClick={close}
-                      className="bg-white w-12 h-12 rounded-full text-ui-fg-base flex justify-center items-center"
+                      className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors duration-200"
                       data-testid="close-modal-button"
                     >
-                      <X />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="bg-white px-6 py-12">
+                  <div className="px-6 pb-8 max-h-[60vh] overflow-y-auto">
                     {(product.variants?.length ?? 0) > 1 && (
                       <div className="flex flex-col gap-y-6">
                         {(product.options || []).map((option) => {

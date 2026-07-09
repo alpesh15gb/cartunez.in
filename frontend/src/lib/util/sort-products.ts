@@ -25,8 +25,8 @@ export function sortProducts(
           ...product.variants.map(
             (variant) =>
               variant?.calculated_price?.calculated_amount ||
-              (Array.isArray((variant as any).prices) &&
-                (variant as any).prices[0]?.amount) ||
+              (Array.isArray((variant as HttpTypes.StoreProductVariant & { prices?: { amount: number }[] }).prices) &&
+                (variant as HttpTypes.StoreProductVariant & { prices?: { amount: number }[] }).prices?.[0]?.amount) ||
               0
           )
         )

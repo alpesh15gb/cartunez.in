@@ -2,7 +2,6 @@ import ItemsTemplate from "./items"
 import Summary from "./summary"
 import EmptyCartMessage from "../components/empty-cart-message"
 import SignInPrompt from "../components/sign-in-prompt"
-import Divider from "@modules/common/components/divider"
 import { HttpTypes } from "@medusajs/types"
 
 const CartTemplate = ({
@@ -13,33 +12,35 @@ const CartTemplate = ({
   customer: HttpTypes.StoreCustomer | null
 }) => {
   return (
-    <div className="py-12">
+    <div className="py-8 small:py-12 bg-gradient-to-b from-gray-50 to-white min-h-screen">
       <div className="content-container" data-testid="cart-container">
         {cart?.items?.length ? (
-          <div className="grid grid-cols-1 gap-12 small:grid-cols-[1fr_400px]">
-            <div className="flex flex-col gap-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_400px]">
+            {/* Left column - Items */}
+            <div className="flex flex-col gap-y-6">
               {!customer && (
-                <>
+                <div className="rounded-[var(--radius-lg)] border border-gray-200 bg-white p-5 sm:p-6 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)]">
                   <SignInPrompt />
-                  <Divider />
-                </>
+                </div>
               )}
-              <ItemsTemplate cart={cart} />
+              <div className="rounded-[var(--radius-lg)] border border-gray-200 bg-white p-5 sm:p-6 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)]">
+                <ItemsTemplate cart={cart} />
+              </div>
             </div>
+
+            {/* Right column - Summary */}
             <div className="relative">
-              <div className="flex flex-col gap-y-8 sticky top-12">
+              <div className="flex flex-col gap-y-6 sticky top-24">
                 {cart && cart.region && (
-                  <>
-                    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                      <Summary cart={cart} />
-                    </div>
-                  </>
+                  <div className="rounded-[var(--radius-lg)] border border-gray-200 bg-white p-5 sm:p-6 shadow-[0_2px_16px_-6px_rgba(0,0,0,0.08)]">
+                    <Summary cart={cart} />
+                  </div>
                 )}
               </div>
             </div>
           </div>
         ) : (
-          <div>
+          <div className="rounded-[var(--radius-lg)] border border-gray-200 bg-white shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)]">
             <EmptyCartMessage />
           </div>
         )}

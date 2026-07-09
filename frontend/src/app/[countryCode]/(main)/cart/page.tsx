@@ -4,8 +4,10 @@ import CartTemplate from "@modules/cart/templates"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
+import { getBaseURL } from "@lib/util/env"
 export const metadata: Metadata = {
   title: "Cart",
+  alternates: { canonical: `${getBaseURL()}/cart` },
   description: "View your cart",
 }
 
