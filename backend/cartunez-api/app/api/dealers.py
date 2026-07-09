@@ -1,4 +1,4 @@
-"""Dealer API routes for CRUD and nearby dealer lookup."""
+﻿"""Dealer API routes for CRUD and nearby dealer lookup."""
 
 import math
 from typing import List, Optional
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/dealers", tags=["dealers"])
 
 def _escape_like(value: str) -> str:
     """Escape LIKE wildcards in user input."""
-    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return value.replace("\", "\\\").replace("%", "\\%").replace("_", "\\_")
 
 
 def _haversine_distance(

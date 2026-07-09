@@ -1,4 +1,4 @@
-"""Vehicle API routes for make, model, year, and variant management."""
+﻿"""Vehicle API routes for make, model, year, and variant management."""
 
 from typing import List, Optional
 from uuid import UUID
@@ -26,10 +26,10 @@ router = APIRouter(prefix="/vehicles", tags=["vehicles"])
 
 def _escape_like(value: str) -> str:
     """Escape LIKE wildcards in user input."""
-    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return value.replace("\", "\\\").replace("%", "\\%").replace("_", "\\_")
 
 
-# ─── Makes (public read, admin write) ─────────────────────────────────────────
+# â”€â”€â”€ Makes (public read, admin write) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/makes", response_model=List[VehicleMakeResponse])
 async def list_makes(
@@ -89,7 +89,7 @@ async def delete_make(
     await db.delete(make)
 
 
-# ─── Models (public read, admin write) ────────────────────────────────────────
+# â”€â”€â”€ Models (public read, admin write) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/models", response_model=List[VehicleModelResponse])
 async def list_models(
@@ -135,7 +135,7 @@ async def create_model(
     return model
 
 
-# ─── Years (public read, admin write) ─────────────────────────────────────────
+# â”€â”€â”€ Years (public read, admin write) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/years", response_model=List[VehicleYearResponse])
 async def list_years(
@@ -181,7 +181,7 @@ async def create_year(
     return year
 
 
-# ─── Variants (public read, admin write) ──────────────────────────────────────
+# â”€â”€â”€ Variants (public read, admin write) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/variants", response_model=List[VehicleVariantResponse])
 async def list_variants(
@@ -227,7 +227,7 @@ async def create_variant(
     return variant
 
 
-# ─── Search (public) ─────────────────────────────────────────────────────────
+# â”€â”€â”€ Search (public) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/search")
 async def search_vehicles(
