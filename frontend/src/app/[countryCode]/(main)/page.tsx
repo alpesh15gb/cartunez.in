@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     "Upgrade your ride with premium automotive accessories. Premium quality car mats, LED headlights, Android stereo systems, seat covers & more at Cartunez.",
 }
 
-async function FeaturedProductsSection({ region, collections }: { region: any, collections: any }) {
+async function FeaturedProductsSection({ region, collections }: { region: Record<string, unknown>; collections: Array<Record<string, unknown>> }) {
   return (
     <div className="bg-white py-12">
       <ul className="flex flex-col gap-y-6">
