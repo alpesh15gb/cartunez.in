@@ -26,7 +26,7 @@ router = APIRouter(prefix="/vehicles", tags=["vehicles"])
 
 def _escape_like(value: str) -> str:
     """Escape LIKE wildcards in user input."""
-    return value.replace("\", "\\\").replace("%", "\\%").replace("_", "\\_")
+    return value.replace("\\", "\\\\").replace("%", "\\\\%").replace("_", "\\\\_")
 
 
 # â”€â”€â”€ Makes (public read, admin write) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
