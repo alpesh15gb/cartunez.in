@@ -64,12 +64,10 @@ const categories = [
 const FeaturedCategories = () => {
   return (
     <section className="relative bg-gradient-to-b from-white via-gray-50/50 to-white border-t border-gray-100 py-24 sm:py-28">
-      {/* Subtle background decoration */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(201,28,28,0.04),transparent_60%)] pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(201,28,28,0.03),transparent_60%)] pointer-events-none" />
 
       <div className="content-container relative z-10">
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="space-y-4">
             <span className="eyebrow">Shop by Category</span>
@@ -87,7 +85,6 @@ const FeaturedCategories = () => {
           </p>
         </div>
 
-        {/* Category Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
           {categories.map((cat) => {
             const Icon = cat.icon
@@ -99,11 +96,9 @@ const FeaturedCategories = () => {
                            transition-all duration-500 ease-out
                            hover:-translate-y-2 hover:border-brand/15 hover:shadow-[var(--shadow-card-hover)]"
               >
-                {/* Top accent bar */}
                 <span className={`absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-0 rounded-full ${cat.accent}
                                   transition-all duration-500 ease-out group-hover:w-3/4`} />
 
-                {/* Icon container */}
                 <div
                   className={`relative mb-5 flex h-16 w-16 items-center justify-center rounded-[var(--radius-md)]
                               bg-gradient-to-br ${cat.gradient} bg-white
@@ -118,17 +113,14 @@ const FeaturedCategories = () => {
                   />
                 </div>
 
-                {/* Category name */}
                 <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 mb-2 transition-colors duration-300 group-hover:text-brand">
                   {cat.name}
                 </h3>
 
-                {/* Description */}
                 <p className="text-[11px] text-gray-500 font-medium leading-relaxed mb-5 line-clamp-2">
                   {cat.description}
                 </p>
 
-                {/* Shop Now link */}
                 <span className="mt-auto inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em]
                                  text-brand/0 group-hover:text-brand
                                  translate-y-1 group-hover:translate-y-0

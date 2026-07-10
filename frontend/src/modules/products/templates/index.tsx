@@ -17,9 +17,7 @@ import ProductActionsWrapper from "./product-actions-wrapper"
 import {
   Truck,
   ShieldCheck,
-  Star,
   Wrench,
-  Award,
   Headphones,
   CheckCircle,
 } from "lucide-react"
@@ -42,8 +40,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   }
 
   const brandName = (product.metadata?.brand as string) || "Cartunez"
-  const avgRating = 4.5
-  const reviewCount = 12
+  // Ratings are fetched dynamically in ProductReviews component
 
   return (
     <>
@@ -72,29 +69,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                   </span>
                 </div>
 
-                {/* Rating with stars */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        size={16}
-                        className={
-                          star <= Math.round(avgRating)
-                            ? "fill-amber-400 text-amber-400"
-                            : "fill-gray-200 text-gray-200"
-                        }
-                      />
-                    ))}
-                  </div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-sm font-bold text-gray-900">
-                      {avgRating.toFixed(1)}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      ({reviewCount} reviews)
-                    </span>
-                  </div>
+                {/* Rating will be loaded from ProductReviews component below */}
+                <div className="flex items-center gap-3 text-sm text-gray-500">
+                  <span>Ratings from verified reviews below</span>
                 </div>
               </div>
 
@@ -123,7 +100,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-3.5 transition-all hover:border-gray-200 hover:bg-gray-50">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/5 text-brand"><Award size={18} /></div>
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/5 text-brand"><ShieldCheck size={18} /></div>
                     <div>
                       <span className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">Premium Warranty</span>
                       <p className="mt-0.5 text-[10px] text-gray-500 leading-relaxed">1-year manufacturer warranty. Full coverage against defects.</p>

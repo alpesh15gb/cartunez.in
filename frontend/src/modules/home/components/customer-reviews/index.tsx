@@ -1,55 +1,55 @@
 "use client"
 
-import React, { useRef } from "react"
-import { Star, ChevronLeft, ChevronRight, Quote, MessageCircle } from "lucide-react"
+import React, { useRef, useEffect, useState } from "react"
+import { Star, ChevronLeft, ChevronRight, Quote, MessageCircle, Loader } from "lucide-react"
+import { fetchReviews } from "@lib/data/fastapi"
 
-const reviews = [
-  {
-    name: "Arjun Mehta",
-    avatar: "AM",
-    vehicle: "Hyundai Creta 2023",
-    rating: 5,
-    text: "The 7D floor mats are absolutely perfect — precision fit like OEM. Delivery was surprisingly fast and installation was a breeze. Highly recommended!",
-  },
-  {
-    name: "Priya Sharma",
-    avatar: "PS",
-    vehicle: "Maruti Suzuki Baleno 2024",
-    rating: 5,
-    text: "Bought the Android stereo system and the difference is night and day. Wireless CarPlay works flawlessly. The team even helped with compatibility check before ordering.",
-  },
-  {
-    name: "Rahul Verma",
-    avatar: "RV",
-    vehicle: "Mahindra Thar 2023",
-    rating: 5,
-    text: "Ambient lighting kit transformed the cabin experience. App control is smooth and the install video guide made it easy to DIY. Quality is top notch.",
-  },
-  {
-    name: "Sneha Patel",
-    avatar: "SP",
-    vehicle: "Toyota Fortuner 2022",
-    rating: 5,
-    text: "Premium seat covers that actually fit! No loose fabric, no shifting. The leatherette feels premium and the stitching matches my interior perfectly.",
-  },
-  {
-    name: "Vikram Singh",
-    avatar: "VS",
-    vehicle: "Honda City 2024",
-    rating: 5,
-    text: "Been shopping here for all my accessories. The fitment guarantee is real — everything has been spot on. Customer support is genuinely helpful and responsive.",
-  },
-  {
-    name: "Ananya Reddy",
-    avatar: "AR",
-    vehicle: "Kia Seltos 2023",
-    rating: 5,
-    text: "Ordered steering wheel cover and LED lights. Quality exceeded expectations. Free shipping is a bonus and the packaging was premium. Will definitely order again.",
-  },
-]
+interface Review {
+  id: string
+  name: string
+  avatar: string
+  vehicle?: string
+  rating: number
+  text: string
+}
 
 const CustomerReviews = () => {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        // Fetch approved reviews - passing empty string to get all approved reviews
+        const data = await fetchReviews("")
+        // Filter and limit to 6 most recent
+        const recentReviews = data
+          .filter((r) => r.is_approved)
+          .slice(0, 6)
+          .map((r) => ({
+            id: r.id,
+            name: r.customer_name,
+            avatar: r.customer_name
+              .split(" ")
+              .map((n: string) => n[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2),
+            vehicle: undefined, // FastAPI reviews don't have vehicle field
+            rating: r.rating,
+            text: r.content,
+          }))
+        setReviews(recentReviews)
+      } catch (error) {
+        console.error("Failed to load reviews:", error)
+        setReviews([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadReviews()
+  }, [])
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return
@@ -58,6 +58,28 @@ const CustomerReviews = () => {
       left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth",
     })
+  }
+
+  if (isLoading) {
+    return (
+      <section className="relative bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 py-24 sm:py-28 overflow-hidden">
+        <div className="content-container relative z-10 flex items-center justify-center min-h-[300px]">
+          <Loader className="animate-spin text-brand" size={32} />
+        </div>
+      </section>
+    )
+  }
+
+  if (!reviews || reviews.length === 0) {
+    return (
+      <section className="relative bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 py-24 sm:py-28 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(201,28,28,0.04),transparent_60%)] pointer-events-none" />
+        <div className="content-container relative z-10 text-center">
+          <h2 className="text-h2 text-gray-900 mb-4">Customer Reviews</h2>
+          <p className="text-gray-500 max-w-md mx-auto">Be the first to share your experience with Cartunez premium accessories.</p>
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -117,7 +139,7 @@ const CustomerReviews = () => {
       >
         {reviews.map((review, idx) => (
           <div
-            key={idx}
+            key={review.id || idx}
             className="snap-start shrink-0 w-[360px] sm:w-[400px] bg-white rounded-[var(--radius-lg)]
                        border border-gray-200/80 p-8
                        flex flex-col gap-5
@@ -159,10 +181,12 @@ const CustomerReviews = () => {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-gray-900 truncate">{review.name}</p>
-                <p className="text-[11px] text-gray-400 font-medium truncate flex items-center gap-1">
-                  <MessageCircle size={10} className="shrink-0" />
-                  {review.vehicle}
-                </p>
+                {review.vehicle && (
+                  <p className="text-[11px] text-gray-400 font-medium truncate flex items-center gap-1">
+                    <MessageCircle size={10} className="shrink-0" />
+                    {review.vehicle}
+                  </p>
+                )}
               </div>
             </div>
           </div>

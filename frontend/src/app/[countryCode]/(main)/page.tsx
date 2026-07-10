@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     "Upgrade your ride with premium automotive accessories. Premium quality car mats, LED headlights, Android stereo systems, seat covers & more at Cartunez.",
 }
 
-async function FeaturedProductsSection({ region, collections }: { region: NonNullable<Awaited<ReturnType<typeof getRegion>>>, collections: Awaited<ReturnType<typeof listCollections>>["collections"] }) {
+async function FeaturedProductsSection({ region, collections }: { region: any, collections: any }) {
   return (
     <div className="bg-white py-12">
       <ul className="flex flex-col gap-y-6">
@@ -38,29 +38,53 @@ export default async function Home(props: {
 
   const { countryCode } = params
 
-  const region = await getRegion(countryCode)
+  let region = null
+  let collections = null
 
-  const { collections } = await listCollections({
-    fields: "id, handle, title",
-  })
-
-  if (!collections || !region) {
-    return null
+  try {
+    region = await getRegion(countryCode)
+    const result = await listCollections({
+      fields: "id, handle, title",
+    })
+    collections = result.collections
+  } catch (error) {
+    console.error("[Homepage] Error loading data:", error)
   }
 
+  // ✅ CRITICAL FIX: ALWAYS render design, never return null
+  // Even if API fails, show loading placeholders so page isn't blank
   return (
     <main>
       <Hero />
       <FeaturedCategories />
-      <Suspense fallback={<div className="bg-white py-12"><div className="content-container"><div className="h-96 bg-gray-50 animate-pulse rounded-[var(--radius-lg)]" /></div></div>}>
-        <FeaturedProductsSection region={region} collections={collections} />
-      </Suspense>
+      
+      {collections && region ? (
+        <Suspense fallback={<div className="bg-white py-12"><div className="content-container"><div className="h-96 bg-gray-50 animate-pulse rounded-[var(--radius-lg)]" /></div></div>}}>
+          <FeaturedProductsSection region={region} collections={collections} />
+        </Suspense>
+      ) : (
+        <div className="bg-white py-12">
+          <div className="content-container">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900">Featured Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-gray-100 h-72 animate-pulse rounded-lg" />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
       <VehicleFinder />
       <FeaturedBrands />
       <PromoBanner />
-      <Suspense fallback={<div className="py-16"><div className="content-container"><div className="h-64 bg-gray-50 animate-pulse rounded-[var(--radius-lg)]" /></div></div>}>
-        <RecentlyAdded region={region} />
-      </Suspense>
+      
+      {region ? (
+        <Suspense fallback={<div className="py-16"><div className="content-container"><div className="h-64 bg-gray-50 animate-pulse rounded-[var(--radius-lg)]" /></div></div>}}>
+          <RecentlyAdded region={region} />
+        </Suspense>
+      ) : null}
+      
       <WhyChooseUs />
       <CustomerReviews />
       <InstagramReels />
