@@ -59,7 +59,7 @@ export default async function Home(props: {
       <FeaturedCategories />
       
       {collections && region ? (
-        <Suspense fallback={<div className="bg-white py-12"><div className="content-container"><div className="h-96 bg-gray-50 animate-pulse rounded-[var(--radius-lg)]" /></div></div>}}>
+        <Suspense fallback={<div className="bg-white py-12"><div className="content-container"><div className="h-96 bg-gray-50 animate-pulse rounded-[var(--radius-lg)]" /></div></div>}>
           <FeaturedProductsSection region={region} collections={collections} />
         </Suspense>
       ) : (
@@ -80,7 +80,7 @@ export default async function Home(props: {
       <PromoBanner />
       
       {region ? (
-        <Suspense fallback={<div className="py-16"><div className="content-container"><div className="h-64 bg-gray-50 animate-pulse rounded-[var(--radius-lg)]" /></div></div>}}>
+        <Suspense fallback={<div className="py-16"><div className="content-container"><div className="h-64 bg-gray-50 animate-pulse rounded-[var(--radius-lg)]" /></div></div>}>
           <RecentlyAdded region={region} />
         </Suspense>
       ) : null}
