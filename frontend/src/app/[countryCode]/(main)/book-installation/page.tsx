@@ -1,7 +1,21 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { bookInstallation, fetchMakes, fetchModels, type VehicleMake, type VehicleModel } from "@lib/data/fastapi"
+interface VehicleMake {
+  id: string
+  name: string
+  slug: string
+  logo_url?: string
+}
+
+interface VehicleModel {
+  id: string
+  make_id: string
+  name: string
+  slug: string
+  body_type?: string
+  image_url?: string
+}
 import { Button } from "@modules/common/components/ui"
 import { Wrench, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
 
@@ -26,9 +40,18 @@ export default function BookInstallationPage() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    fetchMakes()
-      .then(setMakes)
-      .catch((err) => console.error("Failed to load makes for booking:", err))
+    const loadMakes = async () => {
+      try {
+        const res = await fetch("/api/makes")
+        if (res.ok) {
+          const data = await res.json()
+          setMakes(data.makes || [])
+        }
+      } catch (err) {
+        console.error("Failed to load makes for booking:", err)
+      }
+    }
+    loadMakes()
   }, [])
 
   useEffect(() => {
@@ -37,9 +60,18 @@ export default function BookInstallationPage() {
       setSelectedModel("")
       return
     }
-    fetchModels(selectedMake)
-      .then(setModels)
-      .catch((err) => console.error("Failed to load models for booking:", err))
+    const loadModels = async () => {
+      try {
+        const res = await fetch(`/api/models?make_id=${selectedMake}`)
+        if (res.ok) {
+          const data = await res.json()
+          setModels(data.models || [])
+        }
+      } catch (err) {
+        console.error("Failed to load models for booking:", err)
+      }
+    }
+    loadModels()
   }, [selectedMake])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,7 +86,10 @@ export default function BookInstallationPage() {
     const modelName = models.find((m) => m.id === selectedModel)?.name
 
     try {
-      await bookInstallation({
+      const res = await fetch("/api/installation-bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
         customer_name: name.trim(),
         customer_email: email.trim(),
         customer_phone: phone.trim(),
@@ -66,7 +101,8 @@ export default function BookInstallationPage() {
         vehicle_make: makeName,
         vehicle_model: modelName,
         notes: notes.trim(),
-      })
+      })}
+      if (!res.ok) throw new Error("Failed")
       setSuccess("Your installation service booking has been requested successfully! Our crew will call to confirm.")
       setName("")
       setEmail("")
