@@ -3,7 +3,7 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm ci || (echo "npm ci failed, attempting npm install..." && rm -rf node_modules && npm install)
 
 FROM base AS builder
 WORKDIR /app
