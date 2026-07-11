@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { createLead } from "@lib/data/fastapi"
+
 import { CheckCircle, AlertCircle, Loader2, ArrowRight, Users, Sparkles } from "lucide-react"
 
 export default function Newsletter() {
@@ -20,12 +20,17 @@ export default function Newsletter() {
     setMessage("")
 
     try {
-      await createLead({
-        name: name.trim(),
-        email: email.trim(),
-        source: "newsletter",
-        notes: "Subscribed to newsletter from homepage.",
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          source: "newsletter",
+          notes: "Subscribed to newsletter from homepage.",
+        }),
       })
+      if (!res.ok) throw new Error("Failed")
       setStatus("success")
       setMessage("You're in. Expect early drops, exclusive fitment deals, and insider updates.")
       setEmail("")

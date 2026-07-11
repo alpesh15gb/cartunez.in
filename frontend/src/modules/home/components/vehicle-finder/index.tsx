@@ -3,14 +3,27 @@
 import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2, ArrowRight, Search } from "lucide-react"
-import {
-  fetchMakes,
-  fetchModels,
-  fetchYears,
-  type VehicleMake,
-  type VehicleModel,
-  type VehicleYear
-} from "@lib/data/fastapi"
+interface VehicleMake {
+  id: string
+  name: string
+  slug: string
+  logo_url?: string
+}
+
+interface VehicleModel {
+  id: string
+  make_id: string
+  name: string
+  slug: string
+  body_type?: string
+  image_url?: string
+}
+
+interface VehicleYear {
+  id: string
+  model_id: string
+  year: number
+}
 
 export default function VehicleFinder() {
   const [makes, setMakes] = useState<VehicleMake[]>([])
@@ -25,16 +38,30 @@ export default function VehicleFinder() {
   const [error, setError] = useState("")
   const router = useRouter()
 
+  const apiFetch = async (url: string) => {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+    if (!res.ok) throw new Error(`API ${res.status}: ${res.statusText}`)
+    return res.json()
+  }
+
   useEffect(() => {
-    setLoading((prev) => ({ ...prev, makes: true }))
-    setError("")
-    fetchMakes()
-      .then(setMakes)
-      .catch((err) => {
+    const loadMakes = async () => {
+      setLoading((prev) => ({ ...prev, makes: true }))
+      setError("")
+      try {
+        const data = await apiFetch("/api/makes")
+        setMakes(data.makes || [])
+      } catch (err) {
         console.error("Failed to fetch makes:", err)
         setError("Unable to load vehicle database. Please try again.")
-      })
-      .finally(() => setLoading((prev) => ({ ...prev, makes: false })))
+      } finally {
+        setLoading((prev) => ({ ...prev, makes: false }))
+      }
+    }
+    loadMakes()
   }, [])
 
   useEffect(() => {
@@ -44,11 +71,19 @@ export default function VehicleFinder() {
       setSelectedYear("")
       return
     }
-    setLoading((prev) => ({ ...prev, models: true }))
-    fetchModels(selectedMake)
-      .then(setModels)
-      .catch((err) => console.error("Failed to fetch models:", err))
-      .finally(() => setLoading((prev) => ({ ...prev, models: false })))
+    const loadModels = async () => {
+      setLoading((prev) => ({ ...prev, models: true }))
+      try {
+        const data = await apiFetch(`/api/models?make_id=${selectedMake}`)
+        setModels(data.models || [])
+      } catch (err) {
+        console.error("Failed to fetch models:", err)
+        setModels([])
+      } finally {
+        setLoading((prev) => ({ ...prev, models: false }))
+      }
+    }
+    loadModels()
     setSelectedModel("")
     setSelectedYear("")
   }, [selectedMake])
@@ -59,11 +94,19 @@ export default function VehicleFinder() {
       setSelectedYear("")
       return
     }
-    setLoading((prev) => ({ ...prev, years: true }))
-    fetchYears(selectedModel)
-      .then(setYears)
-      .catch((err) => console.error("Failed to fetch years:", err))
-      .finally(() => setLoading((prev) => ({ ...prev, years: false })))
+    const loadYears = async () => {
+      setLoading((prev) => ({ ...prev, years: true }))
+      try {
+        const data = await apiFetch(`/api/years?model_id=${selectedModel}`)
+        setYears(data.years || [])
+      } catch (err) {
+        console.error("Failed to fetch years:", err)
+        setYears([])
+      } finally {
+        setLoading((prev) => ({ ...prev, years: false }))
+      }
+    }
+    loadYears()
     setSelectedYear("")
   }, [selectedModel])
 

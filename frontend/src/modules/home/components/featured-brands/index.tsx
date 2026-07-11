@@ -2,18 +2,36 @@
 
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
-import { fetchMakes, type VehicleMake } from "@lib/data/fastapi"
+interface VehicleMake {
+  id: string
+  name: string
+  slug: string
+  logo_url?: string
+}
 
 export default function FeaturedBrands() {
   const [makes, setMakes] = useState<VehicleMake[]>([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    setLoading(true)
-    fetchMakes()
-      .then((data) => { setMakes(data || []) })
-      .catch(() => { /* silent */ })
-      .finally(() => setLoading(false))
+    const loadMakes = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch("/api/makes", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setMakes(data.makes || [])
+        }
+      } catch {
+        /* silent */
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadMakes()
   }, [])
 
   if (loading || makes.length === 0) return null

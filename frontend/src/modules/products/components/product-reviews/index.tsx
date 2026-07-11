@@ -3,7 +3,16 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
 import { Star, Loader2, MessageSquare, AlertCircle, CheckCircle, User } from "lucide-react"
-import { fetchReviews, createReview, type Review } from "@lib/data/fastapi"
+interface Review {
+  id: string
+  product_id: string
+  customer_name: string
+  rating: number
+  title: string
+  content: string
+  is_approved: boolean
+  created_at: string
+}
 import { Button } from "@modules/common/components/ui"
 
 interface ProductReviewsProps {
@@ -25,8 +34,9 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   const loadReviews = useCallback(() => {
     setLoading(true)
     setError("")
-    fetchReviews(productId)
-      .then((data) => setReviews(data || []))
+    fetch(`/api/reviews?product_id=${encodeURIComponent(productId)}`)
+      .then((res) => res.ok ? res.json() : Promise.reject("Failed"))
+      .then((data) => setReviews(data.reviews || data || []))
       .catch((err) => {
         console.error("Failed to load reviews:", err)
         setError("Unable to load reviews for this product.")
@@ -47,13 +57,18 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
     setSuccess("")
 
     try {
-      await createReview({
-        product_id: productId,
-        customer_name: name.trim(),
-        rating,
-        title: title.trim(),
-        content: body.trim(),
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          product_id: productId,
+          customer_name: name.trim(),
+          rating,
+          title: title.trim(),
+          content: body.trim(),
+        }),
       })
+      if (!res.ok) throw new Error("Failed to submit review")
       setSuccess("Your review has been submitted for moderation. Thank you!")
       setName("")
       setTitle("")
