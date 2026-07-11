@@ -20,7 +20,7 @@ export default function MobileBottomNav() {
 
   return (
     <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-xl border-t border-gray-200/80 z-50 md:hidden safe-bottom shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-      <div className="flex items-center justify-around h-16 px-2">
+      <div className="flex items-center justify-around h-[68px] px-2 pb-1">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
@@ -28,19 +28,20 @@ export default function MobileBottomNav() {
             <Link
               key={item.label}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full text-center transition-all duration-200 relative ${
-                isActive ? "text-[var(--color-brand)]" : "text-gray-400 hover:text-gray-700"
+              className={`flex flex-col items-center justify-center w-full h-full text-center transition-all duration-200 relative min-h-[52px] ${
+                isActive ? "text-brand" : "text-gray-400 hover:text-gray-700"
               }`}
+              aria-label={item.label}
             >
               <div
-                className={`relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ${
+                className={`relative flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${
                   isActive
-                    ? "bg-[var(--color-brand-light)] after:absolute after:-bottom-2 after:w-1 after:h-1 after:rounded-full after:bg-[var(--color-brand)]"
+                    ? "bg-brand-light after:absolute after:-bottom-1 after:w-1 after:h-1 after:rounded-full after:bg-brand"
                     : ""
                 }`}
               >
-                {true && item.label === "Cart" && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--color-brand)] text-[8px] font-bold text-white shadow-sm shadow-[var(--color-brand)]/30 px-1">
+                {item.label === "Cart" && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand text-[8px] font-bold text-white shadow-sm shadow-brand/30 px-1">
                     0
                   </span>
                 )}
@@ -48,7 +49,7 @@ export default function MobileBottomNav() {
                   size={20}
                   className={`transition-all duration-200 ${
                     isActive
-                      ? "stroke-[2.5px] text-[var(--color-brand)]"
+                      ? "stroke-[2.5px] text-brand"
                       : "stroke-[1.8]"
                   }`}
                 />
@@ -56,7 +57,7 @@ export default function MobileBottomNav() {
               <span
                 className={`text-[9px] mt-0.5 font-medium tracking-wide transition-all duration-200 ${
                   isActive
-                    ? "font-bold text-[var(--color-brand)]"
+                    ? "font-bold text-brand"
                     : "text-gray-400"
                 }`}
               >

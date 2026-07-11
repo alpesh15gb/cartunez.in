@@ -14,6 +14,7 @@ import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 
 import ProductActionsWrapper from "./product-actions-wrapper"
+import DeliveryEstimator from "@modules/products/components/delivery-estimator"
 import {
   Truck,
   ShieldCheck,
@@ -136,6 +137,11 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                   </div>
                   <p className="mt-1 text-[11px] text-gray-600 leading-relaxed">India&apos;s trusted destination for premium car &amp; bike accessories.</p>
                 </div>
+              </div>
+
+              {/* ── Delivery Estimator ── */}
+              <div className="mt-6">
+                <DeliveryEstimator />
               </div>
 
               <ProductOnboardingCta />

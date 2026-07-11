@@ -77,12 +77,12 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
                 leaveFrom="translate-x-0"
                 leaveTo="-translate-x-full"
               >
-                <PopoverPanel className="fixed left-0 top-0 z-[51] h-full w-[300px] sm:w-[360px] max-w-[85vw] bg-[var(--color-carbon-dark)] shadow-2xl shadow-black/50 border-r border-white/[0.06] flex flex-col" data-testid="nav-menu-popup">
+                <PopoverPanel className="fixed left-0 top-0 z-[51] h-full w-[320px] sm:w-[380px] max-w-[85vw] bg-carbon-dark shadow-2xl shadow-black/50 border-r border-white/[0.06] flex flex-col" data-testid="nav-menu-popup">
                   <div className="flex items-center justify-between px-6 h-16 border-b border-white/[0.06] shrink-0">
-                    <LocalizedClientLink href="/" onClick={close} className="text-lg font-black uppercase tracking-tighter text-white font-[var(--font-display)]">
-                      <span className="text-[var(--color-brand)]">Car</span>Tunez
+                    <LocalizedClientLink href="/" onClick={close} className="text-lg font-black uppercase tracking-tighter text-white font-display">
+                      <span className="text-brand">Car</span>Tunez
                     </LocalizedClientLink>
-                    <button data-testid="close-menu-button" onClick={close} className="flex items-center justify-center w-9 h-9 rounded-[var(--radius-sm)] text-gray-500 hover:text-white hover:bg-white/[0.06] transition-all duration-200">
+                    <button data-testid="close-menu-button" onClick={close} className="flex items-center justify-center w-10 h-10 rounded-[var(--radius-sm)] text-gray-500 hover:text-white hover:bg-white/[0.06] transition-all duration-200" aria-label="Close menu">
                       <XMark />
                     </button>
                   </div>
@@ -93,7 +93,7 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
                         return (
                           <li key={item.label}>
                             <LocalizedClientLink href={item.href} onClick={close} className="flex items-center gap-4 px-4 py-3.5 rounded-[var(--radius-sm)] text-base font-medium text-gray-400 hover:text-white hover:bg-white/[0.04] transition-all duration-200 group" data-testid={item.label.toLowerCase() + "-link"}>
-                              <span className="flex items-center justify-center w-9 h-9 rounded-[var(--radius-sm)] bg-white/[0.04] text-gray-500 group-hover:bg-[var(--color-brand)]/10 group-hover:text-[var(--color-brand)] transition-all duration-200">
+                              <span className="flex items-center justify-center w-10 h-10 rounded-[var(--radius-sm)] bg-white/[0.04] text-gray-500 group-hover:bg-brand/10 group-hover:text-brand transition-all duration-200">
                                 <Icon size={18} strokeWidth={1.5} />
                               </span>
                               <span>{item.label}</span>

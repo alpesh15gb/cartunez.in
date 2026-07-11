@@ -73,39 +73,37 @@ export default async function Footer() {
   const paymentMethods = ["Visa", "Mastercard", "UPI", "PayPal", "Amex"];
 
   return (
-    <footer className="bg-[var(--color-carbon-dark)] w-full text-gray-400">
-      {/* ─── Newsletter ──────────────────────────────────────────── */}
-      <div className="border-b border-white/[0.04]">
-        <div className="content-container py-12 sm:py-14 lg:py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-10 items-center">
-            <div className="space-y-3">
-              <span className="text-[10px] font-bold text-[var(--color-brand)] uppercase tracking-[0.2em] block font-[var(--font-display)]">
-                Stay in the loop
-              </span>
-              <h3 className="text-xl sm:text-2xl font-bold text-white font-[var(--font-display)] uppercase tracking-tight">
-                Drive into the <span className="text-[var(--color-brand)]">Latest</span>
-              </h3>
-              <p className="text-sm text-gray-500 max-w-md leading-relaxed">
-                Get exclusive access to new releases, limited drops, and build
-                tips straight to your inbox.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full h-11 sm:h-12 px-4 bg-white/[0.04] border border-white/[0.08] rounded-[var(--radius-sm)] text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-[var(--color-brand)] focus:ring-1 focus:ring-[var(--color-brand)] transition-all duration-200"
-                />
-              </div>
-              <button className="h-11 sm:h-12 px-6 bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white text-xs font-bold uppercase tracking-[0.12em] rounded-[var(--radius-sm)] transition-all duration-200 whitespace-nowrap shrink-0">
+    <footer className="bg-carbon-dark w-full border-t border-white/[0.04]">
+      {/* ─── Newsletter Section ──────────────────────────────────── */}
+      <div className="border-b border-white/[0.05]">
+        <div className="content-container py-12 lg:py-16">
+          <div className="max-w-3xl mx-auto text-center space-y-5">
+            <span className="text-[10px] font-bold text-brand uppercase tracking-[0.2em] font-display">
+              Stay Connected
+            </span>
+            <h3 className="text-2xl lg:text-3xl font-display font-black uppercase tracking-tight text-white">
+              Drive With <span className="text-brand">Style</span>
+            </h3>
+            <p className="text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
+              Get exclusive access to new arrivals, special offers, and fitment tips.
+            </p>
+            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 h-12 px-5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand/60 transition-all duration-200"
+                aria-label="Email for newsletter"
+              />
+              <button
+                type="submit"
+                className="h-12 px-8 bg-brand hover:bg-brand-dark text-white text-[11px] font-bold uppercase tracking-[0.15em] rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-brand/20 shrink-0"
+              >
                 Subscribe
               </button>
-            </div>
+            </form>
           </div>
         </div>
       </div>
-
       {/* ─── Main Links Grid ─────────────────────────────────────── */}
       <div className="border-b border-white/[0.04]">
         <div className="content-container py-12 lg:py-16">
@@ -182,7 +180,7 @@ export default async function Footer() {
 
             {/* Support */}
             <div className="space-y-4">
-              <span className="text-[10px] font-bold text-white uppercase tracking-[0.15em] block font-[var(--font-display)]">
+              <span className="text-[10px] font-bold text-white uppercase tracking-[0.15em] block font-display">
                 Support
               </span>
               <ul className="space-y-2.5">
@@ -196,6 +194,27 @@ export default async function Footer() {
                     </LocalizedClientLink>
                   </li>
                 ))}
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div className="space-y-4">
+              <span className="text-[10px] font-bold text-white uppercase tracking-[0.15em] block font-display">
+                Contact
+              </span>
+              <ul className="space-y-2.5">
+                <li className="text-xs text-gray-500 leading-relaxed">
+                  <span className="block text-white/60 font-medium mb-1">Address</span>
+                  Hyderabad, Telangana, India
+                </li>
+                <li className="text-xs text-gray-500 leading-relaxed">
+                  <span className="block text-white/60 font-medium mb-1">Phone</span>
+                  +91 8919298808
+                </li>
+                <li className="text-xs text-gray-500 leading-relaxed">
+                  <span className="block text-white/60 font-medium mb-1">Email</span>
+                  support@cartunez.in
+                </li>
               </ul>
             </div>
           </div>

@@ -11,6 +11,7 @@ import SideMenu from "@modules/layout/components/side-menu"
 import MegaMenu from "@modules/layout/components/mega-menu"
 import HeaderSearch from "@modules/layout/components/header-search"
 import AnnouncementBar from "@modules/layout/components/announcement-bar"
+import { Heart, User } from "lucide-react"
 
 export default async function Nav() {
   const [regions, locales, currentLocale, categories] = await Promise.all([
@@ -24,8 +25,8 @@ export default async function Nav() {
     <>
       <AnnouncementBar />
       <div className="sticky top-0 inset-x-0 z-50 group">
-        <header className="relative h-16 lg:h-20 mx-auto border-b duration-300 bg-white/95 border-gray-200/80 backdrop-blur-md text-gray-900 transition-shadow duration-300 shadow-xs">
-          <nav className="content-container flex items-center justify-between w-full h-full gap-x-6">
+        <header className="relative h-16 lg:h-[72px] mx-auto border-b duration-300 bg-white/95 border-gray-200/80 backdrop-blur-md text-gray-900 shadow-sm transition-shadow duration-300">
+          <nav className="content-container flex items-center justify-between w-full h-full gap-x-4 lg:gap-x-8">
             {/* Left: Mobile menu + Logo */}
             <div className="flex items-center gap-x-3 flex-1 lg:flex-initial">
               <div className="lg:hidden">
@@ -33,18 +34,21 @@ export default async function Nav() {
               </div>
               <LocalizedClientLink
                 href="/"
-                className="flex items-center gap-2 group"
+                className="flex items-center gap-2.5 group shrink-0"
                 data-testid="nav-store-link"
               >
-                <Image
-                  src="/logo.png"
-                  alt="Cartunez"
-                  width={36}
-                  height={36}
-                  className="h-9 w-9 object-contain rounded transition-transform duration-300 group-hover:scale-105"
-                  priority
-                />
-                <span className="hidden sm:inline text-xl lg:text-2xl font-black uppercase tracking-tighter text-gray-900 transition-colors duration-300 group-hover:text-brand">
+                <div className="relative">
+                  <Image
+                    src="/logo.png"
+                    alt="Cartunez"
+                    width={36}
+                    height={36}
+                    className="h-9 w-9 object-contain rounded transition-transform duration-300 group-hover:scale-105"
+                    priority
+                  />
+                  <div className="absolute -inset-1 bg-brand/10 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <span className="hidden sm:inline text-xl lg:text-[22px] font-black uppercase tracking-tighter text-gray-900 transition-colors duration-300 group-hover:text-brand leading-none">
                   <span className="text-brand">Car</span>Tunez
                 </span>
               </LocalizedClientLink>
@@ -56,7 +60,7 @@ export default async function Nav() {
             </div>
 
             {/* Right: Actions */}
-            <div className="flex items-center justify-end gap-x-2 lg:gap-x-4 flex-1">
+            <div className="flex items-center justify-end gap-x-1 lg:gap-x-1.5 flex-1">
               {/* Search trigger */}
               <div className="hidden sm:block">
                 <HeaderSearch />
@@ -69,10 +73,16 @@ export default async function Nav() {
                 aria-label="Account"
                 data-testid="nav-account-link"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
+                <User size={18} strokeWidth={1.5} />
+              </LocalizedClientLink>
+
+              {/* Wishlist icon */}
+              <LocalizedClientLink
+                href="/account/wishlist"
+                className="hidden sm:flex items-center justify-center w-10 h-10 rounded-[var(--radius-sm)] text-gray-500 hover:text-brand hover:bg-brand/5 transition-all duration-200"
+                aria-label="Wishlist"
+              >
+                <Heart size={18} strokeWidth={1.5} />
               </LocalizedClientLink>
 
               {/* Cart button */}

@@ -34,65 +34,86 @@ export default async function ProductPreview({
         />
 
         {/* Overlay gradient on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         {/* Discount Badge - top left */}
         {isOnSale && cheapestPrice?.percentage_diff && (
           <div
-            className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-red-600 to-red-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg shadow-red-600/20"
+            className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-brand to-brand-dark px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg shadow-brand/30"
             data-testid="discount-badge"
           >
-            Save {cheapestPrice.percentage_diff}%
+            -{cheapestPrice.percentage_diff}%
           </div>
         )}
 
         {/* Stock Indicator */}
         {!isOnSale && (
           <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-emerald-700 shadow-sm ring-1 ring-emerald-200/60">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse-soft" />
             In stock
           </div>
         )}
 
-        {/* Wishlist Heart Button */}
-        <div
-          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-gray-400 shadow-sm backdrop-blur-sm transition-all duration-200 hover:bg-white hover:text-[var(--color-brand)] hover:shadow-md hover:scale-110"
-          role="button"
-          aria-label="Add to wishlist"
-          tabIndex={0}
-          data-testid="wishlist-button"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            className="h-4 w-4 transition-all duration-200"
+        {/* Quick Action Buttons - visible on hover */}
+        <div className="absolute right-3 top-3 z-10 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+          {/* Wishlist Heart Button */}
+          <div
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-400 shadow-sm backdrop-blur-sm transition-all duration-200 hover:bg-white hover:text-brand hover:shadow-md hover:scale-110 cursor-pointer"
+            role="button"
+            aria-label="Add to wishlist"
+            tabIndex={0}
+            data-testid="wishlist-button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-            />
-          </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              className="h-4 w-4"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+            </svg>
+          </div>
+
+          {/* Quick Add to Cart */}
+          <div
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-400 shadow-sm backdrop-blur-sm transition-all duration-200 hover:bg-brand hover:text-white hover:shadow-md hover:scale-110 cursor-pointer"
+            role="button"
+            aria-label="Quick add to cart"
+            tabIndex={0}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-4 w-4">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+          </div>
         </div>
 
-        {/* Quick View overlay */}
-        <div className="absolute inset-x-3 bottom-3 z-10 translate-y-3 rounded-[var(--radius-sm)] bg-white/95 backdrop-blur-md px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-gray-900 opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-white">
-          Quick View
+        {/* Quick Add to Cart Bar (bottom of image) */}
+        <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-900 shadow-sm hover:bg-brand hover:text-white transition-colors duration-200">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+            Quick Add
+          </span>
         </div>
       </div>
 
       {/* ─── Info Section ────────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col justify-between gap-3 p-4 sm:p-5">
-        <div className="space-y-2">
+      <div className="flex flex-1 flex-col justify-between gap-2.5 p-4 sm:p-5">
+        <div className="space-y-1.5">
           {/* Brand Eyebrow */}
           <div className="flex items-center justify-between">
-            <span className="block text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--color-brand)] font-[var(--font-display)]">
+            <span className="block text-[9px] font-bold uppercase tracking-[0.18em] text-brand font-display">
               {((product.metadata || {}).brand as string) || "Cartunez"}
             </span>
-            {/* Rating placeholder */}
+            {/* Rating */}
             <div className="flex items-center gap-0.5">
               {[1, 2, 3, 4, 5].map((star) => (
                 <svg
@@ -111,13 +132,13 @@ export default async function ProductPreview({
                   />
                 </svg>
               ))}
-              <span className="text-[9px] text-gray-400 ml-1 font-medium">(0)</span>
+              <span className="text-[9px] text-gray-400 ml-1 font-medium">(4.0)</span>
             </div>
           </div>
 
           {/* Product Title */}
           <h3
-            className="line-clamp-2 min-h-[40px] text-sm font-bold leading-snug text-gray-900 transition-colors duration-200 group-hover:text-[var(--color-brand)]"
+            className="line-clamp-2 min-h-[38px] text-sm font-bold leading-snug text-gray-900 transition-colors duration-200 group-hover:text-brand"
             data-testid="product-title"
           >
             {product.title}
@@ -136,7 +157,7 @@ export default async function ProductPreview({
           <div className="flex items-end justify-between gap-3">
             <div className="flex flex-col">
               {hasMultipleVariants && cheapestPrice && (
-                <span className="mb-0.5 text-[8px] font-semibold uppercase tracking-wider text-gray-400 font-[var(--font-display)]">
+                <span className="mb-0.5 text-[8px] font-semibold uppercase tracking-wider text-gray-400 font-display">
                   From
                 </span>
               )}
@@ -144,7 +165,7 @@ export default async function ProductPreview({
             </div>
 
             {/* Fitment Badge */}
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gray-50 px-2.5 py-1 text-[8px] font-bold uppercase tracking-widest text-gray-500 ring-1 ring-gray-200 font-[var(--font-display)]">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gray-50 px-2.5 py-1 text-[8px] font-bold uppercase tracking-widest text-gray-500 ring-1 ring-gray-200 font-display">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
                 <circle cx="12" cy="10" r="3" />

@@ -111,12 +111,12 @@ export default function HeaderSearch() {
       {/* Overlay */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] sm:pt-[15vh]"
+          className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] sm:pt-[12vh]"
           data-testid="search-overlay"
         >
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
             onClick={closeModal}
             aria-hidden="true"
           />

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { ChevronDown } from "lucide-react"
@@ -10,6 +10,7 @@ interface Category {
   id: string
   name: string
   handle: string
+  parent_category?: Category | null
   category_children?: Category[]
 }
 
@@ -19,18 +20,18 @@ interface MegaMenuProps {
 
 /* ── Dropdown animation variants ── */
 const dropdownVariants: Variants = {
-  hidden: { opacity: 0, y: 6, scaleY: 0.96, transformOrigin: "top" },
+  hidden: { opacity: 0, y: 8, scaleY: 0.97, transformOrigin: "top" },
   visible: {
     opacity: 1,
     y: 0,
     scaleY: 1,
-    transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] as const },
   },
   exit: {
     opacity: 0,
     y: -4,
-    scaleY: 0.96,
-    transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
+    scaleY: 0.97,
+    transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] as const },
   },
 }
 
@@ -106,12 +107,25 @@ const MOCK_CHILDREN: Record<string, Category[]> = {
 export default function MegaMenu({ categories }: MegaMenuProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const params = useParams()
-  const countryCodeStr = (params?.countryCode as string) || ""
-  const parentCategories = categories.filter(
-    (cat) =>
-      !(cat as unknown as Record<string, unknown>).parent_category_id &&
-      !(cat as unknown as Record<string, unknown>).parent_category
-  )
+  const countryCodeStr = typeof params?.countryCode === "string" ? params.countryCode : ""
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleMouseEnter = (handle: string) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setActiveCategory(handle)
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => setActiveCategory(null), 150)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
+
+  const topLevelCategories = categories?.filter((c) => !c.parent_category) ?? []
 
   return (
     <nav className="hidden md:flex items-center gap-x-0.5 h-full" data-testid="mega-menu">
@@ -123,17 +137,17 @@ export default function MegaMenu({ categories }: MegaMenuProps) {
         All Products
       </Link>
 
-      {parentCategories.slice(0, 5).map((category) => {
+      {topLevelCategories.slice(0, 5).map((category) => {
         const customChildren = MOCK_CHILDREN[category.handle]
         const hasChildren = customChildren && customChildren.length > 0
-        const isHovered = activeCategory === category.id
+        const isHovered = activeCategory === category.handle
 
         return (
           <div
             key={category.id}
             className="relative h-full flex items-center"
-            onMouseEnter={() => hasChildren && setActiveCategory(category.id)}
-            onMouseLeave={() => setActiveCategory(null)}
+            onMouseEnter={() => handleMouseEnter(category.handle)}
+            onMouseLeave={handleMouseLeave}
           >
             <Link
               href={`/${countryCodeStr}/categories/${category.handle}`}
