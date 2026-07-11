@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { Suspense } from "react"
+import { HttpTypes } from "@medusajs/types"
 
 import Hero from "@modules/home/components/hero"
 import FeaturedCategories from "@modules/home/components/featured-categories"
@@ -21,7 +22,13 @@ export const metadata: Metadata = {
     "Upgrade your ride with premium automotive accessories. Premium quality car mats, LED headlights, Android stereo systems, seat covers & more at Cartunez.",
 }
 
-async function FeaturedProductsSection({ region, collections }: { region: Record<string, unknown>; collections: Array<Record<string, unknown>> }) {
+async function FeaturedProductsSection({
+  region,
+  collections,
+}: {
+  region: HttpTypes.StoreRegion
+  collections: HttpTypes.StoreCollection[]
+}) {
   return (
     <div className="bg-white py-12">
       <ul className="flex flex-col gap-y-6">
