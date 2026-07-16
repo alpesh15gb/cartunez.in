@@ -3,7 +3,7 @@
 import Image from "next/image"
 import React, { useState, useEffect, useRef, useCallback } from "react"
 import { sdk } from "@lib/config"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Search, Loader2, X } from "lucide-react"
 
 interface SearchResult {
@@ -20,6 +20,8 @@ export default function HeaderSearch() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  const params = useParams()
+  const countryCode = typeof params?.countryCode === "string" ? params.countryCode : ""
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -74,17 +76,31 @@ export default function HeaderSearch() {
     }
   }, [])
 
+  useEffect(() => {
+    const searchTerm = query.trim()
+
+    if (!searchTerm) {
+      setResults([])
+      setLoading(false)
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      handleSearch(searchTerm)
+    }, 250)
+
+    return () => window.clearTimeout(timer)
+  }, [query, handleSearch])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value
-    setQuery(val)
-    handleSearch(val)
+    setQuery(e.target.value)
   }
 
   const handleSelect = (handle: string) => {
     setIsModalOpen(false)
     setQuery("")
     setResults([])
-    router.push(`/products/${handle}`)
+    router.push(countryCode ? `/${countryCode}/products/${handle}` : `/products/${handle}`)
   }
 
   const openModal = () => {
@@ -234,5 +250,4 @@ export default function HeaderSearch() {
     </>
   )
 }
-
 

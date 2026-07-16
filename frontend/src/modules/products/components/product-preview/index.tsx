@@ -20,7 +20,7 @@ export default async function ProductPreview({
   return (
     <LocalizedClientLink
       href={`/products/${product.handle}`}
-      className="group relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-[var(--radius-lg)] border border-gray-200 bg-white shadow-[var(--shadow-card)] transition-all duration-500 hover:-translate-y-1.5 hover:border-[var(--color-brand)]/15 hover:shadow-[var(--shadow-card-hover)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/15"
+      className="group relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-[var(--radius-md)] border border-gray-200 bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:border-brand/20 hover:shadow-[var(--shadow-card-hover)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/15"
       data-testid="product-link"
     >
       {/* ─── Image Container - 4:5 cinematic ─────────────────────── */}
@@ -55,7 +55,7 @@ export default async function ProductPreview({
         )}
 
         {/* Quick Action Buttons - visible on hover */}
-        <div className="absolute right-3 top-3 z-10 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+        <div className="hidden">
           {/* Wishlist Heart Button */}
           <div
             className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-400 shadow-sm backdrop-blur-sm transition-all duration-200 hover:bg-white hover:text-brand hover:shadow-md hover:scale-110 cursor-pointer"
@@ -95,12 +95,12 @@ export default async function ProductPreview({
         </div>
 
         {/* Quick Add to Cart Bar (bottom of image) */}
-        <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <span className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-900 shadow-sm hover:bg-brand hover:text-white transition-colors duration-200">
+        <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+          <span className="inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-white px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-gray-900 shadow-sm transition-colors duration-200 group-hover:bg-brand group-hover:text-white">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />
             </svg>
-            Quick Add
+            View Details
           </span>
         </div>
       </div>

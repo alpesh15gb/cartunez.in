@@ -122,7 +122,7 @@ const ShippingInfoTab = () => {
     {
       icon: <Truck size={18} />,
       title: "Free Express Shipping",
-      desc: "Free shipping on all orders above ?999. Delivered within 3-7 business days across India.",
+      desc: "Free shipping on all orders above Rs. 999. Delivered within 3-7 business days across India.",
     },
     {
       icon: <RotateCcw size={18} />,

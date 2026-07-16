@@ -1,12 +1,13 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useEffect, useState } from "react"
+import Link from "next/link"
 import { X, ChevronRight, Truck, ShieldCheck, Headphones } from "lucide-react"
 
 const announcements = [
-  { text: "Free Shipping on all orders above ₹999", icon: Truck },
-  { text: "Professional Fitment Available at Select Locations", icon: Headphones },
-  { text: "EMI Options Available on All Orders Above ₹5,000", icon: ShieldCheck },
+  { text: "Free shipping on all orders above Rs. 999", icon: Truck },
+  { text: "Professional fitment available at select locations", icon: Headphones },
+  { text: "EMI options available on orders above Rs. 5,000", icon: ShieldCheck },
 ]
 
 export default function AnnouncementBar() {
@@ -14,10 +15,11 @@ export default function AnnouncementBar() {
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    const t = setInterval(() => {
+    const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % announcements.length)
     }, 5000)
-    return () => clearInterval(t)
+
+    return () => clearInterval(timer)
   }, [])
 
   if (dismissed) return null
@@ -25,39 +27,43 @@ export default function AnnouncementBar() {
   const CurrentIcon = announcements[currentIndex].icon
 
   return (
-    <div className="relative bg-gradient-to-r from-gray-900 via-brand/95 to-gray-900 text-white overflow-hidden select-none">
-      {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:16px_16px]" />
-      
-      <div className="content-container relative flex items-center justify-between h-[38px]">
-        <div className="flex-1 text-center">
+    <div className="relative overflow-hidden bg-gray-950 text-white select-none">
+      <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:16px_16px]" />
+
+      <div className="content-container relative flex h-[38px] items-center justify-between gap-4">
+        <div className="hidden md:flex items-center gap-5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/55">
+          <Link href="/support" className="transition-colors hover:text-white">Contact Us</Link>
+          <Link href="/returns" className="transition-colors hover:text-white">Returns</Link>
+          <Link href="/book-installation" className="transition-colors hover:text-white">Installation</Link>
+        </div>
+
+        <div className="min-w-0 flex-1 text-center">
           <p
             key={currentIndex}
-            className="inline-flex items-center gap-2 text-[11px] font-medium tracking-wide animate-fade-in-down"
+            className="inline-flex max-w-full items-center gap-2 truncate text-[11px] font-semibold tracking-wide animate-fade-in-down"
           >
-            <CurrentIcon size={13} className="text-brand-light shrink-0" strokeWidth={2} />
-            <span>{announcements[currentIndex].text}</span>
-            <ChevronRight size={12} className="text-brand-light/60 hidden sm:inline-block" strokeWidth={2} />
+            <CurrentIcon size={13} className="shrink-0 text-brand-light" strokeWidth={2} />
+            <span className="truncate">{announcements[currentIndex].text}</span>
+            <ChevronRight size={12} className="hidden shrink-0 text-brand-light/60 sm:inline-block" strokeWidth={2} />
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0 ml-3">
-          {/* Dots */}
-          <div className="flex items-center gap-1.5">
+
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="hidden sm:flex items-center gap-1.5">
             {announcements.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                  idx === currentIndex ? "bg-white w-3" : "bg-white/30 hover:bg-white/50"
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  idx === currentIndex ? "w-3 bg-white" : "w-1.5 bg-white/30 hover:bg-white/50"
                 }`}
                 aria-label={`Show announcement ${idx + 1}`}
               />
             ))}
           </div>
-          {/* Close */}
           <button
             onClick={() => setDismissed(true)}
-            className="ml-2 p-1 text-white/40 hover:text-white transition-colors rounded-sm hover:bg-white/10"
+            className="rounded-sm p-1 text-white/40 transition-colors hover:bg-white/10 hover:text-white"
             aria-label="Dismiss announcement"
           >
             <X size={11} />

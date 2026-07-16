@@ -127,6 +127,18 @@
     hover:shadow-[var(--shadow-card-hover)] hover:border-brand/15 hover:-translate-y-1;
   }
 
+  .label {
+    @apply text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500;
+  }
+
+  .select-dark {
+    @apply h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-900 transition-all duration-200 hover:border-gray-300 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .input-range {
+    @apply h-8 w-full cursor-pointer accent-brand;
+  }
+
   /* Safe area for mobile */
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);

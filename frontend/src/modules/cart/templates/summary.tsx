@@ -63,7 +63,7 @@ const Summary = ({ cart }: SummaryProps) => {
         </div>
         <div className="flex items-center gap-1.5 text-[11px] text-gray-400">
           <Truck size={12} className="text-gray-400" />
-          <span>Free shipping over $100</span>
+          <span>Free shipping over Rs. 999</span>
         </div>
         <div className="flex items-center gap-1.5 text-[11px] text-gray-400">
           <RotateCcw size={12} className="text-gray-400" />

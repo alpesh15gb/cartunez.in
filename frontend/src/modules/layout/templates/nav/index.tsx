@@ -62,7 +62,7 @@ export default async function Nav() {
             {/* Right: Actions */}
             <div className="flex items-center justify-end gap-x-1 lg:gap-x-1.5 flex-1">
               {/* Search trigger */}
-              <div className="hidden sm:block">
+              <div className="block">
                 <HeaderSearch />
               </div>
 

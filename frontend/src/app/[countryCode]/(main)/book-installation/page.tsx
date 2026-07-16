@@ -90,18 +90,19 @@ export default function BookInstallationPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-        customer_name: name.trim(),
-        customer_email: email.trim(),
-        customer_phone: phone.trim(),
-        service_type: serviceType,
-        preferred_date: preferredDate,
-        preferred_time: preferredTime,
-        address: address.trim(),
-        city: city.trim(),
-        vehicle_make: makeName,
-        vehicle_model: modelName,
-        notes: notes.trim(),
-      })}
+          customer_name: name.trim(),
+          customer_email: email.trim(),
+          customer_phone: phone.trim(),
+          service_type: serviceType,
+          preferred_date: preferredDate,
+          preferred_time: preferredTime,
+          address: address.trim(),
+          city: city.trim(),
+          vehicle_make: makeName,
+          vehicle_model: modelName,
+          notes: notes.trim(),
+        }),
+      })
       if (!res.ok) throw new Error("Failed")
       setSuccess("Your installation service booking has been requested successfully! Our crew will call to confirm.")
       setName("")

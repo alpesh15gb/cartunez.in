@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -53,7 +54,7 @@ export default function TermsOfServicePage() {
 
           <h2 className="text-xl font-display font-bold text-gray-900 uppercase tracking-wide">7. Returns &amp; Refunds</h2>
           <p>
-            Our Return &amp; Exchange Policy is incorporated into these Terms by reference. Please refer to our <a href="/returns" className="text-brand hover:underline">Returns Policy</a> for detailed information.
+            Our Return &amp; Exchange Policy is incorporated into these Terms by reference. Please refer to our <Link href="/returns" className="text-brand hover:underline">Returns Policy</Link> for detailed information.
           </p>
 
           <h2 className="text-xl font-display font-bold text-gray-900 uppercase tracking-wide">8. Intellectual Property</h2>

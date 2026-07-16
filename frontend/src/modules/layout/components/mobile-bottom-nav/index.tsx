@@ -12,7 +12,7 @@ export default function MobileBottomNav() {
 
   const navItems = [
     { label: "Home", href: `/${countryCode}`, icon: Home },
-    { label: "Search", href: `/${countryCode}/search`, icon: Search },
+    { label: "Search", href: `/${countryCode}/store`, icon: Search },
     { label: "Store", href: `/${countryCode}/store`, icon: ShoppingBag },
     { label: "Account", href: `/${countryCode}/account`, icon: User },
     { label: "Cart", href: `/${countryCode}/cart`, icon: ShoppingCart },

@@ -2,135 +2,92 @@
 
 import React from "react"
 import Link from "next/link"
-import { Monitor, Sun, Grid3x3, Lightbulb, Sofa, Circle, ArrowRight } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 const categories = [
   {
-    name: "Android Stereos",
-    description: "Smart CarPlay & Android Auto displays with OEM-grade integration.",
-    icon: Monitor,
-    href: "/categories/android-stereos",
-    gradient: "from-blue-500/15 via-blue-500/5 to-transparent",
-    accent: "bg-blue-500",
-    ring: "ring-blue-500/20 group-hover:ring-blue-500/40",
+    name: "Interior",
+    description: "Cabin upgrades, mats, lighting, seat comfort and daily-use accessories.",
+    href: "/store?category=interior",
+    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1400&auto=format&fit=crop",
   },
   {
-    name: "Ambient Lighting",
-    description: "Custom interior LED kits with app control and music sync.",
-    icon: Sun,
-    href: "/categories/ambient-lighting",
-    gradient: "from-amber-400/15 via-amber-400/5 to-transparent",
-    accent: "bg-amber-400",
-    ring: "ring-amber-400/20 group-hover:ring-amber-400/40",
+    name: "Exterior",
+    description: "Lighting, styling, protection and road-ready exterior enhancements.",
+    href: "/store?category=exterior",
+    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1400&auto=format&fit=crop",
   },
   {
-    name: "Floor Mats",
-    description: "Precision-cut 7D all-weather protection for your exact model.",
-    icon: Grid3x3,
-    href: "/categories/floor-mats",
-    gradient: "from-emerald-500/15 via-emerald-500/5 to-transparent",
-    accent: "bg-emerald-500",
-    ring: "ring-emerald-500/20 group-hover:ring-emerald-500/40",
+    name: "Wheels",
+    description: "Alloy wheels, fitment-led upgrades and premium stance products.",
+    href: "/store?category=wheels",
+    image: "https://images.unsplash.com/photo-1617814076668-9d7cc7e8ca43?q=80&w=1400&auto=format&fit=crop",
   },
-  {
-    name: "LED Lights",
-    description: "High-performance LED headlights, fog lights & interior bulbs.",
-    icon: Lightbulb,
-    href: "/categories/led-lights",
-    gradient: "from-yellow-500/15 via-yellow-400/5 to-transparent",
-    accent: "bg-yellow-500",
-    ring: "ring-yellow-500/20 group-hover:ring-yellow-500/40",
-  },
-  {
-    name: "Seat Covers",
-    description: "Premium leatherette and fabric covers tailored to your seats.",
-    icon: Sofa,
-    href: "/categories/seat-covers",
-    gradient: "from-rose-500/15 via-rose-400/5 to-transparent",
-    accent: "bg-rose-500",
-    ring: "ring-rose-500/20 group-hover:ring-rose-500/40",
-  },
-  {
-    name: "Steering Wheels",
-    description: "Sports and premium steering wheels with custom stitch options.",
-    icon: Circle,
-    href: "/categories/steering-wheels",
-    gradient: "from-violet-500/15 via-violet-400/5 to-transparent",
-    accent: "bg-violet-500",
-    ring: "ring-violet-500/20 group-hover:ring-violet-500/40",
-  },
+]
+
+const quickCategories = [
+  { name: "Android Stereos", href: "/categories/android-stereos" },
+  { name: "Ambient Lighting", href: "/categories/ambient-lighting" },
+  { name: "Floor Mats", href: "/categories/floor-mats" },
+  { name: "LED Lights", href: "/categories/led-lights" },
+  { name: "Seat Covers", href: "/categories/seat-covers" },
+  { name: "Steering Wheels", href: "/categories/steering-wheels" },
 ]
 
 const FeaturedCategories = () => {
   return (
-    <section className="relative bg-gradient-to-b from-white via-gray-50/50 to-white border-t border-gray-100 py-24 sm:py-28">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(201,28,28,0.04),transparent_60%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(201,28,28,0.03),transparent_60%)] pointer-events-none" />
-
-      <div className="content-container relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-          <div className="space-y-4">
-            <span className="eyebrow">Shop by Category</span>
-            <h2
-              className="font-display font-black uppercase text-gray-900 leading-none"
-              style={{ fontSize: "clamp(36px, 4vw, 56px)", letterSpacing: "-0.02em" }}
-            >
-              Find Your
-              <br />
-              <span className="text-brand">Perfect Fit</span>
+    <section className="relative border-t border-gray-100 bg-white py-14 sm:py-16 lg:py-20">
+      <div className="content-container">
+        <div className="mb-8 flex flex-col gap-4 border-b border-gray-100 pb-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <span className="eyebrow">Shop Our Exclusive Range</span>
+            <h2 className="mt-3 font-display text-4xl font-black uppercase leading-none tracking-tight text-gray-950 sm:text-5xl">
+              Premium Car Accessories
             </h2>
           </div>
-          <p className="text-sm text-gray-500 max-w-xs font-medium leading-relaxed">
-            Premium automotive accessories curated and verified for your specific vehicle.
+          <p className="max-w-md text-sm font-medium leading-6 text-gray-500">
+            Browse the same way serious automotive shoppers do: by interior, exterior, wheels, and fitment-led upgrades.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
-          {categories.map((cat) => {
-            const Icon = cat.icon
-            return (
-              <Link
-                key={cat.name}
-                href={cat.href}
-                className="group relative flex flex-col items-center text-center bg-white rounded-[var(--radius-lg)] border border-gray-200/80 p-6 sm:p-7
-                           transition-all duration-500 ease-out
-                           hover:-translate-y-2 hover:border-brand/15 hover:shadow-[var(--shadow-card-hover)]"
-              >
-                <span className={`absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-0 rounded-full ${cat.accent}
-                                  transition-all duration-500 ease-out group-hover:w-3/4`} />
-
-                <div
-                  className={`relative mb-5 flex h-16 w-16 items-center justify-center rounded-[var(--radius-md)]
-                              bg-gradient-to-br ${cat.gradient} bg-white
-                              ring-1 ${cat.ring} ring-gray-900/5
-                              transition-all duration-500 ease-out
-                              group-hover:shadow-lg group-hover:scale-105`}
-                >
-                  <Icon
-                    size={28}
-                    className="text-gray-700 transition-colors duration-500 ease-out group-hover:text-brand"
-                    strokeWidth={1.5}
-                  />
-                </div>
-
-                <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 mb-2 transition-colors duration-300 group-hover:text-brand">
-                  {cat.name}
+        <div className="grid gap-5 lg:grid-cols-3">
+          {categories.map((category) => (
+            <Link
+              key={category.name}
+              href={category.href}
+              className="group relative min-h-[360px] overflow-hidden rounded-[var(--radius-md)] bg-gray-950 shadow-[var(--shadow-card)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
+            >
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                style={{ backgroundImage: `url('${category.image}')` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/5" />
+              <div className="absolute inset-x-0 bottom-0 p-6 sm:p-7">
+                <h3 className="font-display text-4xl font-black uppercase leading-none tracking-tight text-white">
+                  {category.name}
                 </h3>
-
-                <p className="text-[11px] text-gray-500 font-medium leading-relaxed mb-5 line-clamp-2">
-                  {cat.description}
+                <p className="mt-3 max-w-sm text-sm font-medium leading-6 text-white/72">
+                  {category.description}
                 </p>
-
-                <span className="mt-auto inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em]
-                                 text-brand/0 group-hover:text-brand
-                                 translate-y-1 group-hover:translate-y-0
-                                 transition-all duration-500 ease-out">
+                <span className="mt-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white transition-colors group-hover:text-brand-light">
                   Shop Now
-                  <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
                 </span>
-              </Link>
-            )
-          })}
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {quickCategories.map((category) => (
+            <Link
+              key={category.name}
+              href={category.href}
+              className="flex min-h-14 items-center justify-center rounded-[var(--radius-sm)] border border-gray-200 bg-gray-50 px-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-gray-700 transition-all hover:border-brand/30 hover:bg-brand-light hover:text-brand"
+            >
+              {category.name}
+            </Link>
+          ))}
         </div>
       </div>
     </section>

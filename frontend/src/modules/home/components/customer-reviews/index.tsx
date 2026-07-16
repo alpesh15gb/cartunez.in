@@ -12,6 +12,15 @@ interface Review {
   text: string
 }
 
+interface ApiReview {
+  id?: string
+  customer_name?: string
+  is_approved?: boolean
+  rating?: number
+  content?: string
+  title?: string
+}
+
 const CustomerReviews = () => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [reviews, setReviews] = useState<Review[]>([])
@@ -28,14 +37,14 @@ const CustomerReviews = () => {
         
         if (!response.ok) throw new Error("Failed to fetch reviews")
         
-        const data = await response.json()
+        const data = (await response.json()) as { reviews?: ApiReview[] }
         
         // Filter and limit to 6 most recent
         const recentReviews = (data.reviews || [])
-          .filter((r: any) => r.is_approved !== false)
+          .filter((r) => r.is_approved !== false)
           .slice(0, 6)
-          .map((r: any) => ({
-            id: r.id,
+          .map((r, index) => ({
+            id: r.id || `review-${index}`,
             name: r.customer_name || "Anonymous",
             avatar: (r.customer_name || "A")
               .split(" ")

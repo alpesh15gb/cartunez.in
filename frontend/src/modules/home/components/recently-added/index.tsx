@@ -23,7 +23,7 @@ export default async function RecentlyAdded({
   }
 
   return (
-    <section className="bg-white border-t border-gray-100 py-20">
+    <section className="bg-white border-t border-gray-100 py-16 lg:py-20">
       <div className="content-container">
         {/* Section header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">

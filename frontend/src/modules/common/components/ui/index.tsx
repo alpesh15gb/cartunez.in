@@ -88,7 +88,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           variant === "transparent" && "bg-transparent text-gray-700 hover:bg-gray-100",
           size === "small" && "h-8 px-3 text-sm",
           size === "medium" && "h-10 px-4",
-          size === "large" && "h-12 px-6 text-lg",
+          size === "large" && "h-12 px-6 text-sm",
           className
         )}
         {...props}
