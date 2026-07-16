@@ -1,8 +1,8 @@
 "use client"
 
 import React from "react"
-import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 const categories = [
   {
@@ -52,7 +52,7 @@ const FeaturedCategories = () => {
 
         <div className="grid gap-5 lg:grid-cols-3">
           {categories.map((category) => (
-            <Link
+            <LocalizedClientLink
               key={category.name}
               href={category.href}
               className="group relative min-h-[360px] overflow-hidden rounded-[var(--radius-md)] bg-gray-950 shadow-[var(--shadow-card)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
@@ -74,19 +74,19 @@ const FeaturedCategories = () => {
                   <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
                 </span>
               </div>
-            </Link>
+            </LocalizedClientLink>
           ))}
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {quickCategories.map((category) => (
-            <Link
+            <LocalizedClientLink
               key={category.name}
               href={category.href}
               className="flex min-h-14 items-center justify-center rounded-[var(--radius-sm)] border border-gray-200 bg-gray-50 px-3 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-gray-700 transition-all hover:border-brand/30 hover:bg-brand-light hover:text-brand"
             >
               {category.name}
-            </Link>
+            </LocalizedClientLink>
           ))}
         </div>
       </div>

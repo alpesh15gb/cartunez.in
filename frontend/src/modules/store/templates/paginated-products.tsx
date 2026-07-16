@@ -66,7 +66,10 @@ export default async function PaginatedProducts({
     queryParams["order"] = "created_at"
   }
 
-  const region = await getRegion(countryCode)
+  const region = await getRegion(countryCode).catch((error) => {
+    console.error("[PaginatedProducts] Failed to load region:", error)
+    return null
+  })
 
   if (!region) {
     return null
@@ -86,6 +89,9 @@ export default async function PaginatedProducts({
     make,
     model,
     year,
+  }).catch((error) => {
+    console.error("[PaginatedProducts] Failed to load products:", error)
+    return { response: { products: [], count: 0 }, nextPage: null }
   })
 
   const totalPages = Math.ceil(count / PRODUCT_LIMIT)

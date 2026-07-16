@@ -1,6 +1,6 @@
-import { listProducts } from "@lib/data/products"
+﻿import { listProducts } from "@lib/data/products"
 import { HttpTypes } from "@medusajs/types"
-import Link from "next/link"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import ProductPreview from "@modules/products/components/product-preview"
 
 export default async function ProductRail({
@@ -10,15 +10,21 @@ export default async function ProductRail({
   collection: HttpTypes.StoreCollection
   region: HttpTypes.StoreRegion
 }) {
-  const {
-    response: { products: pricedProducts },
-  } = await listProducts({
-    regionId: region.id,
-    queryParams: {
-      collection_id: collection.id,
-      fields: "*variants.calculated_price",
-    },
-  })
+  let pricedProducts: HttpTypes.StoreProduct[] = []
+
+  try {
+    const result = await listProducts({
+      regionId: region.id,
+      queryParams: {
+        collection_id: collection.id,
+        fields: "*variants.calculated_price",
+      },
+    })
+    pricedProducts = result.response.products
+  } catch (error) {
+    console.error("[ProductRail] Failed to load collection products:", error)
+    return null
+  }
 
   if (!pricedProducts || pricedProducts.length === 0) {
     return null
@@ -38,17 +44,15 @@ export default async function ProductRail({
             </h2>
             <div className="w-10 h-[3px] bg-[var(--color-brand)] mt-3" />
           </div>
-          <Link
+          <LocalizedClientLink
             href={`/collections/${collection.handle}`}
-            className="group inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest
-                       text-gray-400 hover:text-[var(--color-brand)] transition-all duration-300 border-b border-transparent hover:border-[var(--color-brand)]/30 pb-0.5"
+            className="group inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-gray-400 hover:text-[var(--color-brand)] transition-all duration-300 border-b border-transparent hover:border-[var(--color-brand)]/30 pb-0.5"
           >
             <span>View All</span>
-            <span className="inline-block transition-transform duration-300 group-hover:translate-x-1.5 group-hover:-translate-y-0.5">→</span>
-          </Link>
+            <span className="inline-block transition-transform duration-300 group-hover:translate-x-1.5">-&gt;</span>
+          </LocalizedClientLink>
         </div>
 
-        {/* Product grid */}
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
           {pricedProducts.map((product) => (
             <li key={product.id}>

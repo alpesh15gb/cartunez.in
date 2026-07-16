@@ -42,12 +42,16 @@ const PaymentBadge = ({ label }: { label: string }) => (
 /* ─── Main Footer Component ───────────────────────────────────── */
 
 export default async function Footer() {
-  const { collections } = await listCollections({
-    fields: "*products",
-  });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  void collections;
-  const productCategories = await listCategories();
+  let productCategories: Awaited<ReturnType<typeof listCategories>> = [];
+
+  try {
+    await listCollections({
+      fields: "*products",
+    });
+    productCategories = await listCategories();
+  } catch (error) {
+    console.error("[Footer] Failed to load navigation data:", error);
+  }
 
   const quickLinks = [
     { label: "Home", href: "/" },
