@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || process.env.FASTAPI_BACKEND_URL || 'https://api.cartunez.in'
+const FASTAPI_URL = process.env.FASTAPI_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'https://api.cartunez.in'
 
 const fallbackReviews = [
   { id: '1', customer_name: 'Rajesh Kumar', rating: 5, is_approved: true, content: 'Amazing quality and perfect fit. The installation was smooth and the customer service was excellent!', created_at: new Date().toISOString() },
