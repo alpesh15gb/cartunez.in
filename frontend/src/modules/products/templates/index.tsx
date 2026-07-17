@@ -52,7 +52,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         >
           {/* ── Left: Image Gallery ── */}
           <div className="min-w-0">
-            <ImageGallery images={images} />
+            <ImageGallery images={images} productTitle={product.title} />
           </div>
 
           {/* ── Right: Sticky Info Panel ── */}

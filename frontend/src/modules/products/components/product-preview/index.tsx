@@ -28,6 +28,7 @@ export default async function ProductPreview({
         <Thumbnail
           thumbnail={product.thumbnail}
           images={product.images}
+          productTitle={product.title}
           size="full"
           isFeatured={isFeatured}
           className="h-full w-full rounded-none border-none bg-transparent p-0 shadow-none"

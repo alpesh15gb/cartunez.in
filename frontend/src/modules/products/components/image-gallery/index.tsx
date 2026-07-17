@@ -4,13 +4,15 @@ import { HttpTypes } from "@medusajs/types"
 import Image from "next/image"
 import { useMemo, useState, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ImageIcon, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react"
+import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react"
+import { AutomotiveFallback } from "@modules/products/components/thumbnail"
 
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
+  productTitle?: string | null
 }
 
-const ImageGallery = ({ images }: ImageGalleryProps) => {
+const ImageGallery = ({ images, productTitle }: ImageGalleryProps) => {
   const galleryImages = useMemo(
     () => images.filter((image) => Boolean(image.url)),
     [images]
@@ -31,11 +33,8 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
 
   if (!galleryImages.length) {
     return (
-      <div className="relative flex aspect-square min-h-[400px] w-full items-center justify-center overflow-hidden rounded-3xl border border-gray-200 bg-gray-50">
-        <div className="flex flex-col items-center gap-3 text-gray-400">
-          <ImageIcon size={48} strokeWidth={1.5} />
-          <span className="text-xs font-bold uppercase tracking-widest">No images available</span>
-        </div>
+      <div className="relative aspect-square min-h-[400px] w-full overflow-hidden rounded-3xl border border-gray-200 bg-gray-50 shadow-lg">
+        <AutomotiveFallback productTitle={productTitle} />
       </div>
     )
   }
