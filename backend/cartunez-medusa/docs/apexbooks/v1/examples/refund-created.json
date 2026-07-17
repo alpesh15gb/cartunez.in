@@ -1,0 +1,43 @@
+{
+  "contract_version": "v1",
+  "event_id": "evt_medusa_refund_001",
+  "event_type": "payment.refunded",
+  "occurred_at": "2026-07-17T12:00:00.000Z",
+  "idempotency_key": "payment.refunded:refund:refund_01",
+  "refund": {
+    "apexbooks_refund_id": null,
+    "medusa_refund_id": "refund_01",
+    "medusa_order_id": "order_01",
+    "original_invoice": {
+      "apexbooks_invoice_id": "ab_inv_001",
+      "invoice_number": "INV-2026-0001",
+      "invoice_date": "2026-07-17"
+    },
+    "amount": { "currency_code": "inr", "amount": 449900 },
+    "line_items": [
+      {
+        "medusa_line_item_id": "item_01",
+        "apexbooks_item_id": "ab_item_7d_mat",
+        "quantity": 1,
+        "unit_price": { "currency_code": "inr", "amount": 499900 },
+        "refund_subtotal": { "currency_code": "inr", "amount": 449900 },
+        "taxes": {
+          "hsn_sac": "87089900",
+          "gst_rate": 1800,
+          "taxable_value": { "currency_code": "inr", "amount": 381271 },
+          "tax_amount": { "currency_code": "inr", "amount": 68629 },
+          "cgst": { "currency_code": "inr", "amount": 34315 },
+          "sgst": { "currency_code": "inr", "amount": 34314 },
+          "igst": { "currency_code": "inr", "amount": 0 },
+          "cess": { "currency_code": "inr", "amount": 0 },
+          "discount_allocation": { "currency_code": "inr", "amount": 50000 }
+        },
+        "restock": true,
+        "reason": "Customer return"
+      }
+    ],
+    "refund_tax_total": { "currency_code": "inr", "amount": 68629 },
+    "refund_total": { "currency_code": "inr", "amount": 449900 },
+    "reason": "Customer return"
+  }
+}

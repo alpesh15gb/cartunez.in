@@ -1,0 +1,20 @@
+{
+  "contract_version": "v1",
+  "event_id": "evt_medusa_payment_001",
+  "event_type": "payment.captured",
+  "occurred_at": "2026-07-17T10:01:00.000Z",
+  "idempotency_key": "payment.captured:payment:pay_01",
+  "payment": {
+    "apexbooks_payment_id": null,
+    "medusa_payment_id": "pay_01",
+    "medusa_order_id": "order_01",
+    "provider_id": "manual",
+    "transaction_id": "txn_gateway_001",
+    "amount": {
+      "currency_code": "inr",
+      "amount": 449900
+    },
+    "captured_at": "2026-07-17T10:01:00.000Z",
+    "metadata": {}
+  }
+}

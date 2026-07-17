@@ -1,0 +1,187 @@
+openapi: 3.1.0
+info:
+  title: Cartunez Medusa ApexBooks Integration API
+  version: 1.0.0
+  description: >
+    Versioned v1 REST/webhook contract between Cartunez Medusa and ApexBooks ERP.
+    ApexBooks remains the source of truth for products, inventory, customers,
+    accounting, GST, invoices, and payments.
+servers:
+  - url: https://cartunez.in
+    description: Production Medusa public origin
+  - url: http://localhost:9000
+    description: Local Medusa
+security:
+  - ApexBooksSignature: []
+paths:
+  /apexbooks/v1/webhooks:
+    post:
+      summary: Generic ApexBooks inbound webhook
+      operationId: receiveApexBooksWebhookV1
+      parameters:
+        - $ref: "#/components/parameters/ContractVersion"
+        - $ref: "#/components/parameters/EventId"
+        - $ref: "#/components/parameters/EventType"
+        - $ref: "#/components/parameters/Timestamp"
+        - $ref: "#/components/parameters/Signature"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/apexbooks-events.schema.json"
+            examples:
+              productUpdated:
+                value:
+                  contract_version: v1
+                  event_id: evt_ab_product_001
+                  event_type: product.updated
+                  occurred_at: "2026-07-17T00:00:00.000Z"
+                  idempotency_key: product.updated:ab_prod_001:evt_ab_product_001
+                  product:
+                    apexbooks_product_id: ab_prod_001
+                    sku: CTZ-MAT-7D-BLK
+                    title: Cartunez 7D Custom Car Floor Mats
+                    description: Custom fit floor mats.
+                    status: published
+                    thumbnail: https://cdn.apexbooks.example/products/ab_prod_001/main.jpg
+                    images: []
+                    hsn_sac: "87089900"
+                    gst_rate: 1800
+      responses:
+        "202":
+          description: Webhook accepted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncResponse"
+        "400":
+          description: Invalid signature, payload, or unsupported contract.
+  /apexbooks/v1/webhooks/products:
+    post:
+      summary: Product created/updated webhook
+      operationId: receiveProductWebhookV1
+      parameters:
+        - $ref: "#/components/parameters/ContractVersion"
+        - $ref: "#/components/parameters/EventId"
+        - $ref: "#/components/parameters/EventType"
+        - $ref: "#/components/parameters/Timestamp"
+        - $ref: "#/components/parameters/Signature"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/apexbooks-events.schema.json#/$defs/ProductInboundPayload"
+      responses:
+        "202": { description: Accepted }
+        "400": { description: Invalid request }
+  /apexbooks/v1/webhooks/prices:
+    post:
+      summary: Product price update webhook
+      operationId: receivePriceWebhookV1
+      parameters:
+        - $ref: "#/components/parameters/ContractVersion"
+        - $ref: "#/components/parameters/EventId"
+        - $ref: "#/components/parameters/EventType"
+        - $ref: "#/components/parameters/Timestamp"
+        - $ref: "#/components/parameters/Signature"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/apexbooks-events.schema.json#/$defs/PriceInboundPayload"
+      responses:
+        "202": { description: Accepted }
+        "400": { description: Invalid request }
+  /apexbooks/v1/webhooks/inventory:
+    post:
+      summary: Inventory update webhook
+      operationId: receiveInventoryWebhookV1
+      parameters:
+        - $ref: "#/components/parameters/ContractVersion"
+        - $ref: "#/components/parameters/EventId"
+        - $ref: "#/components/parameters/EventType"
+        - $ref: "#/components/parameters/Timestamp"
+        - $ref: "#/components/parameters/Signature"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/apexbooks-events.schema.json#/$defs/InventoryInboundPayload"
+      responses:
+        "202": { description: Accepted }
+        "400": { description: Invalid request }
+  /apexbooks/v1/webhooks/customers:
+    post:
+      summary: Customer update webhook
+      operationId: receiveCustomerWebhookV1
+      parameters:
+        - $ref: "#/components/parameters/ContractVersion"
+        - $ref: "#/components/parameters/EventId"
+        - $ref: "#/components/parameters/EventType"
+        - $ref: "#/components/parameters/Timestamp"
+        - $ref: "#/components/parameters/Signature"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/apexbooks-events.schema.json#/$defs/CustomerPayload"
+      responses:
+        "202": { description: Accepted }
+        "400": { description: Invalid request }
+components:
+  securitySchemes:
+    ApexBooksSignature:
+      type: apiKey
+      in: header
+      name: X-ApexBooks-Signature
+      description: HMAC SHA-256 signature over `{timestamp}.{raw_body}`.
+  parameters:
+    ContractVersion:
+      name: X-ApexBooks-Contract-Version
+      in: header
+      required: true
+      schema:
+        type: string
+        const: v1
+    EventId:
+      name: X-ApexBooks-Event-Id
+      in: header
+      required: true
+      schema:
+        type: string
+    EventType:
+      name: X-ApexBooks-Event-Type
+      in: header
+      required: true
+      schema:
+        type: string
+    Timestamp:
+      name: X-ApexBooks-Timestamp
+      in: header
+      required: true
+      schema:
+        type: string
+    Signature:
+      name: X-ApexBooks-Signature
+      in: header
+      required: true
+      schema:
+        type: string
+        pattern: "^sha256=[a-f0-9]{64}$"
+  schemas:
+    SyncResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok, skipped, failed]
+        id:
+          type: string
+        message:
+          type: string

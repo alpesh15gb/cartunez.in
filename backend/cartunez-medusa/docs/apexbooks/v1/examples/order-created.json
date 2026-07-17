@@ -1,0 +1,119 @@
+{
+  "contract_version": "v1",
+  "event_id": "evt_medusa_order_001",
+  "event_type": "order.created",
+  "occurred_at": "2026-07-17T10:00:00.000Z",
+  "idempotency_key": "order.created:order:order_01",
+  "order": {
+    "apexbooks_order_id": null,
+    "apexbooks_invoice_id": null,
+    "medusa_order_id": "order_01",
+    "display_id": 1001,
+    "status": "pending",
+    "currency_code": "inr",
+    "customer": {
+      "apexbooks_customer_id": null,
+      "medusa_customer_id": "cus_01",
+      "email": "buyer@example.com",
+      "first_name": "Amit",
+      "last_name": "Sharma",
+      "phone": "+919999999999",
+      "gst": {
+        "gstin": null,
+        "gst_type": "consumer",
+        "state_code": "27"
+      },
+      "billing_address": {
+        "name": "Amit Sharma",
+        "company": null,
+        "phone": "+919999999999",
+        "address_1": "Bandra West",
+        "address_2": null,
+        "city": "Mumbai",
+        "province": "Maharashtra",
+        "postal_code": "400050",
+        "country_code": "in",
+        "state_code": "27"
+      },
+      "shipping_address": {
+        "name": "Amit Sharma",
+        "company": null,
+        "phone": "+919999999999",
+        "address_1": "Bandra West",
+        "address_2": null,
+        "city": "Mumbai",
+        "province": "Maharashtra",
+        "postal_code": "400050",
+        "country_code": "in",
+        "state_code": "27"
+      }
+    },
+    "billing_address": {
+      "name": "Amit Sharma",
+      "company": null,
+      "phone": "+919999999999",
+      "address_1": "Bandra West",
+      "address_2": null,
+      "city": "Mumbai",
+      "province": "Maharashtra",
+      "postal_code": "400050",
+      "country_code": "in",
+      "state_code": "27"
+    },
+    "shipping_address": {
+      "name": "Amit Sharma",
+      "company": null,
+      "phone": "+919999999999",
+      "address_1": "Bandra West",
+      "address_2": null,
+      "city": "Mumbai",
+      "province": "Maharashtra",
+      "postal_code": "400050",
+      "country_code": "in",
+      "state_code": "27"
+    },
+    "items": [
+      {
+        "apexbooks_item_id": "ab_item_7d_mat",
+        "medusa_line_item_id": "item_01",
+        "medusa_product_id": "prod_01",
+        "medusa_variant_id": "variant_01",
+        "sku": "CTZ-MAT-7D-BLK",
+        "title": "Cartunez 7D Custom Car Floor Mats",
+        "quantity": 1,
+        "unit_price": { "currency_code": "inr", "amount": 499900 },
+        "line_subtotal": { "currency_code": "inr", "amount": 499900 },
+        "discount_total": { "currency_code": "inr", "amount": 50000 },
+        "line_total": { "currency_code": "inr", "amount": 449900 },
+        "gst": {
+          "hsn_sac": "87089900",
+          "gst_rate": 1800,
+          "taxable_value": { "currency_code": "inr", "amount": 381271 },
+          "tax_amount": { "currency_code": "inr", "amount": 68629 },
+          "cgst": { "currency_code": "inr", "amount": 34315 },
+          "sgst": { "currency_code": "inr", "amount": 34314 },
+          "igst": { "currency_code": "inr", "amount": 0 },
+          "cess": { "currency_code": "inr", "amount": 0 },
+          "discount_allocation": { "currency_code": "inr", "amount": 50000 }
+        }
+      }
+    ],
+    "subtotal": { "currency_code": "inr", "amount": 499900 },
+    "discount_total": { "currency_code": "inr", "amount": 50000 },
+    "tax_total": { "currency_code": "inr", "amount": 68629 },
+    "shipping_total": { "currency_code": "inr", "amount": 0 },
+    "total": { "currency_code": "inr", "amount": 449900 },
+    "gst_summary": {
+      "hsn_sac": "87089900",
+      "gst_rate": 1800,
+      "taxable_value": { "currency_code": "inr", "amount": 381271 },
+      "tax_amount": { "currency_code": "inr", "amount": 68629 },
+      "cgst": { "currency_code": "inr", "amount": 34315 },
+      "sgst": { "currency_code": "inr", "amount": 34314 },
+      "igst": { "currency_code": "inr", "amount": 0 },
+      "cess": { "currency_code": "inr", "amount": 0 },
+      "discount_allocation": { "currency_code": "inr", "amount": 50000 }
+    },
+    "metadata": {}
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "contract_version": "v1",
+  "event_id": "evt_medusa_customer_001",
+  "event_type": "customer.created",
+  "occurred_at": "2026-07-17T09:30:00.000Z",
+  "idempotency_key": "customer.created:customer:cus_01",
+  "customer": {
+    "apexbooks_customer_id": null,
+    "medusa_customer_id": "cus_01",
+    "email": "buyer@example.com",
+    "first_name": "Amit",
+    "last_name": "Sharma",
+    "phone": "+919999999999",
+    "gst": {
+      "gstin": "27ABCDE1234F1Z5",
+      "gst_type": "regular",
+      "state_code": "27"
+    },
+    "billing_address": {
+      "name": "Amit Sharma",
+      "company": "Amit Auto Works",
+      "phone": "+919999999999",
+      "address_1": "Bandra West",
+      "address_2": null,
+      "city": "Mumbai",
+      "province": "Maharashtra",
+      "postal_code": "400050",
+      "country_code": "in",
+      "state_code": "27"
+    },
+    "shipping_address": {
+      "name": "Amit Sharma",
+      "company": "Amit Auto Works",
+      "phone": "+919999999999",
+      "address_1": "Bandra West",
+      "address_2": null,
+      "city": "Mumbai",
+      "province": "Maharashtra",
+      "postal_code": "400050",
+      "country_code": "in",
+      "state_code": "27"
+    }
+  }
+}

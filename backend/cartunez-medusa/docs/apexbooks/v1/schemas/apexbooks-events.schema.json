@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cartunez.in/contracts/apexbooks/v1/apexbooks-events.schema.json",
+  "title": "Cartunez Medusa ApexBooks Integration Contract v1",
+  "type": "object",
+  "$defs": {
+    "Money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency_code", "amount"],
+      "properties": {
+        "currency_code": { "type": "string", "pattern": "^[a-z]{3}$", "description": "ISO 4217 lowercase currency code." },
+        "amount": { "type": "integer", "description": "Minor units. For INR, paise." }
+      }
+    },
+    "Address": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "address_1", "city", "postal_code", "country_code", "state_code"],
+      "properties": {
+        "name": { "type": "string" },
+        "company": { "type": ["string", "null"] },
+        "phone": { "type": ["string", "null"] },
+        "address_1": { "type": "string" },
+        "address_2": { "type": ["string", "null"] },
+        "city": { "type": "string" },
+        "province": { "type": ["string", "null"] },
+        "postal_code": { "type": "string" },
+        "country_code": { "type": "string", "pattern": "^[a-z]{2}$" },
+        "state_code": { "type": "string", "description": "Indian GST state code, e.g. 27 for Maharashtra." }
+      }
+    },
+    "GstBreakdown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hsn_sac", "gst_rate", "taxable_value", "tax_amount", "cgst", "sgst", "igst", "cess", "discount_allocation"],
+      "properties": {
+        "hsn_sac": { "type": "string" },
+        "gst_rate": { "type": "integer", "description": "Basis points. 1800 = 18.00%." },
+        "taxable_value": { "$ref": "#/$defs/Money" },
+        "tax_amount": { "$ref": "#/$defs/Money" },
+        "cgst": { "$ref": "#/$defs/Money" },
+        "sgst": { "$ref": "#/$defs/Money" },
+        "igst": { "$ref": "#/$defs/Money" },
+        "cess": { "$ref": "#/$defs/Money" },
+        "discount_allocation": { "$ref": "#/$defs/Money" }
+      }
+    },
+    "Customer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["medusa_customer_id", "email", "billing_address", "shipping_address", "gst"],
+      "properties": {
+        "apexbooks_customer_id": { "type": ["string", "null"] },
+        "medusa_customer_id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "first_name": { "type": ["string", "null"] },
+        "last_name": { "type": ["string", "null"] },
+        "phone": { "type": ["string", "null"] },
+        "gst": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["gstin", "gst_type", "state_code"],
+          "properties": {
+            "gstin": { "type": ["string", "null"], "pattern": "^([0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z])?$" },
+            "gst_type": { "type": "string", "enum": ["unregistered", "regular", "composition", "consumer", "overseas", "sez"] },
+            "state_code": { "type": "string" }
+          }
+        },
+        "billing_address": { "$ref": "#/$defs/Address" },
+        "shipping_address": { "$ref": "#/$defs/Address" }
+      }
+    },
+    "OrderLineItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["medusa_line_item_id", "medusa_variant_id", "title", "quantity", "unit_price", "line_subtotal", "discount_total", "line_total", "gst"],
+      "properties": {
+        "apexbooks_item_id": { "type": ["string", "null"] },
+        "medusa_line_item_id": { "type": "string" },
+        "medusa_product_id": { "type": ["string", "null"] },
+        "medusa_variant_id": { "type": "string" },
+        "sku": { "type": ["string", "null"] },
+        "title": { "type": "string" },
+        "quantity": { "type": "integer", "minimum": 1 },
+        "unit_price": { "$ref": "#/$defs/Money" },
+        "line_subtotal": { "$ref": "#/$defs/Money" },
+        "discount_total": { "$ref": "#/$defs/Money" },
+        "line_total": { "$ref": "#/$defs/Money" },
+        "gst": { "$ref": "#/$defs/GstBreakdown" }
+      }
+    },
+    "OrderPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "event_id", "event_type", "occurred_at", "idempotency_key", "order"],
+      "properties": {
+        "contract_version": { "const": "v1" },
+        "event_id": { "type": "string" },
+        "event_type": { "type": "string", "enum": ["order.created", "order.updated", "order.cancelled"] },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "idempotency_key": { "type": "string" },
+        "order": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["medusa_order_id", "display_id", "currency_code", "customer", "billing_address", "shipping_address", "items", "subtotal", "discount_total", "tax_total", "shipping_total", "total", "gst_summary"],
+          "properties": {
+            "apexbooks_order_id": { "type": ["string", "null"] },
+            "apexbooks_invoice_id": { "type": ["string", "null"] },
+            "medusa_order_id": { "type": "string" },
+            "display_id": { "type": ["integer", "string"] },
+            "status": { "type": "string" },
+            "currency_code": { "type": "string", "pattern": "^[a-z]{3}$" },
+            "customer": { "$ref": "#/$defs/Customer" },
+            "billing_address": { "$ref": "#/$defs/Address" },
+            "shipping_address": { "$ref": "#/$defs/Address" },
+            "items": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/OrderLineItem" } },
+            "subtotal": { "$ref": "#/$defs/Money" },
+            "discount_total": { "$ref": "#/$defs/Money" },
+            "tax_total": { "$ref": "#/$defs/Money" },
+            "shipping_total": { "$ref": "#/$defs/Money" },
+            "total": { "$ref": "#/$defs/Money" },
+            "gst_summary": { "$ref": "#/$defs/GstBreakdown" },
+            "metadata": { "type": "object" }
+          }
+        }
+      }
+    },
+    "PaymentPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "event_id", "event_type", "occurred_at", "idempotency_key", "payment"],
+      "properties": {
+        "contract_version": { "const": "v1" },
+        "event_id": { "type": "string" },
+        "event_type": { "const": "payment.captured" },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "idempotency_key": { "type": "string" },
+        "payment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["medusa_payment_id", "medusa_order_id", "provider_id", "amount", "captured_at"],
+          "properties": {
+            "apexbooks_payment_id": { "type": ["string", "null"] },
+            "medusa_payment_id": { "type": "string" },
+            "medusa_order_id": { "type": "string" },
+            "provider_id": { "type": "string" },
+            "transaction_id": { "type": ["string", "null"] },
+            "amount": { "$ref": "#/$defs/Money" },
+            "captured_at": { "type": "string", "format": "date-time" },
+            "metadata": { "type": "object" }
+          }
+        }
+      }
+    },
+    "RefundLineItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["medusa_line_item_id", "quantity", "unit_price", "refund_subtotal", "taxes", "restock"],
+      "properties": {
+        "medusa_line_item_id": { "type": "string" },
+        "apexbooks_item_id": { "type": ["string", "null"] },
+        "quantity": { "type": "integer", "minimum": 1 },
+        "unit_price": { "$ref": "#/$defs/Money" },
+        "refund_subtotal": { "$ref": "#/$defs/Money" },
+        "taxes": { "$ref": "#/$defs/GstBreakdown" },
+        "restock": { "type": "boolean" },
+        "reason": { "type": ["string", "null"] }
+      }
+    },
+    "RefundPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "event_id", "event_type", "occurred_at", "idempotency_key", "refund"],
+      "properties": {
+        "contract_version": { "const": "v1" },
+        "event_id": { "type": "string" },
+        "event_type": { "const": "payment.refunded" },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "idempotency_key": { "type": "string" },
+        "refund": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["medusa_refund_id", "medusa_order_id", "original_invoice", "amount", "line_items", "refund_tax_total", "refund_total"],
+          "properties": {
+            "apexbooks_refund_id": { "type": ["string", "null"] },
+            "medusa_refund_id": { "type": "string" },
+            "medusa_order_id": { "type": "string" },
+            "original_invoice": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["apexbooks_invoice_id"],
+              "properties": {
+                "apexbooks_invoice_id": { "type": "string" },
+                "invoice_number": { "type": ["string", "null"] },
+                "invoice_date": { "type": ["string", "null"], "format": "date" }
+              }
+            },
+            "amount": { "$ref": "#/$defs/Money" },
+            "line_items": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/RefundLineItem" } },
+            "refund_tax_total": { "$ref": "#/$defs/Money" },
+            "refund_total": { "$ref": "#/$defs/Money" },
+            "reason": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "ReturnPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "event_id", "event_type", "occurred_at", "idempotency_key", "return"],
+      "properties": {
+        "contract_version": { "const": "v1" },
+        "event_id": { "type": "string" },
+        "event_type": { "const": "return.created" },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "idempotency_key": { "type": "string" },
+        "return": {
+          "type": "object",
+          "required": ["medusa_return_id", "medusa_order_id", "items"],
+          "properties": {
+            "medusa_return_id": { "type": "string" },
+            "medusa_order_id": { "type": "string" },
+            "items": { "type": "array", "items": { "$ref": "#/$defs/RefundLineItem" } }
+          }
+        }
+      }
+    },
+    "CustomerPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "event_id", "event_type", "occurred_at", "idempotency_key", "customer"],
+      "properties": {
+        "contract_version": { "const": "v1" },
+        "event_id": { "type": "string" },
+        "event_type": { "type": "string", "enum": ["customer.created", "customer.updated"] },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "idempotency_key": { "type": "string" },
+        "customer": { "$ref": "#/$defs/Customer" }
+      }
+    },
+    "ProductInboundPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "event_id", "event_type", "occurred_at", "idempotency_key", "product"],
+      "properties": {
+        "contract_version": { "const": "v1" },
+        "event_id": { "type": "string" },
+        "event_type": { "type": "string", "enum": ["product.created", "product.updated"] },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "idempotency_key": { "type": "string" },
+        "product": {
+          "type": "object",
+          "required": ["apexbooks_product_id", "title", "status", "hsn_sac", "gst_rate"],
+          "properties": {
+            "apexbooks_product_id": { "type": "string" },
+            "sku": { "type": ["string", "null"] },
+            "title": { "type": "string" },
+            "description": { "type": ["string", "null"] },
+            "status": { "type": "string", "enum": ["draft", "published", "rejected", "proposed"] },
+            "thumbnail": { "type": ["string", "null"] },
+            "images": { "type": "array", "items": { "type": "string" } },
+            "hsn_sac": { "type": "string" },
+            "gst_rate": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "InventoryInboundPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "event_id", "event_type", "occurred_at", "idempotency_key", "inventory"],
+      "properties": {
+        "contract_version": { "const": "v1" },
+        "event_id": { "type": "string" },
+        "event_type": { "const": "inventory.updated" },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "idempotency_key": { "type": "string" },
+        "inventory": {
+          "type": "object",
+          "required": ["apexbooks_product_id", "apexbooks_variant_id", "available_quantity"],
+          "properties": {
+            "apexbooks_product_id": { "type": "string" },
+            "apexbooks_variant_id": { "type": "string" },
+            "sku": { "type": ["string", "null"] },
+            "available_quantity": { "type": "integer", "minimum": 0 },
+            "reserved_quantity": { "type": "integer", "minimum": 0 },
+            "location_id": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "PriceInboundPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "event_id", "event_type", "occurred_at", "idempotency_key", "price"],
+      "properties": {
+        "contract_version": { "const": "v1" },
+        "event_id": { "type": "string" },
+        "event_type": { "const": "price.updated" },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "idempotency_key": { "type": "string" },
+        "price": {
+          "type": "object",
+          "required": ["apexbooks_product_id", "apexbooks_variant_id", "currency_code", "unit_price", "tax_inclusive"],
+          "properties": {
+            "apexbooks_product_id": { "type": "string" },
+            "apexbooks_variant_id": { "type": "string" },
+            "currency_code": { "type": "string", "pattern": "^[a-z]{3}$" },
+            "unit_price": { "$ref": "#/$defs/Money" },
+            "mrp": { "$ref": "#/$defs/Money" },
+            "tax_inclusive": { "type": "boolean" },
+            "gst_rate": { "type": "integer" }
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/OrderPayload" },
+    { "$ref": "#/$defs/PaymentPayload" },
+    { "$ref": "#/$defs/RefundPayload" },
+    { "$ref": "#/$defs/ReturnPayload" },
+    { "$ref": "#/$defs/CustomerPayload" },
+    { "$ref": "#/$defs/ProductInboundPayload" },
+    { "$ref": "#/$defs/InventoryInboundPayload" },
+    { "$ref": "#/$defs/PriceInboundPayload" }
+  ]
+}

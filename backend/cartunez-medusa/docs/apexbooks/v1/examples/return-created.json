@@ -1,0 +1,60 @@
+{
+  "contract_version": "v1",
+  "event_id": "evt_medusa_return_001",
+  "event_type": "return.created",
+  "occurred_at": "2026-07-17T11:00:00.000Z",
+  "idempotency_key": "return.created:return:return_01",
+  "return": {
+    "medusa_return_id": "return_01",
+    "medusa_order_id": "order_01",
+    "items": [
+      {
+        "medusa_line_item_id": "item_01",
+        "apexbooks_item_id": "ab_item_7d_mat",
+        "quantity": 1,
+        "unit_price": {
+          "currency_code": "inr",
+          "amount": 499900
+        },
+        "refund_subtotal": {
+          "currency_code": "inr",
+          "amount": 449900
+        },
+        "taxes": {
+          "hsn_sac": "87089900",
+          "gst_rate": 1800,
+          "taxable_value": {
+            "currency_code": "inr",
+            "amount": 381271
+          },
+          "tax_amount": {
+            "currency_code": "inr",
+            "amount": 68629
+          },
+          "cgst": {
+            "currency_code": "inr",
+            "amount": 34315
+          },
+          "sgst": {
+            "currency_code": "inr",
+            "amount": 34314
+          },
+          "igst": {
+            "currency_code": "inr",
+            "amount": 0
+          },
+          "cess": {
+            "currency_code": "inr",
+            "amount": 0
+          },
+          "discount_allocation": {
+            "currency_code": "inr",
+            "amount": 50000
+          }
+        },
+        "restock": true,
+        "reason": "Size mismatch"
+      }
+    ]
+  }
+}

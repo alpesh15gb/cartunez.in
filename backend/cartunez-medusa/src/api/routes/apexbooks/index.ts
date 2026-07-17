@@ -4,15 +4,15 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/medusa";
 export default () => {
   const router = Router();
 
-  router.get("/apexbooks/health", async (req: MedusaRequest, res: MedusaResponse) => {
+  const healthHandler = async (req: MedusaRequest, res: MedusaResponse) => {
     const service = req.scope.resolve("apexbooksIntegrationService");
     res.json({
       status: "ok",
       config: service.getConfig(),
     });
-  });
+  };
 
-  router.post("/apexbooks/webhooks", async (req: MedusaRequest, res: MedusaResponse) => {
+  const genericWebhookHandler = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
       const service = req.scope.resolve("apexbooksIntegrationService");
       const result = await service.handleInboundWebhook(req.body as Record<string, any>, req.headers);
@@ -24,9 +24,9 @@ export default () => {
         message: error.message || "ApexBooks webhook failed",
       });
     }
-  });
+  };
 
-  router.post("/apexbooks/webhooks/products", async (req: MedusaRequest, res: MedusaResponse) => {
+  const productWebhookHandler = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
       const service = req.scope.resolve("apexbooksIntegrationService");
       const eventId = String(req.headers["x-apexbooks-event-id"] || (req.body as any).event_id || Date.now());
@@ -37,9 +37,9 @@ export default () => {
       req.scope.resolve("logger").error("[ApexBooks] product webhook failed", error);
       res.status(400).json({ status: "failed", message: error.message });
     }
-  });
+  };
 
-  router.post("/apexbooks/webhooks/prices", async (req: MedusaRequest, res: MedusaResponse) => {
+  const priceWebhookHandler = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
       const service = req.scope.resolve("apexbooksIntegrationService");
       const eventId = String(req.headers["x-apexbooks-event-id"] || (req.body as any).event_id || Date.now());
@@ -50,9 +50,9 @@ export default () => {
       req.scope.resolve("logger").error("[ApexBooks] price webhook failed", error);
       res.status(400).json({ status: "failed", message: error.message });
     }
-  });
+  };
 
-  router.post("/apexbooks/webhooks/inventory", async (req: MedusaRequest, res: MedusaResponse) => {
+  const inventoryWebhookHandler = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
       const service = req.scope.resolve("apexbooksIntegrationService");
       const eventId = String(req.headers["x-apexbooks-event-id"] || (req.body as any).event_id || Date.now());
@@ -63,9 +63,9 @@ export default () => {
       req.scope.resolve("logger").error("[ApexBooks] inventory webhook failed", error);
       res.status(400).json({ status: "failed", message: error.message });
     }
-  });
+  };
 
-  router.post("/apexbooks/webhooks/customers", async (req: MedusaRequest, res: MedusaResponse) => {
+  const customerWebhookHandler = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
       const service = req.scope.resolve("apexbooksIntegrationService");
       const eventId = String(req.headers["x-apexbooks-event-id"] || (req.body as any).event_id || Date.now());
@@ -76,7 +76,21 @@ export default () => {
       req.scope.resolve("logger").error("[ApexBooks] customer webhook failed", error);
       res.status(400).json({ status: "failed", message: error.message });
     }
-  });
+  };
+
+  router.get("/apexbooks/health", healthHandler);
+  router.post("/apexbooks/webhooks", genericWebhookHandler);
+  router.post("/apexbooks/webhooks/products", productWebhookHandler);
+  router.post("/apexbooks/webhooks/prices", priceWebhookHandler);
+  router.post("/apexbooks/webhooks/inventory", inventoryWebhookHandler);
+  router.post("/apexbooks/webhooks/customers", customerWebhookHandler);
+
+  router.get("/apexbooks/v1/health", healthHandler);
+  router.post("/apexbooks/v1/webhooks", genericWebhookHandler);
+  router.post("/apexbooks/v1/webhooks/products", productWebhookHandler);
+  router.post("/apexbooks/v1/webhooks/prices", priceWebhookHandler);
+  router.post("/apexbooks/v1/webhooks/inventory", inventoryWebhookHandler);
+  router.post("/apexbooks/v1/webhooks/customers", customerWebhookHandler);
 
   return router;
 };

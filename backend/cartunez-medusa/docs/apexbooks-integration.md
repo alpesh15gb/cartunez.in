@@ -85,7 +85,7 @@ Medusa event -> ApexBooks event:
 - `order.updated` -> `order.updated`
 - `order.canceled` -> `order.cancelled`
 - `payment.captured` -> `payment.captured`
-- `payment.refunded` -> `payment.refunded`
+- `refund.created` -> `payment.refunded`
 - `return.requested` -> `return.created`
 - `customer.created` -> `customer.created`
 
@@ -99,7 +99,15 @@ The key is sent as `Idempotency-Key`.
 
 ## Inbound Webhooks
 
-Endpoints:
+Versioned v1 endpoints:
+
+- `POST /apexbooks/v1/webhooks`
+- `POST /apexbooks/v1/webhooks/products`
+- `POST /apexbooks/v1/webhooks/prices`
+- `POST /apexbooks/v1/webhooks/inventory`
+- `POST /apexbooks/v1/webhooks/customers`
+
+Legacy aliases retained for backward compatibility:
 
 - `POST /apexbooks/webhooks`
 - `POST /apexbooks/webhooks/products`

@@ -1,0 +1,16 @@
+{
+  "contract_version": "v1",
+  "event_id": "evt_ab_price_001",
+  "event_type": "price.updated",
+  "occurred_at": "2026-07-17T08:10:00.000Z",
+  "idempotency_key": "price.updated:ab_var_001:evt_ab_price_001",
+  "price": {
+    "apexbooks_product_id": "ab_prod_001",
+    "apexbooks_variant_id": "ab_var_001",
+    "currency_code": "inr",
+    "unit_price": { "currency_code": "inr", "amount": 499900 },
+    "mrp": { "currency_code": "inr", "amount": 599900 },
+    "tax_inclusive": true,
+    "gst_rate": 1800
+  }
+}

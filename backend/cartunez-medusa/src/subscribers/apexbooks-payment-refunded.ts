@@ -1,5 +1,5 @@
 export const config = {
-  event: "payment.refunded",
+  event: "refund.created",
 };
 
 export default async function apexbooksPaymentRefundedHandler({ data, container }: any) {
