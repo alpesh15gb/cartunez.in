@@ -34,23 +34,20 @@ export default async function Nav() {
               </div>
               <LocalizedClientLink
                 href="/"
-                className="flex items-center gap-2.5 group shrink-0"
+                className="flex items-center group shrink-0"
                 data-testid="nav-store-link"
               >
                 <div className="relative">
                   <Image
-                    src="/logo.png"
+                    src="/logo-mark.png"
                     alt="Cartunez"
-                    width={36}
-                    height={36}
-                    className="h-9 w-9 object-contain rounded transition-transform duration-300 group-hover:scale-105"
+                    width={112}
+                    height={72}
+                    className="h-12 w-auto object-contain rounded transition-transform duration-300 group-hover:scale-105 lg:h-14"
                     priority
                   />
                   <div className="absolute -inset-1 bg-brand/10 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
-                <span className="hidden sm:inline text-xl lg:text-[22px] font-black uppercase tracking-tighter text-gray-900 transition-colors duration-300 group-hover:text-brand leading-none">
-                  <span className="text-brand">Car</span>Tunez
-                </span>
               </LocalizedClientLink>
             </div>
 

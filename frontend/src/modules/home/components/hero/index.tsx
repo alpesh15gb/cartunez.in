@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import Link from "next/link"
 import {
   motion,
   useScroll,
@@ -14,32 +13,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 const easeOut = [0.16, 1, 0.3, 1] as const
 
 /* â”€â”€ Animation Variants â”€â”€ */
-const container = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.12, delayChildren: 0.25 },
-  },
-}
-
-const childFadeUp = {
-  hidden: { opacity: 0, y: 32 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: easeOut },
-  },
-}
-
-const childScale = {
-  hidden: { opacity: 0, scale: 0.92, y: 20 },
-  show: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { duration: 0.55, ease: easeOut },
-  },
-}
-
 /* â”€â”€ Hero slides â”€â”€ */
 const slides = [
   {
@@ -52,7 +25,7 @@ const slides = [
     cta2: "Shop Android Stereos",
     cta2Link: "/categories/android-stereos",
     image: "/hero-bg.jpg",
-    gradient: "from-black/70 via-black/40 to-transparent",
+    gradient: "from-black/15 via-transparent to-black/20",
   },
   {
     title: "CUSTOM 7D",
@@ -65,7 +38,7 @@ const slides = [
     cta2Link: "/store",
     image:
       "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2000&auto=format&fit=crop",
-    gradient: "from-black/70 via-black/30 to-transparent",
+    gradient: "from-black/20 via-transparent to-black/20",
   },
   {
     title: "ANDROID",
@@ -78,7 +51,7 @@ const slides = [
     cta2Link: "/store",
     image:
       "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=2000&auto=format&fit=crop",
-    gradient: "from-black/70 via-black/30 to-transparent",
+    gradient: "from-black/20 via-transparent to-black/20",
   },
 ]
 
@@ -211,99 +184,6 @@ const Hero = () => {
       </div>
 
       {/* â”€â”€ Content â”€â”€ */}
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="relative z-10 flex flex-col justify-center h-full content-container text-white pt-24 pb-36 min-h-screen"
-      >
-        <div className="max-w-4xl space-y-6 md:space-y-8">
-          {/* Eyebrow */}
-          <motion.div variants={childFadeUp} className="flex items-center gap-3">
-            <span className="w-6 h-[2px] bg-brand" />
-            <span className="text-[10px] md:text-[11px] font-bold text-brand uppercase tracking-[0.28em]">
-              Premium Automotive Customization
-            </span>
-          </motion.div>
-
-          {/* Display headline */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.55, ease: easeOut }}
-              className="space-y-0 leading-none"
-            >
-              <h1
-                className="font-display font-black uppercase leading-none text-white"
-                style={{
-                  fontSize: "clamp(44px, 6.5vw, 100px)",
-                  letterSpacing: "-0.03em",
-                }}
-              >
-                {slide.title}
-              </h1>
-              <h1
-                className="font-display font-black uppercase leading-none text-brand"
-                style={{
-                  fontSize: "clamp(44px, 6.5vw, 100px)",
-                  letterSpacing: "-0.03em",
-                }}
-              >
-                {slide.subtitle}
-              </h1>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Description */}
-          <motion.p
-            variants={childScale}
-            className="text-sm sm:text-base text-neutral-300 font-normal leading-relaxed max-w-lg tracking-wide"
-          >
-            {slide.description}
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            variants={childFadeUp}
-            className="flex flex-wrap gap-3 md:gap-4 pt-2"
-          >
-            <Link href={slide.ctaLink}>
-              <motion.span
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="btn-primary inline-flex items-center gap-2"
-              >
-                {slide.cta}
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </motion.span>
-            </Link>
-            <Link href={slide.cta2Link}>
-              <motion.span
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="btn-ghost inline-flex items-center gap-2 border-white/20 text-white hover:bg-white hover:text-neutral-900 text-sm"
-              >
-                {slide.cta2}
-              </motion.span>
-            </Link>
-          </motion.div>
-        </div>
-      </motion.div>
-
       {/* â”€â”€ Bottom badge strip â”€â”€ */}
       <motion.div
         initial={{ y: 30, opacity: 0 }}
