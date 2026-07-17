@@ -20,7 +20,8 @@
     "migration:run": "ts-node --transpile-only node_modules/typeorm/cli.js migration:run -d src/utils/datasource.ts",
     "migration:generate": "ts-node --transpile-only node_modules/typeorm/cli.js migration:generate -d src/utils/datasource.ts",
     "lint": "eslint --ext .ts src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:apexbooks": "node tests/apexbooks-integration.test.js"
   },
   "dependencies": {
     "@medusajs/admin": "^7.1.18",
