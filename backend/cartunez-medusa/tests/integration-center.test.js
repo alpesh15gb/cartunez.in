@@ -288,6 +288,16 @@ test("UI has detail view for connections", () => {
   assert(uiFile.includes("openDetail") || uiFile.includes("detailModal"));
 });
 
+test("Routes file (index.ts) also serves UI HTML page", () => {
+  assert(routes.includes('"/admin/integrations/ui"'));
+  assert(routes.includes("text/html"));
+});
+
+test("Routes file (index.ts) also serves UI app.js", () => {
+  assert(routes.includes('"/admin/integrations/ui/app.js"'));
+  assert(routes.includes("application/javascript"));
+});
+
 // ─── Section 6: Datasource Registration ───────────────────────────────────────
 
 console.log("\nSection 6: Datasource Registration\n");
