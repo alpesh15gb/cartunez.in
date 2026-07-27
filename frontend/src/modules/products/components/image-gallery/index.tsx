@@ -1,6 +1,6 @@
 "use client"
 
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import Image from "next/image"
 import { useMemo, useState, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"

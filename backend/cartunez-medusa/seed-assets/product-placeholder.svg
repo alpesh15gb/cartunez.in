@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Cartunez development product</title>
+  <desc id="desc">Neutral placeholder used only by disposable development seed data.</desc>
+  <rect width="1200" height="800" fill="#111827"/>
+  <path d="M280 470h640l-55-145c-12-32-43-53-77-53H430c-35 0-66 22-78 55l-72 143Z" fill="#c91c1c"/>
+  <circle cx="400" cy="500" r="72" fill="#030712" stroke="#e5e7eb" stroke-width="18"/>
+  <circle cx="800" cy="500" r="72" fill="#030712" stroke="#e5e7eb" stroke-width="18"/>
+  <text x="600" y="650" text-anchor="middle" fill="#f9fafb" font-family="system-ui,sans-serif" font-size="48" font-weight="700">CARTUNEZ DEVELOPMENT</text>
+</svg>

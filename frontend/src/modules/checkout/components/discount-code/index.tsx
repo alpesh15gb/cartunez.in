@@ -3,9 +3,9 @@
 import { Input } from "@modules/common/components/ui"
 import React from "react"
 
-import { applyPromotions } from "@lib/data/cart"
+import { applyPromotions, removePromotion } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import ErrorMessage from "../error-message"
 import { SubmitButton } from "../submit-button"
 import { Tag, Plus, X } from "lucide-react"
@@ -18,15 +18,9 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState("")
 
-  const { promotions = [] } = cart
+  const promotions = cart.discounts || []
   const removePromotionCode = async (code: string) => {
-    const validPromotions = promotions.filter(
-      (promotion) => promotion.code !== code
-    )
-
-    await applyPromotions(
-      validPromotions.filter((p) => p.code !== undefined).map((p) => p.code!)
-    )
+    await removePromotion(code)
   }
 
   const addPromotionCode = async (formData: FormData) => {
@@ -126,13 +120,13 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                           {promotion.code}
                         </span>
                         <span className="text-gray-400 shrink-0">
-                          {promotion.application_method?.value !== undefined && (
+                          {promotion.rule?.value !== undefined && (
                             <>
-                              ({promotion.application_method.type === "percentage"
-                                ? `${promotion.application_method.value}%`
+                              ({promotion.rule.type === "percentage"
+                                ? `${promotion.rule.value}%`
                                 : convertToLocale({
-                                    amount: +promotion.application_method.value,
-                                    currency_code: promotion.application_method.currency_code,
+                                    amount: +promotion.rule.value,
+                                    currency_code: cart.currency_code,
                                   })}
                               )
                             </>
@@ -140,7 +134,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                         </span>
                       </div>
                     </div>
-                    {!promotion.is_automatic && (
+                    <>
                       <button
                         className="flex items-center justify-center w-7 h-7 rounded-full hover:bg-rose-50 transition-colors group"
                         onClick={() => {
@@ -152,7 +146,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                         <X size={14} className="text-gray-300 group-hover:text-rose-500 transition-colors" />
                         <span className="sr-only">Remove discount code from order</span>
                       </button>
-                    )}
+                    </>
                   </div>
                 )
               })}

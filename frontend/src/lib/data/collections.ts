@@ -1,7 +1,7 @@
 "use server"
 
-import { sdk } from "@lib/config"
-import { HttpTypes } from "@medusajs/types"
+import { commerceClient } from "@lib/config"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { getCacheOptions } from "./cookies"
 
 export const retrieveCollection = async (id: string) => {
@@ -9,7 +9,7 @@ export const retrieveCollection = async (id: string) => {
     ...(await getCacheOptions("collections")),
   }
 
-  return await sdk.client
+  return await commerceClient
     .fetch<{ collection: HttpTypes.StoreCollection }>(
       `/store/collections/${id}`,
       {
@@ -30,7 +30,7 @@ export const listCollections = async (
   queryParams.limit = queryParams.limit || "100"
   queryParams.offset = queryParams.offset || "0"
 
-  return await sdk.client
+  return await commerceClient
     .fetch<{ collections: HttpTypes.StoreCollection[]; count: number }>(
       "/store/collections",
       {
@@ -49,7 +49,7 @@ export const getCollectionByHandle = async (
     ...(await getCacheOptions("collections")),
   }
 
-  return await sdk.client
+  return await commerceClient
     .fetch<HttpTypes.StoreCollectionListResponse>(`/store/collections`, {
       query: { "handle[]": handle },
       next,

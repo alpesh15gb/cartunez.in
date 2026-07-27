@@ -1,4 +1,4 @@
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { Container } from "@modules/common/components/ui"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
@@ -39,10 +39,10 @@ const ShippingAddress = ({
   // check if customer has saved addresses that are in the current region
   const addressesInRegion = useMemo(
     () =>
-      customer?.addresses.filter(
+      customer?.shipping_addresses?.filter(
         (a) => a.country_code && countriesInRegion?.includes(a.country_code)
       ),
-    [customer?.addresses, countriesInRegion]
+    [customer?.shipping_addresses, countriesInRegion]
   )
 
   const setFormAddress = (
@@ -75,7 +75,7 @@ const ShippingAddress = ({
   useEffect(() => {
     // Ensure cart is not null and has a shipping_address before setting form data
     if (cart && cart.shipping_address) {
-      setFormAddress(cart?.shipping_address, cart?.email)
+      setFormAddress(cart?.shipping_address, cart?.email || undefined)
     }
 
     if (cart && !cart.email && customer?.email) {
@@ -102,7 +102,7 @@ const ShippingAddress = ({
             {`Hi ${customer.first_name}, do you want to use one of your saved addresses?`}
           </p>
           <AddressSelect
-            addresses={customer.addresses}
+            addresses={customer.shipping_addresses || []}
             addressInput={
               mapKeys(formData, (_, key) =>
                 key.replace("shipping_address.", "")

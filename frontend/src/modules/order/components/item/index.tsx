@@ -1,4 +1,4 @@
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { Table, Text } from "@modules/common/components/ui"
 
 import LineItemOptions from "@modules/common/components/line-item-options"
@@ -25,7 +25,7 @@ const Item = ({ item, currencyCode }: ItemProps) => {
           className="txt-medium-plus text-ui-fg-base"
           data-testid="product-name"
         >
-          {item.product_title}
+          {item.title}
         </Text>
         <LineItemOptions variant={item.variant} data-testid="product-variant" />
       </Table.Cell>

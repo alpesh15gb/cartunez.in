@@ -5,7 +5,7 @@ import {
   updateCustomerAddress,
 } from "@lib/data/customer"
 import useToggleState from "@lib/hooks/use-toggle-state"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import CountrySelect from "@modules/checkout/components/country-select"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"

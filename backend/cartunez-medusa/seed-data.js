@@ -1,7 +1,17 @@
 const express = require("express");
 const loaders = require("@medusajs/medusa/dist/loaders").default;
+const { assertSafeDatabase } = require("./scripts/assert-safe-database");
+const fs = require("fs");
+const path = require("path");
 
 async function seed() {
+  assertSafeDatabase("Medusa development seed");
+  const uploadDir = path.join(process.cwd(), "uploads");
+  fs.mkdirSync(uploadDir, { recursive: true });
+  fs.copyFileSync(
+    path.join(process.cwd(), "seed-assets", "product-placeholder.svg"),
+    path.join(uploadDir, "seed-product.svg")
+  );
   console.log("Bootstrapping Medusa loader...");
   const directory = process.cwd();
   const app = express();
@@ -29,6 +39,8 @@ async function seed() {
   const shippingProfileService = container.resolve("shippingProfileService");
   const regionService = container.resolve("regionService");
   const salesChannelService = container.resolve("salesChannelService");
+  const productCollectionService = container.resolve("productCollectionService");
+  const customerService = container.resolve("customerService");
   // 1. Get India Region
   const regions = await regionService.list();
   let region = regions.find(r => r.currency_code === "inr" || r.currency_code === "INR");
@@ -55,6 +67,13 @@ async function seed() {
   const defaultSalesChannel = await salesChannelService.retrieveDefault();
   const defaultSalesChannelId = defaultSalesChannel.id;
   console.log(`Using default sales channel: ${defaultSalesChannelId}`);
+
+  const existingCollections = await productCollectionService.list({ handle: "development-catalog" });
+  const developmentCollection = existingCollections[0] || await productCollectionService.create({
+    title: "Development Catalog",
+    handle: "development-catalog",
+  });
+  const publicUrl = (process.env.MEDUSA_PUBLIC_URL || "http://localhost:9000").replace(/\/$/, "");
 
   // 3. Create Shipping Options if none exist
   const existingOptions = await shippingOptionService.list({ region_id: regionId });
@@ -193,6 +212,12 @@ async function seed() {
     const existingProducts = await productService.list({ handle: prodData.handle });
     if (existingProducts.length > 0) {
       console.log(`Product already exists: ${prodData.title}`);
+      await productService.update(existingProducts[0].id, {
+        collection_id: developmentCollection.id,
+        categories: [{ id: categoryMap[prodData.categoryHandle].id }],
+        thumbnail: `${publicUrl}/uploads/seed-product.svg`,
+        images: [{ url: `${publicUrl}/uploads/seed-product.svg` }],
+      });
       continue;
     }
 
@@ -209,6 +234,9 @@ async function seed() {
       discountable: true,
       options: prodData.options.map(o => ({ title: o })),
       profile_id: defaultProfileId,
+      collection_id: developmentCollection.id,
+      thumbnail: `${publicUrl}/uploads/seed-product.svg`,
+      images: [{ url: `${publicUrl}/uploads/seed-product.svg` }],
     });
 
     // Link product to category
@@ -257,11 +285,25 @@ async function seed() {
     }
   }
 
+  if (process.env.SEED_TEST_CUSTOMER_EMAIL && process.env.SEED_TEST_CUSTOMER_PASSWORD) {
+    const email = process.env.SEED_TEST_CUSTOMER_EMAIL.toLowerCase();
+    const existingCustomers = await customerService.list({ email });
+    if (existingCustomers.length === 0) {
+      await customerService.create({
+        email,
+        password: process.env.SEED_TEST_CUSTOMER_PASSWORD,
+        first_name: "Test",
+        last_name: "Customer",
+      });
+      console.log("Created optional development test customer");
+    }
+  }
+
   console.log("Medusa seed process complete!");
   process.exit(0);
 }
 
-seed().catch(err => {
-  console.error("Seed failed:", err);
+seed().catch(() => {
+  console.error("Seed failed. Review sanitized backend diagnostics for the root cause.");
   process.exit(1);
 });

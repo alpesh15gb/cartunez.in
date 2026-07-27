@@ -1,5 +1,5 @@
-import { sdk } from "@lib/config"
-import { HttpTypes } from "@medusajs/types"
+import { commerceClient } from "@lib/config"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { getCacheOptions } from "./cookies"
 
 export const listCategories = async (query?: Record<string, unknown>) => {
@@ -8,16 +8,17 @@ export const listCategories = async (query?: Record<string, unknown>) => {
   }
 
   const limit = query?.limit || 100
+  const { fields: _fields, ...nativeQuery } = query || {}
 
-  return sdk.client
+  return commerceClient
     .fetch<{ product_categories: HttpTypes.StoreProductCategory[] }>(
       "/store/product-categories",
       {
         query: {
-          fields:
-            "*category_children, *products, *parent_category, *parent_category.parent_category",
+          expand:
+            "category_children,products,parent_category,parent_category.parent_category",
           limit,
-          ...query,
+          ...nativeQuery,
         },
         next,
         cache: "force-cache",
@@ -33,12 +34,12 @@ export const getCategoryByHandle = async (categoryHandle: string[]) => {
     ...(await getCacheOptions("categories")),
   }
 
-  return sdk.client
+  return commerceClient
     .fetch<HttpTypes.StoreProductCategoryListResponse>(
       `/store/product-categories`,
       {
         query: {
-          fields: "*category_children, *products",
+          expand: "category_children,products",
           handle,
         },
         next,

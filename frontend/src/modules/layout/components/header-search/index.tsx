@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import React, { useState, useEffect, useRef, useCallback } from "react"
-import { sdk } from "@lib/config"
+import { commerceClient } from "@lib/config"
 import { useParams, useRouter } from "next/navigation"
 import { Search, Loader2, X } from "lucide-react"
 
@@ -64,7 +64,7 @@ export default function HeaderSearch() {
     }
     setLoading(true)
     try {
-      const resp = await sdk.client.fetch<{ products: SearchResult[] }>("/store/products", {
+      const resp = await commerceClient.fetch<{ products: SearchResult[] }>("/store/products", {
         query: { q: val, limit: 5 },
       })
       setResults(resp.products || [])

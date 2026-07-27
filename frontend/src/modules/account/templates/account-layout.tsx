@@ -5,7 +5,7 @@ import { Text } from "@modules/common/components/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 import AccountNav from "../components/account-nav"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 interface AccountLayoutProps {
   customer: HttpTypes.StoreCustomer | null

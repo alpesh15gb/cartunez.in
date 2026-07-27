@@ -1,4 +1,4 @@
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 interface MinPricedProduct extends HttpTypes.StoreProduct {
@@ -23,11 +23,7 @@ export function sortProducts(
       if (product.variants && product.variants.length > 0) {
         product._minPrice = Math.min(
           ...product.variants.map(
-            (variant) =>
-              variant?.calculated_price?.calculated_amount ||
-              (Array.isArray((variant as HttpTypes.StoreProductVariant & { prices?: { amount: number }[] }).prices) &&
-                (variant as HttpTypes.StoreProductVariant & { prices?: { amount: number }[] }).prices?.[0]?.amount) ||
-              0
+            (variant) => variant.calculated_price ?? Number.POSITIVE_INFINITY
           )
         )
       } else {
@@ -37,6 +33,8 @@ export function sortProducts(
 
     // Sort products based on the precomputed minimum prices
     sortedProducts.sort((a, b) => {
+      if (a._minPrice === Number.POSITIVE_INFINITY) return 1
+      if (b._minPrice === Number.POSITIVE_INFINITY) return -1
       const diff = a._minPrice! - b._minPrice!
       return sortBy === "price_asc" ? diff : -diff
     })

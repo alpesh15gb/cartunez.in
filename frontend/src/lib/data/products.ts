@@ -1,9 +1,9 @@
 "use server"
 
-import { sdk } from "@lib/config"
+import { commerceClient } from "@lib/config"
 import { OptionValueIds } from "@lib/util/product-option-filters"
 import { sortProducts } from "@lib/util/sort-products"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { getRegion, retrieveRegion } from "./regions"
@@ -60,7 +60,9 @@ export const listProducts = async ({
     ...(await getCacheOptions("products")),
   }
 
-  return sdk.client
+  const { fields: _fields, expand: _expand, ...nativeQuery } = queryParams || {}
+
+  return commerceClient
     .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
       `/store/products`,
       {
@@ -69,7 +71,8 @@ export const listProducts = async ({
           limit,
           offset,
           region_id: region?.id,
-          ...queryParams,
+          expand: "variants,variants.prices,variants.options,images,options,categories,collection",
+          ...nativeQuery,
         },
         headers,
         next,
@@ -146,7 +149,8 @@ export const listProductsWithSort = async ({
   if (minPrice !== undefined || maxPrice !== undefined) {
     filteredProducts = filteredProducts.filter((p) => {
       const variantPrices = (p.variants?.[0] as { prices?: { amount: number }[] })?.prices
-      const price = p.variants?.[0]?.calculated_price?.calculated_amount ?? (Array.isArray(variantPrices) ? variantPrices[0]?.amount : 0) ?? 0
+      const price = p.variants?.[0]?.calculated_price ?? (Array.isArray(variantPrices) ? variantPrices[0]?.amount : undefined)
+      if (price === undefined) return false
       if (minPrice !== undefined && price < minPrice) return false
       if (maxPrice !== undefined && price > maxPrice) return false
       return true

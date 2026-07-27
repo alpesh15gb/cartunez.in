@@ -2,7 +2,7 @@
 
 import { Text } from "@modules/common/components/ui"
 import { updateLineItem } from "@lib/data/cart"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import DeleteButton from "@modules/common/components/delete-button"
 import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
@@ -46,7 +46,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
     return (
       <div className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-b-0 group" data-testid="product-row">
         <LocalizedClientLink
-          href={`/products/${item.product_handle}`}
+          href={`/products/${item.variant?.product?.handle || ""}`}
           className="w-14 h-14 shrink-0 rounded-[var(--radius-sm)] overflow-hidden bg-gray-50"
         >
           <Thumbnail
@@ -60,7 +60,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
             className="text-sm font-medium text-gray-900 truncate"
             data-testid="product-title"
           >
-            {item.product_title}
+            {item.title}
           </Text>
           <LineItemOptions variant={item.variant} data-testid="product-variant" />
           <div className="flex items-center gap-2 mt-0.5">
@@ -82,7 +82,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
     >
       {/* Thumbnail */}
       <LocalizedClientLink
-        href={`/products/${item.product_handle}`}
+        href={`/products/${item.variant?.product?.handle || ""}`}
         className="w-full sm:w-24 h-24 shrink-0 rounded-[var(--radius-md)] overflow-hidden bg-gray-100"
       >
         <Thumbnail
@@ -95,12 +95,12 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
       {/* Details */}
       <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-start gap-3">
         <div className="flex-1 min-w-0">
-          <LocalizedClientLink href={`/products/${item.product_handle}`}>
+          <LocalizedClientLink href={`/products/${item.variant?.product?.handle || ""}`}>
             <Text
               className="text-base font-semibold text-gray-900 hover:text-[var(--color-brand)] transition-colors truncate"
               data-testid="product-title"
             >
-              {item.product_title}
+              {item.title}
             </Text>
           </LocalizedClientLink>
           <LineItemOptions variant={item.variant} data-testid="product-variant" />

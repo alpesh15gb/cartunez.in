@@ -1,8 +1,9 @@
 "use server"
 
-import { sdk } from "@lib/config"
+import { commerceClient } from "@lib/config"
+import { CommerceApiError } from "@lib/commerce/medusa-v1"
 import medusaError from "@lib/util/medusa-error"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import {
@@ -13,7 +14,6 @@ import {
   setCartId,
 } from "./cookies"
 import { getRegion } from "./regions"
-import { getLocale } from "./locale-actions"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -31,14 +31,20 @@ export async function retrieveCart(cartId?: string) {
     ...(await getAuthHeaders()),
   }
 
-  return await sdk.client
+  return await commerceClient
     .fetch<HttpTypes.StoreCartResponse>(`/store/carts/${id}`, {
       method: "GET",
       headers,
       cache: "no-store",
     })
     .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart)
-    .catch(() => null)
+    .catch(async (error: unknown) => {
+      if (error instanceof CommerceApiError && error.cartExpired) {
+        await removeCartId()
+        return null
+      }
+      throw error
+    })
 }
 
 export async function getOrSetCart(countryCode: string) {
@@ -55,12 +61,12 @@ export async function getOrSetCart(countryCode: string) {
   }
 
   if (!cart) {
-    const locale = await getLocale()
-    const cartResp = await sdk.store.cart.create(
-      { region_id: region.id, locale: locale || undefined },
-      {},
-      headers
-    )
+    const cartResp = await commerceClient.fetch<{ cart: HttpTypes.StoreCart }>("/store/carts", {
+      method: "POST",
+      body: { region_id: region.id },
+      headers,
+      cache: "no-store",
+    })
     cart = cartResp.cart
 
     await setCartId(cart.id)
@@ -70,7 +76,9 @@ export async function getOrSetCart(countryCode: string) {
   }
 
   if (cart && cart?.region_id !== region.id) {
-    await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers)
+    await commerceClient.fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cart.id}`, {
+      method: "POST", body: { region_id: region.id }, headers, cache: "no-store",
+    })
     const cartCacheTag = await getCacheTag("carts")
     revalidateTag(cartCacheTag)
   }
@@ -89,8 +97,8 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
     ...(await getAuthHeaders()),
   }
 
-  return sdk.store.cart
-    .update(cartId, data, {}, headers)
+  return commerceClient
+    .fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cartId}`, { method: "POST", body: data, headers, cache: "no-store" })
     .then(async ({ cart }: { cart: HttpTypes.StoreCart }) => {
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
@@ -126,16 +134,10 @@ export async function addToCart({
     ...(await getAuthHeaders()),
   }
 
-  await sdk.store.cart
-    .createLineItem(
-      cart.id,
-      {
-        variant_id: variantId,
-        quantity,
-      },
-      {},
-      headers
-    )
+  await commerceClient
+    .fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cart.id}/line-items`, {
+      method: "POST", body: { variant_id: variantId, quantity }, headers, cache: "no-store",
+    })
     .then(async () => {
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
@@ -167,8 +169,10 @@ export async function updateLineItem({
     ...(await getAuthHeaders()),
   }
 
-  await sdk.store.cart
-    .updateLineItem(cartId, lineId, { quantity }, {}, headers)
+  await commerceClient
+    .fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cartId}/line-items/${lineId}`, {
+      method: "POST", body: { quantity }, headers, cache: "no-store",
+    })
     .then(async () => {
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
@@ -194,8 +198,10 @@ export async function deleteLineItem(lineId: string) {
     ...(await getAuthHeaders()),
   }
 
-  await sdk.store.cart
-    .deleteLineItem(cartId, lineId, {}, headers)
+  await commerceClient
+    .fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cartId}/line-items/${lineId}`, {
+      method: "DELETE", headers, cache: "no-store",
+    })
     .then(async () => {
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
@@ -217,8 +223,10 @@ export async function setShippingMethod({
     ...(await getAuthHeaders()),
   }
 
-  return sdk.store.cart
-    .addShippingMethod(cartId, { option_id: shippingMethodId }, {}, headers)
+  return commerceClient
+    .fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cartId}/shipping-methods`, {
+      method: "POST", body: { option_id: shippingMethodId }, headers, cache: "no-store",
+    })
     .then(async () => {
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
@@ -234,8 +242,13 @@ export async function initiatePaymentSession(
     ...(await getAuthHeaders()),
   }
 
-  return sdk.store.payment
-    .initiatePaymentSession(cart, data, {}, headers)
+  return commerceClient
+    .fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cart.id}/payment-sessions`, {
+      method: "POST", headers, cache: "no-store",
+    })
+    .then(() => commerceClient.fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cart.id}/payment-session`, {
+      method: "POST", body: { provider_id: data.provider_id }, headers, cache: "no-store",
+    }))
     .then(async (resp) => {
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
@@ -255,8 +268,11 @@ export async function applyPromotions(codes: string[]) {
     ...(await getAuthHeaders()),
   }
 
-  return sdk.store.cart
-    .update(cartId, { promo_codes: codes }, {}, headers)
+  if (!codes[0]) throw new Error("A promotion code is required")
+  return commerceClient
+    .fetch<{ cart: HttpTypes.StoreCart }>(`/store/carts/${cartId}/discounts/${encodeURIComponent(codes[0])}`, {
+      method: "POST", headers, cache: "no-store",
+    })
     .then(async () => {
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
@@ -265,6 +281,16 @@ export async function applyPromotions(codes: string[]) {
       revalidateTag(fulfillmentCacheTag)
     })
     .catch(medusaError)
+}
+
+export async function removePromotion(code: string) {
+  const cartId = await getCartId()
+  if (!cartId) throw new Error("No existing cart found")
+  await commerceClient.fetch<{ cart: HttpTypes.StoreCart }>(
+    `/store/carts/${cartId}/discounts/${encodeURIComponent(code)}`,
+    { method: "DELETE", headers: await getAuthHeaders(), cache: "no-store" }
+  )
+  revalidateTag(await getCacheTag("carts"))
 }
 
 export async function submitPromotionForm(
@@ -347,8 +373,10 @@ export async function placeOrder(cartId?: string) {
     ...(await getAuthHeaders()),
   }
 
-  const cartRes = await sdk.store.cart
-    .complete(id, {}, headers)
+  const cartRes = await commerceClient
+    .fetch<{ type: "order"; data: HttpTypes.StoreOrder } | { type: "cart"; data: HttpTypes.StoreCart }>(`/store/carts/${id}/complete`, {
+      method: "POST", headers, cache: "no-store",
+    })
     .then(async (cartRes) => {
       const cartCacheTag = await getCacheTag("carts")
       revalidateTag(cartCacheTag)
@@ -358,16 +386,16 @@ export async function placeOrder(cartId?: string) {
 
   if (cartRes?.type === "order") {
     const countryCode =
-      cartRes.order.shipping_address?.country_code?.toLowerCase()
+      cartRes.data.shipping_address?.country_code?.toLowerCase() || "in"
 
     const orderCacheTag = await getCacheTag("orders")
     revalidateTag(orderCacheTag)
 
-    removeCartId()
-    redirect(`/${countryCode}/order/${cartRes?.order.id}/confirmed`)
+    await removeCartId()
+    redirect(`/${countryCode}/order/${cartRes.data.id}/confirmed`)
   }
 
-  return cartRes.cart
+  return cartRes.type === "cart" ? cartRes.data : null
 }
 
 /**
@@ -409,7 +437,7 @@ export async function listCartOptions() {
     ...(await getAuthHeaders()),
   }
 
-  return await sdk.client
+  return await commerceClient
     .fetch<{
       shipping_options: HttpTypes.StoreCartShippingOption[]
     }>(`/store/shipping-options/${cartId}`, {
