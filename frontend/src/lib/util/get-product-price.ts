@@ -1,16 +1,8 @@
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { getPercentageDiff } from "./get-percentage-diff"
 import { convertToLocale } from "./money"
 
 type VariantWithPrice = HttpTypes.StoreProductVariant & {
-  calculated_price?: {
-    calculated_amount: number
-    original_amount: number
-    currency_code: string
-    calculated_price: {
-      price_list_type: string
-    }
-  } | null
   prices?: {
     id?: string
     amount: number
@@ -20,21 +12,12 @@ type VariantWithPrice = HttpTypes.StoreProductVariant & {
 }
 
 function resolveAmount(variant: VariantWithPrice): { amount: number; currency: string } | null {
-  if (variant?.calculated_price?.calculated_amount && variant.calculated_price.calculated_amount > 0) {
+  if (typeof variant.calculated_price === "number" && variant.calculated_price > 0) {
+    const currency = variant.prices?.find((price) => price.amount === variant.calculated_price)?.currency_code
+    if (!currency) return null
     return {
-      amount: variant.calculated_price.calculated_amount,
-      currency: variant.calculated_price.currency_code,
-    }
-  }
-
-  const prices = variant?.prices
-  if (Array.isArray(prices) && prices.length > 0) {
-    const price = prices[0]
-    if (price && typeof price.amount === "number" && price.amount > 0) {
-      return {
-        amount: price.amount,
-        currency: (price.currency_code || "inr").toLowerCase(),
-      }
+      amount: variant.calculated_price,
+      currency,
     }
   }
 
@@ -48,7 +31,7 @@ export const getPricesForVariant = (variant: VariantWithPrice) => {
   }
 
   const { amount, currency } = resolved
-  const originalAmount = variant?.calculated_price?.original_amount || amount
+  const originalAmount = variant.original_price || amount
 
   return {
     calculated_price_number: amount,
@@ -62,7 +45,7 @@ export const getPricesForVariant = (variant: VariantWithPrice) => {
       currency_code: currency,
     }),
     currency_code: currency,
-    price_type: variant?.calculated_price?.calculated_price?.price_list_type || "default",
+    price_type: originalAmount > amount ? "sale" : "default",
     percentage_diff: getPercentageDiff(originalAmount, amount),
   }
 }

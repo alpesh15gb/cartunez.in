@@ -1,0 +1,196 @@
+name: Commerce verification
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  storefront:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+          registry-url: https://registry.npmjs.org
+      - run: npm install --global npm@10.8.2
+      - name: Verify Node and npm versions
+        run: |
+          node --version | grep -E '^v20\.'
+          test "$(npm --version)" = "10.8.2"
+      - run: npm ci
+        working-directory: frontend
+      - run: npm test
+        working-directory: frontend
+      - run: npm run lint
+        working-directory: frontend
+      - run: npx tsc --noEmit
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+
+  medusa-runtime:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: cartunez_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-postgres-password
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d cartunez_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      meilisearch:
+        image: getmeili/meilisearch:v1.7
+        env:
+          MEILI_ENV: development
+          MEILI_NO_ANALYTICS: true
+          MEILI_MASTER_KEY: ci-meilisearch-master-key
+        ports: ["7700:7700"]
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:ci-postgres-password@127.0.0.1:5432/cartunez_ci
+      REDIS_URL: redis://127.0.0.1:6379
+      MEILISEARCH_HOST: http://127.0.0.1:7700
+      MEILISEARCH_API_KEY: ci-meilisearch-master-key
+      JWT_SECRET: ci-jwt-secret-at-least-thirty-two-characters
+      COOKIE_SECRET: ci-cookie-secret-at-least-thirty-two-characters
+      STORE_CORS: http://127.0.0.1:8000
+      ADMIN_CORS: http://127.0.0.1:9000
+      MEDUSA_PUBLIC_URL: http://127.0.0.1:9000
+      APEXBOOKS_ENABLED: "false"
+      CONFIRM_DISPOSABLE_DATABASE: "yes"
+      ALLOW_TEST_ORDER_COMPLETION: "true"
+      MEDUSA_SMOKE_URL: http://127.0.0.1:9000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+      - run: npm install --global npm@10.8.2
+      - name: Verify toolchain, registry, and disposable target
+        run: |
+          node scripts/verify-ci-environment.js
+          npm view @medusajs/admin@7.1.18 version
+        working-directory: backend/cartunez-medusa
+      - name: Verify PostgreSQL service
+        run: |
+          docker exec "${{ job.services.postgres.id }}" postgres --version
+          for attempt in $(seq 1 30); do
+            if docker exec "${{ job.services.postgres.id }}" pg_isready -U postgres -d cartunez_ci; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs "${{ job.services.postgres.id }}" || true
+          exit 1
+      - name: Verify Redis service
+        run: |
+          docker exec "${{ job.services.redis.id }}" redis-server --version
+          for attempt in $(seq 1 30); do
+            if docker exec "${{ job.services.redis.id }}" redis-cli ping | grep -q PONG; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs "${{ job.services.redis.id }}" || true
+          exit 1
+      - name: Verify Meilisearch service
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error \
+              -H "Authorization: Bearer ${MEILISEARCH_API_KEY}" \
+              http://127.0.0.1:7700/version; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs "${{ job.services.meilisearch.id }}" || true
+          exit 1
+      - name: Require reviewed lockfile
+        run: test -f package-lock.json
+        working-directory: backend/cartunez-medusa
+      - run: npm ci
+        working-directory: backend/cartunez-medusa
+      - name: Verify selected dependency graph
+        run: |
+          npm ls typeorm @medusajs/medusa
+          ! npm ls medusa-extender --depth=0
+        working-directory: backend/cartunez-medusa
+      - run: npm test
+        working-directory: backend/cartunez-medusa
+      - run: npm run typecheck
+        working-directory: backend/cartunez-medusa
+      - run: npm run build
+        working-directory: backend/cartunez-medusa
+      - name: Inspect and run migrations on disposable database
+        run: |
+          npm run migrations:show
+          npx --no-install medusa migrations run
+          npm run migrations:run
+          npm run migrations:show
+          npm run migrations:run
+        working-directory: backend/cartunez-medusa
+      - name: Seed disposable database
+        run: npm run seed
+        working-directory: backend/cartunez-medusa
+        env:
+          NODE_ENV: test
+      - name: Start Medusa
+        run: |
+          nohup npm run start:dev > "$RUNNER_TEMP/medusa.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/medusa.pid"
+        working-directory: backend/cartunez-medusa
+      - name: Wait for readiness
+        run: |
+          for attempt in $(seq 1 60); do
+            curl --fail --silent http://127.0.0.1:9000/ready && exit 0
+            sleep 2
+          done
+          node scripts/redact-log.js "$RUNNER_TEMP/medusa.log" "$RUNNER_TEMP/medusa.sanitized.log"
+          cat "$RUNNER_TEMP/medusa.sanitized.log"
+          exit 1
+        working-directory: backend/cartunez-medusa
+      - run: npm run test:integration
+        working-directory: backend/cartunez-medusa
+      - run: npm run smoke:store
+        working-directory: backend/cartunez-medusa
+      - name: Sanitize Medusa log on failure
+        if: failure()
+        run: node scripts/redact-log.js "$RUNNER_TEMP/medusa.log" "$RUNNER_TEMP/medusa.sanitized.log"
+        working-directory: backend/cartunez-medusa
+      - name: Upload sanitized Medusa log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: medusa-log
+          path: ${{ runner.temp }}/medusa.sanitized.log
+          if-no-files-found: ignore
+
+  fastapi-source:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m compileall -q app
+        working-directory: backend/cartunez-api
+      - run: git diff --check
+      - name: Secret pattern check
+        run: |
+          ! git grep -nE '(sk_live_|rzp_live_|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|npm_[A-Za-z0-9]{30,})' -- ':!*.md' ':!.github/workflows/commerce-verification.yml'

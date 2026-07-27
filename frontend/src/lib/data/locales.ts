@@ -1,6 +1,6 @@
 "use server"
 
-import { sdk } from "@lib/config"
+import { commerceClient } from "@lib/config"
 import { getCacheOptions } from "./cookies"
 
 export type Locale = {
@@ -17,7 +17,7 @@ export const listLocales = async (): Promise<Locale[] | null> => {
     ...(await getCacheOptions("locales")),
   }
 
-  return sdk.client
+  return commerceClient
     .fetch<{ locales: Locale[] }>(`/store/locales`, {
       method: "GET",
       next,

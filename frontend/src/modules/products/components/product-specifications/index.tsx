@@ -1,5 +1,5 @@
 import React from "react"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { Ruler, Weight, Shield, MapPin, Tag, Wrench } from "lucide-react"
 
 interface ProductSpecificationsProps {

@@ -5,7 +5,7 @@ import { Button, Heading } from "@modules/common/components/ui"
 import CartTotals from "@modules/common/components/cart-totals"
 import DiscountCode from "@modules/checkout/components/discount-code"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { Truck, RotateCcw, Lock } from "lucide-react"
 
 type SummaryProps = {

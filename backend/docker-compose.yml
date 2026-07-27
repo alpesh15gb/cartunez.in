@@ -65,7 +65,6 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${NEXT_PUBLIC_MEDUSA_BACKEND_URL:-https://cartunez.in}
-        NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-pk_01KVBSWHFD53JWKRBEHS43FDBJ}
         NEXT_PUBLIC_DEFAULT_REGION: ${NEXT_PUBLIC_DEFAULT_REGION:-dk}
         NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-https://cartunez.in}
     container_name: cartunez-frontend
@@ -130,8 +129,10 @@ services:
       MEILISEARCH_HOST: http://meilisearch:7700
       MEILISEARCH_API_KEY: ${MEILISEARCH_API_KEY:-}
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-}
-      JWT_SECRET: ${JWT_SECRET:-change_me}
-      COOKIE_SECRET: ${COOKIE_SECRET:-change_me}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be at least 32 random characters}
+      COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET must be at least 32 random characters}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      MEDUSA_PUBLIC_URL: ${MEDUSA_PUBLIC_URL:-http://localhost:9000}
       STORE_CORS: ${STORE_CORS:-http://localhost:3001,http://localhost:3000,https://cartunez.in,https://shop.cartunez.in}
       ADMIN_CORS: ${ADMIN_CORS:-http://localhost:7001,http://localhost:3000,http://localhost:9000,https://cartunez.in,https://shop.cartunez.in}
     depends_on:

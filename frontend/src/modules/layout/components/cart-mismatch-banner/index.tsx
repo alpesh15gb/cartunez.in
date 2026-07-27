@@ -2,7 +2,7 @@
 
 import { transferCart } from "@lib/data/customer"
 import { ExclamationCircleSolid } from "@medusajs/icons"
-import { StoreCart, StoreCustomer } from "@medusajs/types"
+import { StoreCart, StoreCustomer } from "@lib/commerce/medusa-v1/types"
 import { Button } from "@modules/common/components/ui"
 import { useState } from "react"
 function CartMismatchBanner(props: {

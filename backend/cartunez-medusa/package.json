@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node --transpile-only src/index.ts",
+    "start:dev": "ts-node --transpile-only src/index.ts",
+    "dev": "npm run start:dev",
     "seed": "node seed-data.js",
     "scrape": "node scripts/scrape-neowheels.js",
     "import:wheels": "node scripts/import-neowheels.js",
@@ -17,14 +18,17 @@
     "map:finish-images": "node scripts/map-finish-images.js",
     "validate:images": "node scripts/validate-product-images.js",
     "verify:migration": "node scripts/verify-migration.js",
-    "migration:run": "ts-node --transpile-only node_modules/typeorm/cli.js migration:run -d src/utils/datasource.ts",
-    "migration:generate": "ts-node --transpile-only node_modules/typeorm/cli.js migration:generate -d src/utils/datasource.ts",
+    "migrations:run": "ts-node --transpile-only node_modules/typeorm/cli.js migration:run -d src/utils/datasource.ts",
+    "migrations:show": "ts-node --transpile-only node_modules/typeorm/cli.js migration:show -d src/utils/datasource.ts",
     "lint": "eslint --ext .ts src/",
     "typecheck": "tsc --noEmit",
-    "test:apexbooks": "node tests/apexbooks-integration.test.js"
+    "test": "npm run test:apexbooks && node tests/runtime-safety.test.js && node tests/redact-log.test.js",
+    "test:apexbooks": "node tests/apexbooks-integration.test.js",
+    "test:integration": "node tests/live-store.mjs",
+    "smoke:store": "node ../../frontend/scripts/smoke-medusa-v1.mjs"
   },
   "dependencies": {
-    "@medusajs/admin": "^7.1.18",
+    "@medusajs/admin": "7.1.18",
     "ajv": "^8.12.0",
     "@medusajs/cache-redis": "1.8.9",
     "@medusajs/event-bus-redis": "1.8.9",
@@ -38,12 +42,11 @@
     "ioredis": "^5.3.2",
     "medusa-fulfillment-manual": "^1.1.9",
     "medusa-interfaces": "^1.3.7",
-    "medusa-extender": "^1.8.4",
     "medusa-payment-manual": "^1.0.9",
     "medusa-plugin-meilisearch": "1.0.4",
     "meilisearch": "^0.41.0",
     "pg": "^8.12.0",
-    "typeorm": "^0.3.20",
+    "typeorm": "0.3.20",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
@@ -60,7 +63,8 @@
     "webpackbar": "5.0.2"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "20.x",
+    "npm": ">=10 <11"
   },
   "keywords": [
     "medusa",
@@ -68,5 +72,6 @@
     "automotive",
     "cartunez"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "packageManager": "npm@10.8.2"
 }

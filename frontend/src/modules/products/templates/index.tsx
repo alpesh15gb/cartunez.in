@@ -11,7 +11,7 @@ import ProductSpecifications from "@modules/products/components/product-specific
 import ProductReviews from "@modules/products/components/product-reviews"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import { notFound } from "next/navigation"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 import ProductActionsWrapper from "./product-actions-wrapper"
 import DeliveryEstimator from "@modules/products/components/delivery-estimator"

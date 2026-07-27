@@ -1,4 +1,4 @@
-import { StorePrice } from "@medusajs/types"
+import { StorePrice } from "@lib/commerce/medusa-v1/types"
 
 export type FeaturedProduct = {
   id: string
