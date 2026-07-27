@@ -14,7 +14,7 @@ import {
   Heading,
   Text,
 } from "@modules/common/components/ui"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 
@@ -25,8 +25,8 @@ const Payment = ({
   cart: HttpTypes.StoreCart
   availablePaymentMethods: { id: string }[]
 }) => {
-  const activeSession = cart.payment_collection?.payment_sessions?.find(
-    (paymentSession) => paymentSession.status === "pending"
+  const activeSession = cart.payment_session || cart.payment_sessions?.find(
+    (paymentSession) => paymentSession.is_selected
   )
 
   const [isLoading, setIsLoading] = useState(false)

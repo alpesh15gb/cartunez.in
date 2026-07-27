@@ -1,5 +1,5 @@
 ﻿import { listProducts } from "@lib/data/products"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import ProductPreview from "@modules/products/components/product-preview"
 
 export default async function RecentlyAdded({

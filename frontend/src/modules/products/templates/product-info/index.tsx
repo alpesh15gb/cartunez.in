@@ -1,4 +1,4 @@
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { BadgeCheck, Truck } from "lucide-react"
 

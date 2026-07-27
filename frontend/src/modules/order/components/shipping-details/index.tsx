@@ -1,5 +1,5 @@
 import { convertToLocale } from "@lib/util/money"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { Heading, Text } from "@modules/common/components/ui"
 
 import Divider from "@modules/common/components/divider"

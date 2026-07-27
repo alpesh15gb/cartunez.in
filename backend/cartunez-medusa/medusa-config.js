@@ -13,9 +13,10 @@ switch (process.env.NODE_ENV) {
     ENV_FILE_NAME = ".env";
 }
 
-try {
-  dotenv.config({ path: path.resolve(__dirname, ENV_FILE_NAME) });
-} catch (err) {}
+const envResult = dotenv.config({ path: path.resolve(__dirname, ENV_FILE_NAME) });
+if (envResult.error && envResult.error.code !== "ENOENT") {
+  throw envResult.error;
+}
 
 const databaseUrl = process.env.DATABASE_URL;
 const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
@@ -33,6 +34,14 @@ if (!jwtSecret || !cookieSecret) {
   process.exit(1);
 }
 
+if (
+  process.env.NODE_ENV === "production" &&
+  (jwtSecret.length < 32 || cookieSecret.length < 32)
+) {
+  console.error("FATAL: JWT_SECRET and COOKIE_SECRET must each be at least 32 characters in production.");
+  process.exit(1);
+}
+
 const storeCors = process.env.STORE_CORS || "https://cartunez.in,https://shop.cartunez.in,http://localhost:3000,http://localhost:3001,http://localhost:5173";
 const adminCors = process.env.ADMIN_CORS || "https://cartunez.in,https://shop.cartunez.in,http://localhost:7001,http://localhost:3000,http://localhost:9000";
 
@@ -45,7 +54,8 @@ const projectConfig = {
   admin_cors: adminCors,
   jwt_secret: jwtSecret,
   cookie_secret: cookieSecret,
-  cookie_secure: process.env.COOKIE_SECURE === "true",
+  cookie_secure:
+    process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
 };
 
 /** @type {import('@medusajs/medusa').ConfigModule} */
@@ -73,7 +83,7 @@ module.exports = {
       resolve: "@medusajs/file-local",
       options: {
         upload_dir: "uploads",
-        backend_url: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000",
+        backend_url: process.env.MEDUSA_PUBLIC_URL || "http://localhost:9000",
       },
     },
     {

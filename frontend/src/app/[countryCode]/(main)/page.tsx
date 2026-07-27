@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import { Suspense } from "react"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 import Hero from "@modules/home/components/hero"
 import FeaturedCategories from "@modules/home/components/featured-categories"

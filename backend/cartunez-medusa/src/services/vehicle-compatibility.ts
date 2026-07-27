@@ -1,9 +1,7 @@
-import { Service } from "medusa-extender";
 import { TransactionBaseService } from "@medusajs/medusa";
 import { EntityManager } from "typeorm";
 import { ProductVehicleCompatibility, VehicleVariant } from "../models/vehicle";
 
-@Service()
 export class VehicleCompatibilityService extends TransactionBaseService {
   protected manager_: EntityManager;
   protected readonly container: Record<string, any>;

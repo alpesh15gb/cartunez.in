@@ -1,7 +1,7 @@
 "use server"
 
-import { sdk } from "@lib/config"
-import { HttpTypes } from "@medusajs/types"
+import { commerceClient } from "@lib/config"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 
 export const listCartShippingMethods = async (cartId: string) => {
@@ -9,7 +9,7 @@ export const listCartShippingMethods = async (cartId: string) => {
     ...(await getAuthHeaders()),
   }
 
-  return sdk.client
+  return commerceClient
     .fetch<HttpTypes.StoreShippingOptionListResponse>(
       `/store/shipping-options/${cartId}`,
       {
@@ -18,9 +18,6 @@ export const listCartShippingMethods = async (cartId: string) => {
       }
     )
     .then(({ shipping_options }) => shipping_options)
-    .catch(() => {
-      return null
-    })
 }
 
 export const calculatePriceForShippingOption = async (
@@ -42,7 +39,7 @@ export const calculatePriceForShippingOption = async (
     body.data = data
   }
 
-  return sdk.client
+  return commerceClient
     .fetch<{ shipping_option: HttpTypes.StoreCartShippingOption }>(
       `/store/shipping-options/${optionId}/calculate`,
       {
@@ -53,7 +50,4 @@ export const calculatePriceForShippingOption = async (
       }
     )
     .then(({ shipping_option }) => shipping_option)
-    .catch((_e) => {
-      return null
-    })
 }

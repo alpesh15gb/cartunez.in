@@ -2,7 +2,7 @@ import React from "react"
 
 import AddAddress from "../address-card/add-address"
 import EditAddress from "../address-card/edit-address-modal"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 type AddressBookProps = {
   customer: HttpTypes.StoreCustomer
@@ -10,7 +10,7 @@ type AddressBookProps = {
 }
 
 const AddressBook: React.FC<AddressBookProps> = ({ customer, region }) => {
-  const { addresses } = customer
+  const addresses = customer.shipping_addresses || []
   return (
     <div className="w-full">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 mt-4">

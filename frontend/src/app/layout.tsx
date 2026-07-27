@@ -1,26 +1,10 @@
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
-import { Barlow_Condensed, Inter } from "next/font/google"
 import {
   organizationJsonLd,
   websiteJsonLd,
 } from "@lib/seo/jsonld"
 import "styles/globals.css"
-
-const barlow = Barlow_Condensed({
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "800", "900"],
-  style: ["normal", "italic"],
-  variable: "--font-display",
-  display: "swap",
-})
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-sans",
-  display: "swap",
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -94,7 +78,7 @@ const jsonLd = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${barlow.variable} ${inter.variable}`}>
+    <html lang="en">
       <head>
         <script
           type="application/ld+json"

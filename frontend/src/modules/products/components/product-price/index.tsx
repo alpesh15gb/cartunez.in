@@ -1,7 +1,7 @@
 import { clx } from "@modules/common/components/ui"
 
 import { getProductPrice } from "@lib/util/get-product-price"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 export default function ProductPrice({
   product,
@@ -18,7 +18,7 @@ export default function ProductPrice({
   const selectedPrice = variant ? variantPrice : cheapestPrice
 
   if (!selectedPrice) {
-    return <div className="skeleton block h-12 w-44 rounded-xl" />
+    return <p className="text-sm font-semibold text-gray-500">Price unavailable for this region</p>
   }
 
   const isSale = selectedPrice.price_type === "sale"

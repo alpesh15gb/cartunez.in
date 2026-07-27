@@ -1,9 +1,9 @@
 "use server"
 
-import { sdk } from "@lib/config"
+import { commerceClient } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 export const retrieveOrder = async (id: string) => {
   const headers = {
@@ -14,13 +14,10 @@ export const retrieveOrder = async (id: string) => {
     ...(await getCacheOptions("orders")),
   }
 
-  return sdk.client
+  return commerceClient
     .fetch<HttpTypes.StoreOrderResponse>(`/store/orders/${id}`, {
       method: "GET",
-      query: {
-        fields:
-          "*payment_collections.payments,*items,*items.metadata,*items.variant,*items.product",
-      },
+      query: { expand: "items,items.variant,items.variant.product,shipping_methods,payments" },
       headers,
       next,
       cache: "force-cache",
@@ -42,14 +39,14 @@ export const listOrders = async (
     ...(await getCacheOptions("orders")),
   }
 
-  return sdk.client
-    .fetch<HttpTypes.StoreOrderListResponse>(`/store/orders`, {
+  return commerceClient
+    .fetch<HttpTypes.StoreOrderListResponse>(`/store/customers/me/orders`, {
       method: "GET",
       query: {
         limit,
         offset,
         order: "-created_at",
-        fields: "*items,+items.metadata,*items.variant,*items.product",
+        expand: "items,items.variant,items.variant.product",
         ...filters,
       },
       headers,
@@ -78,35 +75,17 @@ export const createTransferRequest = async (
     return { success: false, error: "Order ID is required", order: null }
   }
 
-  const headers = await getAuthHeaders()
-
-  return await sdk.store.order
-    .requestTransfer(
-      id,
-      {},
-      {
-        fields: "id, email",
-      },
-      headers
-    )
-    .then(({ order }) => ({ success: true, error: null, order }))
-    .catch((err) => ({ success: false, error: err.message, order: null }))
+  return {
+    success: false,
+    error: "Order transfer is not supported by the Medusa v1 Store API.",
+    order: null,
+  }
 }
 
-export const acceptTransferRequest = async (id: string, token: string) => {
-  const headers = await getAuthHeaders()
-
-  return await sdk.store.order
-    .acceptTransfer(id, { token }, {}, headers)
-    .then(({ order }) => ({ success: true, error: null, order }))
-    .catch((err) => ({ success: false, error: err.message, order: null }))
+export const acceptTransferRequest = async (_id: string, _token: string) => {
+  return { success: false, error: "Order transfer is not supported by the Medusa v1 Store API.", order: null }
 }
 
-export const declineTransferRequest = async (id: string, token: string) => {
-  const headers = await getAuthHeaders()
-
-  return await sdk.store.order
-    .declineTransfer(id, { token }, {}, headers)
-    .then(({ order }) => ({ success: true, error: null, order }))
-    .catch((err) => ({ success: false, error: err.message, order: null }))
+export const declineTransferRequest = async (_id: string, _token: string) => {
+  return { success: false, error: "Order transfer is not supported by the Medusa v1 Store API.", order: null }
 }
