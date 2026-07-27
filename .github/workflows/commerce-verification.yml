@@ -112,7 +112,9 @@ jobs:
       - name: Verify Meilisearch service
         run: |
           for attempt in $(seq 1 30); do
-            if curl --fail --silent --show-error http://127.0.0.1:7700/version; then
+            if curl --fail --silent --show-error \
+              -H "Authorization: Bearer ${MEILISEARCH_API_KEY}" \
+              http://127.0.0.1:7700/version; then
               exit 0
             fi
             sleep 2
