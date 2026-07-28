@@ -24,7 +24,7 @@ const Modal = ({
 }: ModalProps) => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-[75]" onClose={close}>
+      <Dialog as="div" className="relative z-[var(--z-dialog)]" onClose={close}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -37,10 +37,10 @@ const Modal = ({
           <div className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm h-screen" />
         </Transition.Child>
 
-        <div className="fixed inset-0 overflow-y-hidden">
+        <div className="fixed inset-0 overflow-y-auto overscroll-contain">
           <div
             className={clx(
-              "flex min-h-full h-full justify-center p-4 text-center",
+              "flex min-h-full justify-center p-4 text-center sm:p-6",
               {
                 "items-center": !search,
                 "items-start": search,
@@ -59,7 +59,7 @@ const Modal = ({
               <Dialog.Panel
                 data-testid={dataTestId}
                 className={clx(
-                  "flex flex-col justify-start w-full transform p-5 text-left align-middle transition-all max-h-[75vh] h-fit",
+                  "flex h-fit max-h-[calc(100dvh-2rem)] w-full transform flex-col justify-start overflow-y-auto p-5 text-left align-middle transition-all sm:max-h-[calc(100dvh-3rem)] sm:p-6",
                   {
                     "max-w-md": size === "small",
                     "max-w-xl": size === "medium",
@@ -86,7 +86,7 @@ const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <Dialog.Title className="flex items-center justify-between">
       <div className="text-large-semi">{children}</div>
       <div>
-        <button onClick={close} data-testid="close-modal-button">
+        <button className="icon-button -mr-2 text-gray-600 hover:bg-gray-100 hover:text-gray-950" onClick={close} aria-label="Close dialog" data-testid="close-modal-button">
           <X size={20} />
         </button>
       </div>

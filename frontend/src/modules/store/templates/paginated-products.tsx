@@ -72,7 +72,12 @@ export default async function PaginatedProducts({
   })
 
   if (!region) {
-    return null
+    return (
+      <div className="empty-state" role="alert">
+        <h2 className="text-xl font-bold text-gray-950">Store unavailable</h2>
+        <p className="mt-2 max-w-md text-sm leading-6 text-gray-600">We could not load pricing for your region. Please refresh the page or try again shortly.</p>
+      </div>
+    )
   }
 
   const {
@@ -121,7 +126,7 @@ export default async function PaginatedProducts({
   return (
     <>
       <ul
-        className="grid grid-cols-2 w-full xsmall:grid-cols-3 small:grid-cols-3 medium:grid-cols-4 gap-4 xsmall:gap-5 small:gap-6 medium:gap-8"
+        className="product-grid"
         data-testid="products-list"
       >
         {products.map((p) => {

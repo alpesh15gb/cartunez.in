@@ -39,7 +39,8 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
               <div className="relative flex h-full">
                 <Popover.Button
                   data-testid="nav-menu-button"
-                  className="relative h-full flex items-center gap-2 px-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors ease-out duration-200 focus:outline-none"
+                  className="icon-button relative gap-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 sm:w-auto sm:px-3"
+                  aria-label={open ? "Close navigation menu" : "Open navigation menu"}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="3" y1="6" x2="21" y2="6" />
@@ -77,12 +78,12 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
                 leaveFrom="translate-x-0"
                 leaveTo="-translate-x-full"
               >
-                <PopoverPanel className="fixed left-0 top-0 z-[51] h-full w-[320px] sm:w-[380px] max-w-[85vw] bg-carbon-dark shadow-2xl shadow-black/50 border-r border-white/[0.06] flex flex-col" data-testid="nav-menu-popup">
+                <PopoverPanel className="safe-bottom fixed left-0 top-0 z-[51] flex h-dvh max-h-dvh w-[320px] max-w-[85vw] flex-col border-r border-white/[0.06] bg-carbon-dark shadow-2xl shadow-black/50 sm:w-[380px]" data-testid="nav-menu-popup">
                   <div className="flex items-center justify-between px-6 h-16 border-b border-white/[0.06] shrink-0">
                     <LocalizedClientLink href="/" onClick={close} className="text-lg font-black uppercase tracking-tighter text-white font-display">
                       <span className="text-brand">Car</span>Tunez
                     </LocalizedClientLink>
-                    <button data-testid="close-menu-button" onClick={close} className="flex items-center justify-center w-10 h-10 rounded-[var(--radius-sm)] text-gray-500 hover:text-white hover:bg-white/[0.06] transition-all duration-200" aria-label="Close menu">
+                    <button data-testid="close-menu-button" onClick={close} className="icon-button text-gray-400 hover:bg-white/[0.06] hover:text-white" aria-label="Close navigation menu">
                       <XMark />
                     </button>
                   </div>

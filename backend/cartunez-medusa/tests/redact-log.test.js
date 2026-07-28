@@ -22,5 +22,15 @@ for (const secret of ["database-password", "secret-jwt", "secret-cookie", "secre
 }
 assert(redacted.includes("<redacted>"));
 assert(redacted.includes("<redacted-email>"));
+ codex/audit-and-restructure-cartunez.in-repository-93fec4
+
+const piped = execFileSync(process.execPath, [path.join(__dirname, "../scripts/redact-log.js"), "-", "-"], {
+  input: "Authorization: Bearer piped-secret\n",
+  encoding: "utf8",
+});
+assert(!piped.includes("piped-secret"));
+assert(piped.includes("Bearer <redacted>"));
+=======
+ main
 fs.rmSync(directory, { recursive: true, force: true });
 console.log("Medusa diagnostic log redaction checks passed");

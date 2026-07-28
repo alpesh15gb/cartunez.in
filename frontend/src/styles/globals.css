@@ -33,8 +33,18 @@
   --radius-full: 9999px;
   --shadow-card: 0 1px 3px rgba(0,0,0,0.04);
   --shadow-card-hover: 0 12px 40px rgba(0,0,0,0.10);
-  --font-display: "Barlow Condensed", sans-serif;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Offline-safe system stacks; builds never depend on a remote font host. */
+  --font-display: "Arial Narrow", "Roboto Condensed", Impact, ui-sans-serif, system-ui, sans-serif;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --layout-max: 90rem;
+  --page-gutter: clamp(1rem, 3vw, 2.5rem);
+  --section-space: clamp(3rem, 6vw, 6rem);
+  --control-height: 2.75rem;
+  --motion-fast: 150ms;
+  --motion-default: 250ms;
+  --z-header: 50;
+  --z-overlay: 70;
+  --z-dialog: 80;
 }
 
 @layer base {
@@ -46,6 +56,8 @@
   
   body {
     @apply bg-white text-gray-900 antialiased;
+    min-width: 320px;
+    overflow-x: clip;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
@@ -63,25 +75,20 @@
 
 @layer components {
   .content-container {
-    max-width: 1480px;
+    max-width: var(--layout-max);
     width: 100%;
     margin: 0 auto;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    overflow-x: hidden;
+    padding-left: var(--page-gutter);
+    padding-right: var(--page-gutter);
   }
-  @media (min-width: 640px) {
-    .content-container {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
-  }
-  @media (min-width: 1024px) {
-    .content-container {
-      padding-left: 2.5rem;
-      padding-right: 2.5rem;
-    }
-  }
+
+  .section-shell { @apply content-container; padding-top: var(--section-space); padding-bottom: var(--section-space); }
+  .page-stack { @apply flex flex-col gap-8 lg:gap-12; }
+  .product-grid { @apply grid w-full grid-cols-1 gap-5 min-[375px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 lg:gap-6; }
+  .surface-card { @apply rounded-[var(--radius-lg)] border border-gray-200 bg-white shadow-[var(--shadow-card)]; }
+  .empty-state { @apply surface-card flex min-h-80 flex-col items-center justify-center px-6 py-12 text-center; }
+  .icon-button { @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-sm)] transition-colors duration-200; }
+  .field-control { @apply min-h-11 w-full rounded-[var(--radius-sm)] border border-gray-300 bg-white px-4 text-base text-gray-900 placeholder:text-gray-400 hover:border-gray-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500; }
 
   /* Premium Button Base Styles */
   .btn-primary {
@@ -150,6 +157,16 @@
   /* Safe area for mobile */
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

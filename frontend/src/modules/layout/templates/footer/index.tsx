@@ -92,11 +92,14 @@ export default async function Footer() {
               Get exclusive access to new arrivals, special offers, and fitment tips.
             </p>
             <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <label htmlFor="footer-newsletter-email" className="sr-only">Email address</label>
               <input
+                id="footer-newsletter-email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 placeholder="Enter your email"
                 className="flex-1 h-12 px-5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand/60 transition-all duration-200"
-                aria-label="Email for newsletter"
               />
               <button
                 type="submit"
@@ -132,7 +135,7 @@ export default async function Footer() {
                     key={s.label}
                     href={s.href}
                     aria-label={s.label}
-                    className="flex items-center justify-center w-9 h-9 rounded-[var(--radius-sm)] border border-white/[0.06] text-gray-500 hover:text-white hover:border-[var(--color-brand)]/40 hover:bg-[var(--color-brand)]/10 transition-all duration-200"
+                    className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-sm)] border border-white/[0.06] text-gray-400 transition-all duration-200 hover:border-[var(--color-brand)]/40 hover:bg-[var(--color-brand)]/10 hover:text-white"
                   >
                     {s.icon}
                   </a>

@@ -20,7 +20,7 @@ export default async function ProductPreview({
   return (
     <LocalizedClientLink
       href={`/products/${product.handle}`}
-      className="group relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-[var(--radius-md)] border border-gray-200 bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:border-brand/20 hover:shadow-[var(--shadow-card-hover)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/15"
+      className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-[var(--radius-md)] border border-gray-200 bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:border-brand/20 hover:shadow-[var(--shadow-card-hover)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/15"
       data-testid="product-link"
     >
       {/* ─── Image Container - 4:5 cinematic ─────────────────────── */}
@@ -47,14 +47,6 @@ export default async function ProductPreview({
           </div>
         )}
 
-        {/* Stock Indicator */}
-        {!isOnSale && (
-          <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-emerald-700 shadow-sm ring-1 ring-emerald-200/60">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse-soft" />
-            In stock
-          </div>
-        )}
-
         {/* Quick Add to Cart Bar (bottom of image) */}
         <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
           <span className="inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-white px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider text-gray-900 shadow-sm transition-colors duration-200 group-hover:bg-brand group-hover:text-white">
@@ -70,31 +62,11 @@ export default async function ProductPreview({
       <div className="flex flex-1 flex-col justify-between gap-2.5 p-4 sm:p-5">
         <div className="space-y-1.5">
           {/* Brand Eyebrow */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className="block text-[9px] font-bold uppercase tracking-[0.18em] text-brand font-display">
               {((product.metadata || {}).brand as string) || "Cartunez"}
             </span>
-            {/* Rating */}
-            <div className="flex items-center gap-0.5">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <svg
-                  key={star}
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill={star <= 4 ? "currentColor" : "none"}
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                  className="w-2.5 h-2.5 text-yellow-500"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5z"
-                  />
-                </svg>
-              ))}
-              <span className="text-[9px] text-gray-400 ml-1 font-medium">(4.0)</span>
-            </div>
+            <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-400">View product</span>
           </div>
 
           {/* Product Title */}
@@ -122,7 +94,7 @@ export default async function ProductPreview({
                   From
                 </span>
               )}
-              {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
+              {cheapestPrice ? <PreviewPrice price={cheapestPrice} /> : <span className="text-sm font-semibold text-gray-600">Price unavailable</span>}
             </div>
 
             {/* Fitment Badge */}

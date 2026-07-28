@@ -24,8 +24,8 @@ export default async function Nav() {
   return (
     <>
       <AnnouncementBar />
-      <div className="sticky top-0 inset-x-0 z-50 group">
-        <header className="relative h-16 lg:h-[72px] mx-auto border-b duration-300 bg-white/95 border-gray-200/80 backdrop-blur-md text-gray-900 shadow-sm transition-shadow duration-300">
+      <div className="sticky top-0 inset-x-0 z-[var(--z-header)] group">
+        <header className="relative h-16 lg:h-[72px] mx-auto border-b bg-white/95 border-gray-200/80 backdrop-blur-md text-gray-900 shadow-sm transition-shadow duration-300">
           <nav className="content-container flex items-center justify-between w-full h-full gap-x-4 lg:gap-x-8">
             {/* Left: Mobile menu + Logo */}
             <div className="flex items-center gap-x-3 flex-1 lg:flex-initial">
@@ -66,7 +66,7 @@ export default async function Nav() {
               {/* Account icon */}
               <LocalizedClientLink
                 href="/account"
-                className="hidden sm:flex items-center justify-center w-10 h-10 rounded-[var(--radius-sm)] text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
+                className="icon-button hidden text-gray-500 hover:bg-gray-100 hover:text-gray-900 sm:flex"
                 aria-label="Account"
                 data-testid="nav-account-link"
               >
@@ -76,7 +76,7 @@ export default async function Nav() {
               {/* Wishlist icon */}
               <LocalizedClientLink
                 href="/account/wishlist"
-                className="hidden sm:flex items-center justify-center w-10 h-10 rounded-[var(--radius-sm)] text-gray-500 hover:text-brand hover:bg-brand/5 transition-all duration-200"
+                className="icon-button hidden text-gray-500 hover:bg-brand/5 hover:text-brand sm:flex"
                 aria-label="Wishlist"
               >
                 <Heart size={18} strokeWidth={1.5} />
@@ -85,7 +85,7 @@ export default async function Nav() {
               {/* Cart button */}
               <Suspense
                 fallback={
-                  <div className="relative flex items-center justify-center w-10 h-10 rounded-[var(--radius-sm)] text-gray-500">
+                  <div className="icon-button relative text-gray-500" role="status" aria-label="Loading cart">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
                       <line x1="3" y1="6" x2="21" y2="6" />
