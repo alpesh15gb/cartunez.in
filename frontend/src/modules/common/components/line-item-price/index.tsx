@@ -1,6 +1,6 @@
 import { getPercentageDiff } from "@lib/util/get-percentage-diff"
 import { convertToLocale } from "@lib/util/money"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { clx } from "@modules/common/components/ui"
 
 type LineItemPriceProps = {

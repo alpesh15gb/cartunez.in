@@ -2,7 +2,7 @@
 
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { Button } from "@modules/common/components/ui"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
@@ -13,6 +13,7 @@ import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
 import { useRouter } from "next/navigation"
 import { ShoppingCart, Zap, CheckCircle, XCircle } from "lucide-react"
+import { getPricesForVariant } from "@lib/util/get-product-price"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -120,6 +121,7 @@ export default function ProductActions({
   }, [selectedVariant])
 
   const actionsRef = useRef<HTMLDivElement>(null)
+  const hasRegionalPrice = selectedVariant ? Boolean(getPricesForVariant(selectedVariant)) : false
 
   const inView = useIntersection(actionsRef, "0px")
 
@@ -162,6 +164,7 @@ export default function ProductActions({
   const getButtonLabel = () => {
     if (!selectedVariant && !Object.keys(options).length) return "Select variant"
     if (!isValidVariant) return "Select options"
+    if (!hasRegionalPrice) return "Price unavailable"
     if (!inStock) return "Out of stock"
     return "Add to cart"
   }
@@ -235,7 +238,8 @@ export default function ProductActions({
             !selectedVariant ||
             !!disabled ||
             isAdding ||
-            !isValidVariant
+            !isValidVariant ||
+            !hasRegionalPrice
           }
           variant="primary"
           className="group relative h-14 w-full overflow-hidden rounded-2xl bg-gradient-to-r from-brand to-brand/90 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-brand/25 transition-all duration-300 hover:shadow-xl hover:shadow-brand/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:shadow-none"
@@ -263,7 +267,8 @@ export default function ProductActions({
             !selectedVariant ||
             !!disabled ||
             isAdding ||
-            !isValidVariant
+            !isValidVariant ||
+            !hasRegionalPrice
           }
           variant="secondary"
           className="group relative h-13 w-full overflow-hidden rounded-2xl border-2 border-gray-900 bg-transparent text-xs font-bold uppercase tracking-wider text-gray-900 transition-all duration-300 hover:bg-gray-900 hover:text-white disabled:opacity-50"
@@ -279,7 +284,7 @@ export default function ProductActions({
           variant={selectedVariant}
           options={options}
           updateOptions={setOptionValue}
-          inStock={inStock}
+          inStock={inStock && hasRegionalPrice}
           handleAddToCart={handleAddToCart}
           isAdding={isAdding}
           show={!inView}

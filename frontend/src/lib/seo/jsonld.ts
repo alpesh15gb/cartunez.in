@@ -84,7 +84,7 @@ export function productJsonLd(product: {
   description?: string | null
   thumbnail?: string | null
   url: string
-  price: number
+  price?: number
   currency: string
   availability?: "InStock" | "OutOfStock" | "PreOrder"
   brand?: string
@@ -106,13 +106,13 @@ export function productJsonLd(product: {
         name: product.brand,
       },
     }),
-    offers: {
+    ...(product.price !== undefined && { offers: {
       "@type": "Offer",
       url: product.url,
       priceCurrency: product.currency,
       price: product.price,
       availability: `https://schema.org/${product.availability || "InStock"}`,
-    },
+    } }),
     ...(product.reviews && {
       aggregateRating: {
         "@type": "AggregateRating",

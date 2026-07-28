@@ -1,4 +1,4 @@
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import ProductRail from "@modules/home/components/featured-products/product-rail"
 
 export default async function FeaturedProducts({

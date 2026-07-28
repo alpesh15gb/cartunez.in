@@ -79,6 +79,14 @@ export default class ApexbooksIntegrationService extends TransactionBaseService 
     this.integrationService_ = container.integrationService;
     this.dbConfigLoaded_ = false;
     this.config_ = this.loadBaseConfig();
+    if (
+      this.config_.enabled &&
+      (!this.config_.baseUrl || !this.config_.apiKey || !this.config_.tenantId)
+    ) {
+      throw new Error(
+        "ApexBooks is enabled but APEXBOOKS_BASE_URL, APEXBOOKS_API_KEY, or APEXBOOKS_TENANT_ID is missing"
+      );
+    }
   }
 
   private loadBaseConfig(): ApexBooksConfig {

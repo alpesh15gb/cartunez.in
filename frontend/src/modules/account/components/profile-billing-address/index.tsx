@@ -6,7 +6,7 @@ import Input from "@modules/common/components/input"
 import NativeSelect from "@modules/common/components/native-select"
 
 import { addCustomerAddress, updateCustomerAddress } from "@lib/data/customer"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import AccountInfo from "../account-info"
 
 type MyInformationProps = {
@@ -33,7 +33,7 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
 
   const [successState, setSuccessState] = React.useState(false)
 
-  const billingAddress = customer.addresses?.find(
+  const billingAddress = customer.shipping_addresses?.find(
     (addr) => addr.is_default_billing
   )
 

@@ -4,7 +4,7 @@ import Package from "@modules/common/icons/package"
 import MapPin from "@modules/common/icons/map-pin"
 import User from "@modules/common/icons/user"
 import { convertToLocale } from "@lib/util/money"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 type OverviewProps = {
   customer: HttpTypes.StoreCustomer | null
@@ -13,7 +13,7 @@ type OverviewProps = {
 
 const Overview = ({ customer, orders }: OverviewProps) => {
   const profileCompletion = getProfileCompletion(customer)
-  const addressCount = customer?.addresses?.length || 0
+  const addressCount = customer?.shipping_addresses?.length || 0
   const orderCount = orders?.length || 0
 
   const quickActions = [
@@ -296,7 +296,7 @@ const getProfileCompletion = (customer: HttpTypes.StoreCustomer | null) => {
     count++
   }
 
-  const billingAddress = customer.addresses?.find(
+  const billingAddress = customer.shipping_addresses?.find(
     (addr) => addr.is_default_billing
   )
 

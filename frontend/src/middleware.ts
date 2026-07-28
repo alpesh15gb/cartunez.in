@@ -1,8 +1,7 @@
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { NextRequest, NextResponse } from "next/server"
 
 const BACKEND_URL = process.env.MEDUSA_BACKEND_URL || process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
-const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "in"
 
 const regionMapCache = {
@@ -40,9 +39,6 @@ async function getRegionMap(cacheId: string) {
     try {
       const response = await fetch(`${BACKEND_URL}/store/regions`, {
         method: "GET",
-        headers: {
-          "x-publishable-api-key": PUBLISHABLE_API_KEY!,
-        },
         next: {
           revalidate: 3600,
           tags: [`regions-${cacheId}`],

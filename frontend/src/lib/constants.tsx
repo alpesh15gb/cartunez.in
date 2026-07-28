@@ -13,6 +13,10 @@ export const paymentInfoMap: Record<
     title: "Credit card",
     icon: <CreditCard />,
   },
+  stripe: {
+    title: "Credit card",
+    icon: <CreditCard />,
+  },
   "pp_medusa-payments_default": {
     title: "Credit card",
     icon: <CreditCard />,
@@ -33,13 +37,17 @@ export const paymentInfoMap: Record<
     title: "Manual Payment",
     icon: <CreditCard />,
   },
+  manual: {
+    title: "Manual Payment",
+    icon: <CreditCard />,
+  },
   // Add more payment providers here
 }
 
 // This only checks if it is native stripe or medusa payments for card payments, it ignores the other stripe-based providers
 export const isStripeLike = (providerId?: string) => {
   return (
-    providerId?.startsWith("pp_stripe_") || providerId?.startsWith("pp_medusa-")
+    providerId === "stripe" || providerId?.startsWith("pp_stripe_") || providerId?.startsWith("pp_medusa-")
   )
 }
 
@@ -47,7 +55,7 @@ export const isPaypal = (providerId?: string) => {
   return providerId?.startsWith("pp_paypal")
 }
 export const isManual = (providerId?: string) => {
-  return providerId?.startsWith("pp_system_default")
+  return providerId === "manual" || providerId?.startsWith("pp_system_default")
 }
 
 // Add currencies that don't need to be divided by 100

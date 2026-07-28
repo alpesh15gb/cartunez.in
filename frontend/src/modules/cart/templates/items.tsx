@@ -1,5 +1,5 @@
 import repeat from "@lib/util/repeat"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { Heading } from "@modules/common/components/ui"
 
 import Item from "@modules/cart/components/item"

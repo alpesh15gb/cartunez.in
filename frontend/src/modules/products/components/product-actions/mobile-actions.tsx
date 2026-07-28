@@ -7,7 +7,7 @@ import { ChevronDown, X } from "lucide-react"
 
 import { getProductPrice } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { isSimpleProduct } from "@lib/util/product"
 
 type MobileActionsProps = {

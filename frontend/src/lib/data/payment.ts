@@ -1,8 +1,8 @@
 "use server"
 
-import { sdk } from "@lib/config"
+import { commerceClient } from "@lib/config"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 export const listCartPaymentMethods = async (regionId: string) => {
   const headers = {
@@ -13,7 +13,7 @@ export const listCartPaymentMethods = async (regionId: string) => {
     ...(await getCacheOptions("payment_providers")),
   }
 
-  return sdk.client
+  return commerceClient
     .fetch<HttpTypes.StorePaymentProviderListResponse>(
       `/store/payment-providers`,
       {
@@ -29,7 +29,4 @@ export const listCartPaymentMethods = async (regionId: string) => {
         return a.id > b.id ? 1 : -1
       })
     )
-    .catch(() => {
-      return null
-    })
 }

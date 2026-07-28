@@ -4,8 +4,8 @@ import * as Accordion from "@radix-ui/react-accordion"
 import { useEffect, useState } from "react"
 import { ChevronDown } from "lucide-react"
 
-import { sdk } from "@lib/config"
-import { HttpTypes } from "@medusajs/types"
+import { commerceClient } from "@lib/config"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import clsx from "clsx"
 
 type OptionsPickerProps = {
@@ -23,7 +23,7 @@ const OptionsPicker = ({
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const response = await sdk.client.fetch<{
+        const response = await commerceClient.fetch<{
           product_options?: HttpTypes.StoreProductOption[]
         }>("/store/product-options", {
           method: "GET",

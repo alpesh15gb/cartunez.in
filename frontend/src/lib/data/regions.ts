@@ -1,7 +1,7 @@
 "use server"
 
-import { sdk } from "@lib/config"
-import { HttpTypes } from "@medusajs/types"
+import { commerceClient } from "@lib/config"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { getCacheOptions } from "./cookies"
 
 export const listRegions = async () => {
@@ -9,7 +9,7 @@ export const listRegions = async () => {
     ...(await getCacheOptions("regions")),
   }
 
-  return await sdk.client
+  return await commerceClient
     .fetch<{ regions: HttpTypes.StoreRegion[] }>(`/store/regions`, {
       method: "GET",
       next,
@@ -23,7 +23,7 @@ export const retrieveRegion = async (id: string) => {
     ...(await getCacheOptions(["regions", id].join("-"))),
   }
 
-  return await sdk.client
+  return await commerceClient
     .fetch<{ region: HttpTypes.StoreRegion }>(`/store/regions/${id}`, {
       method: "GET",
       next,

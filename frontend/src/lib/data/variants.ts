@@ -1,7 +1,7 @@
 "use server"
 
-import { sdk } from "@lib/config"
-import { HttpTypes } from "@medusajs/types"
+import { commerceClient } from "@lib/config"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 
@@ -20,14 +20,12 @@ export const retrieveVariant = async (
     ...(await getCacheOptions("variants")),
   }
 
-  return await sdk.client
+  return await commerceClient
     .fetch<{ variant: HttpTypes.StoreProductVariant }>(
       `/store/product-variants/${variant_id}`,
       {
         method: "GET",
-        query: {
-          fields: "*images",
-        },
+        query: { expand: "images,product" },
         headers,
         next,
         cache: "force-cache",

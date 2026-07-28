@@ -24,7 +24,7 @@ interface VehicleYear {
   model_id: string
   year: number
 }
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 interface VehicleCompatibilityProps {
   product: HttpTypes.StoreProduct

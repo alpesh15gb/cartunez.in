@@ -2,7 +2,7 @@
 
 import { Text } from "@modules/common/components/ui"
 import { updateLineItem } from "@lib/data/cart"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import DeleteButton from "@modules/common/components/delete-button"
 import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
@@ -46,7 +46,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
     return (
       <div className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-b-0 group" data-testid="product-row">
         <LocalizedClientLink
-          href={`/products/${item.product_handle}`}
+          href={`/products/${item.variant?.product?.handle || ""}`}
           className="w-14 h-14 shrink-0 rounded-[var(--radius-sm)] overflow-hidden bg-gray-50"
         >
           <Thumbnail
@@ -60,7 +60,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
             className="text-sm font-medium text-gray-900 truncate"
             data-testid="product-title"
           >
-            {item.product_title}
+            {item.title}
           </Text>
           <LineItemOptions variant={item.variant} data-testid="product-variant" />
           <div className="flex items-center gap-2 mt-0.5">
@@ -82,7 +82,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
     >
       {/* Thumbnail */}
       <LocalizedClientLink
-        href={`/products/${item.product_handle}`}
+        href={`/products/${item.variant?.product?.handle || ""}`}
         className="w-full sm:w-24 h-24 shrink-0 rounded-[var(--radius-md)] overflow-hidden bg-gray-100"
       >
         <Thumbnail
@@ -95,12 +95,12 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
       {/* Details */}
       <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-start gap-3">
         <div className="flex-1 min-w-0">
-          <LocalizedClientLink href={`/products/${item.product_handle}`}>
+          <LocalizedClientLink href={`/products/${item.variant?.product?.handle || ""}`}>
             <Text
               className="text-base font-semibold text-gray-900 hover:text-[var(--color-brand)] transition-colors truncate"
               data-testid="product-title"
             >
-              {item.product_title}
+              {item.title}
             </Text>
           </LocalizedClientLink>
           <LineItemOptions variant={item.variant} data-testid="product-variant" />
@@ -116,14 +116,15 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           {/* Quantity selector - premium style */}
           <div className="flex items-center border border-gray-200 rounded-[var(--radius-sm)] overflow-hidden bg-gray-50/50">
             <button
-              className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-gray-900 hover:bg-white transition-colors disabled:opacity-30 active:bg-gray-100"
+              className="flex h-11 w-11 items-center justify-center text-gray-500 transition-colors hover:bg-white hover:text-gray-900 active:bg-gray-100 disabled:opacity-30"
               onClick={() => changeQuantity(item.quantity - 1)}
               disabled={item.quantity <= 1 || updating}
+              aria-label={`Decrease quantity of ${item.title}`}
               data-testid="product-decrement-button"
             >
               <Minus size={14} strokeWidth={2} />
             </button>
-            <span className="flex items-center justify-center w-10 h-9 text-sm font-semibold text-gray-900 border-x border-gray-200 bg-white">
+            <span className="flex h-11 w-11 items-center justify-center border-x border-gray-200 bg-white text-sm font-semibold text-gray-900" aria-live="polite" aria-label={`Quantity: ${item.quantity}`}>
               {updating ? (
                 <Spinner />
               ) : (
@@ -131,9 +132,10 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
               )}
             </span>
             <button
-              className="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-gray-900 hover:bg-white transition-colors disabled:opacity-30 active:bg-gray-100"
+              className="flex h-11 w-11 items-center justify-center text-gray-500 transition-colors hover:bg-white hover:text-gray-900 active:bg-gray-100 disabled:opacity-30"
               onClick={() => changeQuantity(item.quantity + 1)}
               disabled={item.quantity >= maxQuantity || updating}
+              aria-label={`Increase quantity of ${item.title}`}
               data-testid="product-increment-button"
             >
               <Plus size={14} strokeWidth={2} />
@@ -152,7 +154,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
       </div>
 
       {error && (
-        <div className="col-span-full text-sm text-rose-500 mt-1 bg-rose-50/50 px-3 py-2 rounded-[var(--radius-sm)]" data-testid="product-error-message">
+        <div role="alert" className="col-span-full text-sm text-rose-700 mt-1 bg-rose-50/50 px-3 py-2 rounded-[var(--radius-sm)]" data-testid="product-error-message">
           {error}
         </div>
       )}

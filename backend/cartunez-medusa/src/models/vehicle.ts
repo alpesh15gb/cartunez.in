@@ -125,7 +125,9 @@ export class ProductVehicleCompatibility {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: "uuid" })
+  // Medusa product IDs are string identifiers (for example, `prod_...`), not UUIDs.
+  // Keep this metadata aligned with the existing migration's `text` column.
+  @Column({ type: "text" })
   @Index()
   product_id: string;
 

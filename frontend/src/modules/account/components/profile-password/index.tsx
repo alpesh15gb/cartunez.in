@@ -3,7 +3,7 @@
 import React from "react"
 import Input from "@modules/common/components/input"
 import AccountInfo from "../account-info"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer

@@ -5,6 +5,7 @@ node_modules/
 
 # Testing
 /coverage
+/.commerce-test
 
 # Next.js
 /.next/

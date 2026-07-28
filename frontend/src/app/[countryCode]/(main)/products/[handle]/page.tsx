@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { getBaseURL } from "@lib/util/env"
 import { productJsonLd } from "@lib/seo/jsonld"
 export const dynamic = "force-dynamic"
@@ -104,21 +104,15 @@ export default async function ProductPage(props: Props) {
 
   // Generate product JSON-LD
   const cheapestVariant = pricedProduct.variants?.reduce((min, v) => {
-    const price =
-      (v as any).calculated_price ||
-      ((v as any).prices?.[0] as any)?.amount ||
-      0
-    const minPrice =
-      (min as any).calculated_price ||
-      ((min as any).prices?.[0] as any)?.amount ||
-      0
+    const price = v.calculated_price ?? Number.POSITIVE_INFINITY
+    const minPrice = min.calculated_price ?? Number.POSITIVE_INFINITY
     return price < minPrice ? v : min
   }, pricedProduct.variants?.[0])
 
-  const productPrice =
-    (cheapestVariant as any)?.calculated_price ||
-    ((cheapestVariant as any)?.prices?.[0] as any)?.amount ||
-    0
+  const productPrice = cheapestVariant?.calculated_price
+  const brand = typeof pricedProduct.metadata?.brand === "string"
+    ? pricedProduct.metadata.brand
+    : "Cartunez"
 
   const productLd = productJsonLd({
     id: pricedProduct.id,
@@ -126,15 +120,15 @@ export default async function ProductPage(props: Props) {
     description: pricedProduct.description,
     thumbnail: pricedProduct.thumbnail,
     url: `${getBaseURL()}/products/${pricedProduct.handle}`,
-    price: productPrice / 100,
-    currency: "INR",
+    price: productPrice === undefined ? undefined : productPrice / 100,
+    currency: region.currency_code.toUpperCase(),
     availability:
       pricedProduct.variants?.some(
         (v) => v.manage_inventory && (v.inventory_quantity || 0) > 0
       )
         ? "InStock"
         : "OutOfStock",
-    brand: (pricedProduct as any).brand || "Cartunez",
+    brand,
     sku: cheapestVariant?.sku || undefined,
   })
 
@@ -153,4 +147,3 @@ export default async function ProductPage(props: Props) {
     </>
   )
 }
-

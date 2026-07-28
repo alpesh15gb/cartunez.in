@@ -11,7 +11,7 @@ import ProductSpecifications from "@modules/products/components/product-specific
 import ProductReviews from "@modules/products/components/product-reviews"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import { notFound } from "next/navigation"
-import { HttpTypes } from "@medusajs/types"
+import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 import ProductActionsWrapper from "./product-actions-wrapper"
 import DeliveryEstimator from "@modules/products/components/delivery-estimator"
@@ -20,7 +20,6 @@ import {
   ShieldCheck,
   Wrench,
   Headphones,
-  CheckCircle,
 } from "lucide-react"
 
 type ProductTemplateProps = {
@@ -87,56 +86,39 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                 </Suspense>
               </div>
 
-              {/* ── Premium Trust Badges ── */}
+              {/* ── Purchase support ── */}
               <div className="mt-8 space-y-4 border-t border-gray-100 pt-6">
-                <div className="flex items-center gap-4 rounded-2xl bg-gradient-to-r from-brand/5 to-brand/10 p-4 ring-1 ring-brand/15">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-lg shadow-brand/25">
-                    <ShieldCheck size={22} strokeWidth={2.5} />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">100% Quality Guarantee</span>
-                    <p className="mt-0.5 text-[11px] text-gray-500 leading-relaxed">Every product is tested for quality and fitment. 30-day hassle-free returns.</p>
-                  </div>
-                </div>
-
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-3.5 transition-all hover:border-gray-200 hover:bg-gray-50">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/5 text-brand"><ShieldCheck size={18} /></div>
                     <div>
-                      <span className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">Premium Warranty</span>
-                      <p className="mt-0.5 text-[10px] text-gray-500 leading-relaxed">1-year manufacturer warranty. Full coverage against defects.</p>
+                      <span className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">Secure checkout</span>
+                      <p className="mt-0.5 text-[10px] text-gray-500 leading-relaxed">Review your order, delivery details, and payment before purchase.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-3.5 transition-all hover:border-gray-200 hover:bg-gray-50">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/5 text-brand"><Wrench size={18} /></div>
                     <div>
-                      <span className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">Fitment Guarantee</span>
-                      <p className="mt-0.5 text-[10px] text-gray-500 leading-relaxed">Vehicle-specific fitment verified before dispatch.</p>
+                      <span className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">Check compatibility</span>
+                      <p className="mt-0.5 text-[10px] text-gray-500 leading-relaxed">Use the vehicle compatibility information below before ordering.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-3.5 transition-all hover:border-gray-200 hover:bg-gray-50">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/5 text-brand"><Headphones size={18} /></div>
                     <div>
-                      <span className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">Installation Support</span>
-                      <p className="mt-0.5 text-[10px] text-gray-500 leading-relaxed">Free expert guidance via chat or phone.</p>
+                      <span className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">Need assistance?</span>
+                      <p className="mt-0.5 text-[10px] text-gray-500 leading-relaxed">Contact support if you need product or installation information.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-3.5 transition-all hover:border-gray-200 hover:bg-gray-50">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/5 text-brand"><Truck size={18} /></div>
                     <div>
-                      <span className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">Free Express Shipping</span>
-                      <p className="mt-0.5 text-[10px] text-gray-500 leading-relaxed">Free shipping above ₹999. Delivered in 3–7 days.</p>
+                      <span className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">Delivery estimate</span>
+                      <p className="mt-0.5 text-[10px] text-gray-500 leading-relaxed">Enter your postal code below to check the available estimate.</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-gradient-to-r from-brand/5 to-brand/10 p-4 text-center ring-1 ring-brand/15">
-                  <div className="flex items-center justify-center gap-2">
-                    <CheckCircle size={16} className="text-brand" />
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand">10,000+ Happy Automotive Enthusiasts</p>
-                  </div>
-                  <p className="mt-1 text-[11px] text-gray-600 leading-relaxed">India&apos;s trusted destination for premium car &amp; bike accessories.</p>
-                </div>
               </div>
 
               {/* ── Delivery Estimator ── */}
