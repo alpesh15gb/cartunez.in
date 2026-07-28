@@ -12,7 +12,7 @@
     "build": "next build",
     "start": "next start -p 8000",
     "lint": "next lint",
-    "test": "rm -rf .commerce-test && tsc --outDir .commerce-test --module commonjs --target ES2021 --lib ES2021,DOM --types node --esModuleInterop --skipLibCheck src/lib/commerce/medusa-v1/*.ts && node --test tests/commerce/*.cjs",
+    "test": "node -e \"fs.rmSync('.commerce-test', { recursive: true, force: true })\" && tsc --outDir .commerce-test --module commonjs --target ES2021 --lib ES2021,DOM --types node --esModuleInterop --skipLibCheck src/lib/commerce/medusa-v1/index.ts && node --test tests/commerce/medusa-v1.test.cjs tests/commerce/ui-foundations.test.cjs",
     "smoke:medusa": "node scripts/smoke-medusa-v1.mjs",
     "analyze": "ANALYZE=true next build"
   },
