@@ -29,7 +29,6 @@ const OptionsPicker = ({
           method: "GET",
           query: {
             is_exclusive: false,
-            fields: "*values",
           },
         })
 

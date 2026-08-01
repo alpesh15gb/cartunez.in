@@ -27,14 +27,16 @@ export const listCollections = async (
     ...(await getCacheOptions("collections")),
   }
 
-  queryParams.limit = queryParams.limit || "100"
-  queryParams.offset = queryParams.offset || "0"
+  // Medusa v1 store API rejects the v2-only `fields` query param
+  const { fields: _fields, ...nativeQuery } = queryParams
+  nativeQuery.limit = nativeQuery.limit || "100"
+  nativeQuery.offset = nativeQuery.offset || "0"
 
   return await commerceClient
     .fetch<{ collections: HttpTypes.StoreCollection[]; count: number }>(
       "/store/collections",
       {
-        query: queryParams,
+        query: nativeQuery,
         next,
         cache: "force-cache",
       }

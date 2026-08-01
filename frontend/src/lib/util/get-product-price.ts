@@ -21,6 +21,15 @@ function resolveAmount(variant: VariantWithPrice): { amount: number; currency: s
     }
   }
 
+  // Medusa v1 does not return `calculated_price`; fall back to the first listed price
+  const price = variant.prices && variant.prices[0]
+  if (price && typeof price.amount === "number" && price.currency_code) {
+    return {
+      amount: price.amount,
+      currency: price.currency_code,
+    }
+  }
+
   return null
 }
 
