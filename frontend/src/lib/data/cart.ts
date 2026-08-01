@@ -16,6 +16,19 @@ import {
 import { getRegion } from "./regions"
 
 /**
+ * Medusa v1 carts don't expose a top-level `currency_code` — it lives on
+ * `cart.region.currency_code`. The storefront's v2-shaped components read
+ * `cart.currency_code`, so populate it to keep prices formatted correctly.
+ */
+function withCurrencyCode(
+  cart: HttpTypes.StoreCart | null
+): HttpTypes.StoreCart | null {
+  if (!cart) return cart
+  if (cart.currency_code) return cart
+  return { ...cart, currency_code: cart.region?.currency_code ?? cart.currency_code }
+}
+
+/**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
  * @param cartId - optional - The ID of the cart to retrieve.
  * @returns The cart object if found, or null if not found.
@@ -37,7 +50,7 @@ export async function retrieveCart(cartId?: string) {
       headers,
       cache: "no-store",
     })
-    .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart)
+    .then(({ cart }: { cart: HttpTypes.StoreCart }) => withCurrencyCode(cart))
     .catch(async (error: unknown) => {
       if (error instanceof CommerceApiError && error.cartExpired) {
         await removeCartId()
@@ -83,7 +96,7 @@ export async function getOrSetCart(countryCode: string) {
     revalidateTag(cartCacheTag)
   }
 
-  return cart
+  return withCurrencyCode(cart)
 }
 
 export async function updateCart(data: HttpTypes.StoreUpdateCart) {
@@ -106,7 +119,7 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
       const fulfillmentCacheTag = await getCacheTag("fulfillment")
       revalidateTag(fulfillmentCacheTag)
 
-      return cart
+      return withCurrencyCode(cart)
     })
     .catch(medusaError)
 }
