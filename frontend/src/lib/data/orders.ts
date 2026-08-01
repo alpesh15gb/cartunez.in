@@ -17,7 +17,7 @@ export const retrieveOrder = async (id: string) => {
   return commerceClient
     .fetch<HttpTypes.StoreOrderResponse>(`/store/orders/${id}`, {
       method: "GET",
-      query: { expand: "items,items.variant,items.variant.product,shipping_methods,payments" },
+      query: { expand: "items,items.variant,shipping_methods,payments" },
       headers,
       next,
       cache: "force-cache",
