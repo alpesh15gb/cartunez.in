@@ -1,5 +1,6 @@
 "use server"
 
+import { CommerceApiError } from "@lib/commerce/medusa-v1"
 import { commerceClient } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
@@ -46,7 +47,7 @@ export const listOrders = async (
         limit,
         offset,
         order: "-created_at",
-        expand: "items,items.variant,items.variant.product",
+        expand: "items,items.variant",
         ...filters,
       },
       headers,
@@ -54,7 +55,12 @@ export const listOrders = async (
       cache: "force-cache",
     })
     .then(({ orders }) => orders)
-    .catch((err) => medusaError(err))
+    .catch((err) => {
+      // Unauthenticated (guest on an account page): don't crash the server
+      // render — the account layout routes guests to login.
+      if (err instanceof CommerceApiError && err.status === 401) return []
+      throw medusaError(err)
+    })
 }
 
 export const createTransferRequest = async (
