@@ -176,8 +176,8 @@ async function main() {
               [img.servePath]
             );
             await manager.query(
-              // product_images is a join table with composite PK (product_id, image_id); no id column
-              "INSERT INTO product_images (product_id, image_id, created_at, updated_at) VALUES ($1, $2, NOW(), NOW()) ON CONFLICT DO NOTHING",
+              // product_images is a bare join table: composite PK (product_id, image_id), no timestamps
+              "INSERT INTO product_images (product_id, image_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
               [productId, imgRes[0].id]
             );
             imagesInserted++;
