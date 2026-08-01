@@ -77,6 +77,7 @@ async function main() {
     "SELECT handle FROM product WHERE metadata->>'source' = 'sahibacar.in'"
   );
   var existingHandles = {};
+  var seenSkus = {};
   existingProducts.forEach(function(p) { existingHandles[p.handle] = true; });
   console.log("Found " + existingProducts.length + " existing SahibaCar products\n");
 
@@ -88,7 +89,7 @@ async function main() {
   for (var i = 0; i < data.products.length; i++) {
     var product = data.products[i];
 
-    if (existingHandles[product.handle]) {
+    if (existingHandles[product.handle] || (product.sku && seenSkus[product.sku])) {
       skipped++;
       continue;
     }
@@ -175,7 +176,8 @@ async function main() {
               [img.servePath]
             );
             await manager.query(
-              "INSERT INTO product_images (id, product_id, image_id, created_at, updated_at) VALUES (gen_random_uuid(), $1, $2, NOW(), NOW())",
+              // product_images is a join table with composite PK (product_id, image_id); no id column
+              "INSERT INTO product_images (product_id, image_id, created_at, updated_at) VALUES ($1, $2, NOW(), NOW()) ON CONFLICT DO NOTHING",
               [productId, imgRes[0].id]
             );
             imagesInserted++;
@@ -187,9 +189,10 @@ async function main() {
         console.error("  No images for product '" + product.title + "' - data integrity issue");
       }
 
-      // Mark as seen so near-duplicate handles later in the source data are
+      // Mark as seen so near-duplicate handles/SKUs later in the source data are
       // skipped instead of tripping the unique constraint.
       existingHandles[product.handle] = true;
+      if (product.sku) seenSkus[product.sku] = true;
       created++;
       if (created % 10 === 0) {
         console.log("  Imported " + created + " products...");
