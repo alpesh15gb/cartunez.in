@@ -17,7 +17,7 @@ async function main() {
   var manager = container.resolve("manager");
 
   // Find sahibacar product IDs
-  var products = await manager.query("SELECT id FROM product WHERE handle LIKE 'sahibacar-%'");
+  var products = await manager.query("SELECT id FROM product WHERE metadata->>'source' = 'sahibacar.in'");
   console.log("Found " + products.length + " products");
 
   if (products.length === 0) {
@@ -56,7 +56,7 @@ async function main() {
   await safeQuery("DELETE FROM product WHERE id IN (" + ph + ")", ids);
 
   // Verify deletion
-  var remaining = await manager.query("SELECT COUNT(*) as cnt FROM product WHERE handle LIKE 'sahibacar-%'");
+  var remaining = await manager.query("SELECT COUNT(*) as cnt FROM product WHERE metadata->>'source' = 'sahibacar.in'");
   console.log("Remaining: " + remaining[0].cnt + " products");
   console.log("Done!");
 

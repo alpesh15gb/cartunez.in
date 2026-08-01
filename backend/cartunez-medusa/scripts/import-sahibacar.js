@@ -169,9 +169,14 @@ async function main() {
         for (var imgIdx = 0; imgIdx < product.images.length; imgIdx++) {
           var img = product.images[imgIdx];
           try {
+            // Medusa v1 stores gallery images in `image` + `product_images` (join)
+            var imgRes = await manager.query(
+              "INSERT INTO image (id, url, metadata, created_at, updated_at) VALUES (gen_random_uuid(), $1, '{}', NOW(), NOW()) RETURNING id",
+              [img.servePath]
+            );
             await manager.query(
-              "INSERT INTO product_image (id, product_id, url, rank, created_at, updated_at) VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW())",
-              [productId, img.servePath, imgIdx]
+              "INSERT INTO product_images (id, product_id, image_id, created_at, updated_at) VALUES (gen_random_uuid(), $1, $2, NOW(), NOW())",
+              [productId, imgRes[0].id]
             );
             imagesInserted++;
           } catch (imgErr) {
@@ -182,6 +187,9 @@ async function main() {
         console.error("  No images for product '" + product.title + "' - data integrity issue");
       }
 
+      // Mark as seen so near-duplicate handles later in the source data are
+      // skipped instead of tripping the unique constraint.
+      existingHandles[product.handle] = true;
       created++;
       if (created % 10 === 0) {
         console.log("  Imported " + created + " products...");
