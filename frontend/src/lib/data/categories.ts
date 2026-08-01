@@ -16,7 +16,9 @@ export const listCategories = async (query?: Record<string, unknown>) => {
       {
         query: {
           expand:
-            "category_children,products,parent_category,parent_category.parent_category",
+            // parent_category.parent_category is not a valid relation in this
+            // Medusa v1 schema and makes the endpoint return 500
+            "category_children,products,parent_category",
           limit,
           ...nativeQuery,
         },

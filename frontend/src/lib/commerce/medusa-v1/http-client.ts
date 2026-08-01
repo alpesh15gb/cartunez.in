@@ -23,8 +23,16 @@ function queryString(query?: Record<string, unknown>) {
   const params = new URLSearchParams()
   Object.entries(query || {}).forEach(([key, value]) => {
     if (value === undefined || value === null || value === "") return
-    const values = Array.isArray(value) ? value : [value]
-    values.forEach((entry) => params.append(key, String(entry)))
+    if (Array.isArray(value)) {
+      // Medusa v1 parses array params as `key[]=a&key[]=b`; without the
+      // brackets a single value arrives as a string and validation fails.
+      value.forEach((entry) => {
+        if (entry === undefined || entry === null || entry === "") return
+        params.append(`${key}[]`, String(entry))
+      })
+      return
+    }
+    params.append(key, String(value))
   })
   const encoded = params.toString()
   return encoded ? `?${encoded}` : ""
