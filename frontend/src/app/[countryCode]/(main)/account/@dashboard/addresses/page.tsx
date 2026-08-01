@@ -1,5 +1,4 @@
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
 
 import AddressBook from "@modules/account/components/address-book"
 
@@ -20,7 +19,7 @@ export default async function Addresses(props: {
   const region = await getRegion(countryCode)
 
   if (!customer || !region) {
-    notFound()
+    return null
   }
 
   return (
