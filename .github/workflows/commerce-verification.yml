@@ -89,7 +89,6 @@ jobs:
         working-directory: backend/cartunez-medusa
       - name: Verify PostgreSQL service
         run: |
- codex/audit-and-restructure-cartunez.in-repository-93fec4
           set -euo pipefail
           echo '+ docker ps --all'
           docker ps --all
@@ -116,36 +115,10 @@ jobs:
               --fail \
               --silent \
               --show-error \
-          docker exec "${{ job.services.postgres.id }}" postgres --version
-          for attempt in $(seq 1 30); do
-            if docker exec "${{ job.services.postgres.id }}" pg_isready -U postgres -d cartunez_ci; then
-              exit 0
-            fi
-            sleep 2
-          done
-          docker logs "${{ job.services.postgres.id }}" || true
-          exit 1
-      - name: Verify Redis service
-        run: |
-          docker exec "${{ job.services.redis.id }}" redis-server --version
-          for attempt in $(seq 1 30); do
-            if docker exec "${{ job.services.redis.id }}" redis-cli ping | grep -q PONG; then
-              exit 0
-            fi
-            sleep 2
-          done
-          docker logs "${{ job.services.redis.id }}" || true
-          exit 1
-      - name: Verify Meilisearch service
-        run: |
-          for attempt in $(seq 1 30); do
-            if curl --fail --silent --show-error \
- main
               -H "Authorization: Bearer ${MEILISEARCH_API_KEY}" \
               http://127.0.0.1:7700/version; then
               exit 0
             fi
- codex/audit-and-restructure-cartunez.in-repository-93fec4
             if [ "$attempt" -eq 30 ]; then
               echo 'Meilisearch did not become ready'
               echo '+ docker ps --all'
@@ -156,12 +129,6 @@ jobs:
             fi
             sleep 2
           done
-
-            sleep 2
-          done
-          docker logs "${{ job.services.meilisearch.id }}" || true
-          exit 1
- main
       - name: Require reviewed lockfile
         run: test -f package-lock.json
         working-directory: backend/cartunez-medusa
