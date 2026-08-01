@@ -301,7 +301,7 @@ async function main() {
   // Download images in batches
   console.log("Downloading images...");
   for (const product of products) {
-    for (const img of product.images.slice(0, 3)) { // Max 3 images per product
+    for (const img of product.images) {
       try {
         await downloadImage(img.url, img.localPath);
         downloaded++;
