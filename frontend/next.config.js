@@ -16,7 +16,9 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
-    unoptimized: false,
+    // Medusa v1 serves relative /uploads/ URLs; next/image's optimizer
+    // cannot resolve them against its own origin and returns 400.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "http",
