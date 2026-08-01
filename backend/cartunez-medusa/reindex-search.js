@@ -13,12 +13,32 @@ const MEDUSA_HOST = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000";
 
 async function reindex() {
   console.log("Fetching products from Medusa...");
-  const res = await fetch(`${MEDUSA_HOST}/store/products?limit=100&expand=categories`);
-  const { products } = await res.json();
-  console.log(`Found ${products.length} products.`);
+  const allProducts = [];
+  let offset = 0;
+  let count = null;
+  const limit = 100;
+
+  while (true) {
+    const res = await fetch(
+      `${MEDUSA_HOST}/store/products?limit=${limit}&offset=${offset}&expand=categories`
+    );
+    if (!res.ok) {
+      console.error("Fetch failed:", res.status, await res.text());
+      process.exit(1);
+    }
+    const body = await res.json();
+    const products = body.products || [];
+    if (count === null) count = body.count || products.length;
+    allProducts.push(...products);
+    console.log(`  Fetched ${allProducts.length} of ${count}...`);
+    if (products.length === 0 || allProducts.length >= count) break;
+    offset += products.length;
+  }
+
+  console.log(`Found ${allProducts.length} products.`);
 
   // Transform products for MeiliSearch index
-  const documents = products.map((p) => ({
+  const documents = allProducts.map((p) => ({
     id: p.id,
     title: p.title,
     description: p.description || "",
