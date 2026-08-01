@@ -13,19 +13,17 @@ export const listCartPaymentMethods = async (regionId: string) => {
     ...(await getCacheOptions("payment_providers")),
   }
 
+  // Medusa v1 exposes payment providers on the region; the v2
+  // /store/payment-providers endpoint does not exist here (404).
   return commerceClient
-    .fetch<HttpTypes.StorePaymentProviderListResponse>(
-      `/store/payment-providers`,
-      {
-        method: "GET",
-        query: { region_id: regionId },
-        headers,
-        next,
-        cache: "force-cache",
-      }
-    )
-    .then(({ payment_providers }) =>
-      payment_providers.sort((a, b) => {
+    .fetch<{ region: HttpTypes.StoreRegion }>(`/store/regions/${regionId}`, {
+      method: "GET",
+      headers,
+      next,
+      cache: "force-cache",
+    })
+    .then(({ region }) =>
+      (region?.payment_providers || []).sort((a, b) => {
         return a.id > b.id ? 1 : -1
       })
     )
