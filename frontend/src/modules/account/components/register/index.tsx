@@ -95,14 +95,14 @@ const Register = ({ setCurrentView }: Props) => {
           <p className="text-xs text-gray-400 mt-5 leading-relaxed">
             By creating an account, you agree to Cartunez&apos;s{" "}
             <LocalizedClientLink
-              href="/content/privacy-policy"
+              href="/privacy-policy"
               className="font-medium text-gray-600 underline underline-offset-2 hover:text-[var(--color-brand)] transition-colors"
             >
               Privacy Policy
             </LocalizedClientLink>{" "}
             and{" "}
             <LocalizedClientLink
-              href="/content/terms-of-use"
+              href="/terms-of-service"
               className="font-medium text-gray-600 underline underline-offset-2 hover:text-[var(--color-brand)] transition-colors"
             >
               Terms of Use

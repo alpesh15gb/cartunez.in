@@ -11,7 +11,7 @@ import SideMenu from "@modules/layout/components/side-menu"
 import MegaMenu from "@modules/layout/components/mega-menu"
 import HeaderSearch from "@modules/layout/components/header-search"
 import AnnouncementBar from "@modules/layout/components/announcement-bar"
-import { Heart, User } from "lucide-react"
+import { User } from "lucide-react"
 
 export default async function Nav() {
   const [regions, locales, currentLocale, categories] = await Promise.all([
@@ -71,15 +71,6 @@ export default async function Nav() {
                 data-testid="nav-account-link"
               >
                 <User size={18} strokeWidth={1.5} />
-              </LocalizedClientLink>
-
-              {/* Wishlist icon */}
-              <LocalizedClientLink
-                href="/account/wishlist"
-                className="icon-button hidden text-gray-500 hover:bg-brand/5 hover:text-brand sm:flex"
-                aria-label="Wishlist"
-              >
-                <Heart size={18} strokeWidth={1.5} />
               </LocalizedClientLink>
 
               {/* Cart button */}

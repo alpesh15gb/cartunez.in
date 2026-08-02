@@ -42,7 +42,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
               </Text>
             </div>
             <LocalizedClientLink
-              href="/customer-service"
+              href="/support"
               className="group inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-brand)] hover:text-[var(--color-brand)]/80 transition-colors duration-200"
             >
               Customer Service
