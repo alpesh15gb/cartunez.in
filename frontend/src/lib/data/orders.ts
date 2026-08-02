@@ -46,7 +46,7 @@ export const listOrders = async (
       query: {
         limit,
         offset,
-        order: "-created_at",
+        // Medusa v1 rejects an `order` param on this endpoint
         expand: "items,items.variant",
         ...filters,
       },
