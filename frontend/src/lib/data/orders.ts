@@ -21,7 +21,8 @@ export const retrieveOrder = async (id: string) => {
       query: { expand: "items,items.variant,shipping_methods,payments" },
       headers,
       next,
-      cache: "force-cache",
+      // Order status changes when the admin fulfills/ships — always fetch fresh
+      cache: "no-store",
     })
     .then(({ order }) => order)
     .catch((err) => medusaError(err))
@@ -52,7 +53,8 @@ export const listOrders = async (
       },
       headers,
       next,
-      cache: "force-cache",
+      // Order status changes when the admin fulfills/ships — always fetch fresh
+      cache: "no-store",
     })
     .then(({ orders }) => orders)
     .catch((err) => {
