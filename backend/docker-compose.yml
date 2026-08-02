@@ -135,6 +135,10 @@ services:
       MEDUSA_PUBLIC_URL: ${MEDUSA_PUBLIC_URL:-http://localhost:9000}
       STORE_CORS: ${STORE_CORS:-http://localhost:3001,http://localhost:3000,https://cartunez.in,https://shop.cartunez.in}
       ADMIN_CORS: ${ADMIN_CORS:-http://localhost:7001,http://localhost:3000,http://localhost:9000,https://cartunez.in,https://shop.cartunez.in}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
     depends_on:
       postgres:
         condition: service_healthy
