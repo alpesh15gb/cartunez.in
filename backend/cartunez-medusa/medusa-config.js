@@ -42,8 +42,8 @@ if (
   process.exit(1);
 }
 
-const storeCors = process.env.STORE_CORS || "https://cartunez.in,https://shop.cartunez.in,http://localhost:3000,http://localhost:3001,http://localhost:5173";
-const adminCors = process.env.ADMIN_CORS || "https://cartunez.in,https://shop.cartunez.in,http://localhost:7001,http://localhost:3000,http://localhost:9000";
+const storeCors = process.env.STORE_CORS || "https://cartunez.in,https://www.cartunez.in,http://localhost:3000,http://localhost:3001,http://localhost:5173";
+const adminCors = process.env.ADMIN_CORS || "https://cartunez.in,https://www.cartunez.in,http://localhost:7001,http://localhost:3000,http://localhost:9000";
 
 /** @type {import('@medusajs/medusa').ConfigModule["projectConfig"]} */
 const projectConfig = {

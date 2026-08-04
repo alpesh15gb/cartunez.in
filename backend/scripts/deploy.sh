@@ -52,8 +52,5 @@ docker compose ps
 echo ""
 echo "=== Deployment Complete ==="
 echo "Website:    https://cartunez.in"
-echo "Store:      https://shop.cartunez.in"
-echo "API:        https://api.cartunez.in"
-echo "Commerce:   https://commerce.cartunez.in"
 echo ""
 echo "Completed at $(date)"

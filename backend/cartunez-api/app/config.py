@@ -60,8 +60,6 @@ class Settings(BaseSettings):
             self.CORS_ORIGINS = [
                 "https://cartunez.in",
                 "https://www.cartunez.in",
-                "https://shop.cartunez.in",
-                "https://api.cartunez.in",
                 "http://localhost:3000",
                 "http://localhost:3001",
                 "http://localhost:5173",

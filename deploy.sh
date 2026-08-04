@@ -68,8 +68,8 @@ mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled /var/www/certbot
 
 # Remove old cartunez configs if they reference missing SSL certs
 rm -f /etc/nginx/sites-enabled/cartunez.conf /etc/nginx/sites-enabled/cartunez
-rm -f /etc/nginx/sites-enabled/api /etc/nginx/sites-enabled/search
-rm -f /etc/nginx/sites-enabled/commerce /etc/nginx/sites-enabled/shop
+# Legacy subdomain vhosts are no longer used (single-domain cartunez.in)
+rm -f /etc/nginx/sites-enabled/api /etc/nginx/sites-enabled/search /etc/nginx/sites-enabled/commerce /etc/nginx/sites-enabled/shop
 
 # Write HTTP-only config for initial setup (frontend runs on 3001 via docker)
 cat > /etc/nginx/sites-available/cartunez <<'NGINX'
@@ -189,8 +189,7 @@ read -p "Do you want to set up SSL now? (y/n): " setup_ssl
 if [ "$setup_ssl" = "y" ]; then
     certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --email "adnan@$DOMAIN" --redirect
     echo "SSL configured for $DOMAIN!"
-    echo "For api.$DOMAIN, shop.$DOMAIN, commerce.$DOMAIN — run certbot again after DNS is set up:"
-    echo "  certbot --nginx -d api.$DOMAIN -d shop.$DOMAIN -d commerce.$DOMAIN --non-interactive --agree-tos --email adnan@$DOMAIN"
+    echo "All services (storefront, commerce, API, search) are served from $DOMAIN via nginx proxies."
 else
     echo "Skipping SSL. Run later: certbot --nginx -d $DOMAIN -d www.$DOMAIN"
 fi
@@ -202,7 +201,7 @@ if [ ! -f "$CERT_DIR/fullchain.pem" ] && [ -d "${CERT_DIR}-0001" ]; then
     CERT_DIR="${CERT_DIR}-0001"
 fi
 if [ -f "$CERT_DIR/fullchain.pem" ]; then
-    for conf in cartunez api commerce shop search; do
+    for conf in cartunez; do
         if [ -f "$BACKEND_DIR/nginx/${conf}.conf" ]; then
             cp "$BACKEND_DIR/nginx/${conf}.conf" "/etc/nginx/sites-available/${conf}"
             ln -sf "/etc/nginx/sites-available/${conf}" "/etc/nginx/sites-enabled/${conf}"
