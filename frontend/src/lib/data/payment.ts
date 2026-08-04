@@ -13,8 +13,8 @@ export const listCartPaymentMethods = async (regionId: string) => {
     ...(await getCacheOptions("payment_providers")),
   }
 
-  // Medusa v1 exposes payment providers on the region; the v2
-  // /store/payment-providers endpoint does not exist here (404).
+  // Medusa v1 has no /store/payment-providers route; providers are
+  // exposed on the region, so fetch the region instead of a 404.
   return commerceClient
     .fetch<{ region: HttpTypes.StoreRegion }>(`/store/regions/${regionId}`, {
       method: "GET",

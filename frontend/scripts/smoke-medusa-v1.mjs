@@ -21,6 +21,10 @@ const call = async (path, options = {}) => {
 
 let cartId
 try {
+  // /health is served by the project's custom API route. If it 404s the
+  // docker healthcheck never passes and the stack deadlocks, so assert it.
+  await call("/health")
+  console.log("PASS /health custom route reachable")
   await call("/store/regions?limit=1")
   console.log("PASS Store API reachable")
   const { regions = [] } = await call("/store/regions?limit=1")

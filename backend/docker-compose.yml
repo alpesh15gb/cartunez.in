@@ -64,8 +64,8 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${NEXT_PUBLIC_MEDUSA_BACKEND_URL:-https://cartunez.in}
-        NEXT_PUBLIC_DEFAULT_REGION: ${NEXT_PUBLIC_DEFAULT_REGION:-dk}
+        NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${NEXT_PUBLIC_MEDUSA_BACKEND_URL:-https://commerce.cartunez.in}
+        NEXT_PUBLIC_DEFAULT_REGION: ${NEXT_PUBLIC_DEFAULT_REGION:-in}
         NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-https://cartunez.in}
     container_name: cartunez-frontend
     restart: unless-stopped
@@ -132,7 +132,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be at least 32 random characters}
       COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET must be at least 32 random characters}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
-      MEDUSA_PUBLIC_URL: ${MEDUSA_PUBLIC_URL:-http://localhost:9000}
+      MEDUSA_PUBLIC_URL: ${MEDUSA_PUBLIC_URL:-https://commerce.cartunez.in}
       STORE_CORS: ${STORE_CORS:-http://localhost:3001,http://localhost:3000,https://cartunez.in,https://shop.cartunez.in}
       ADMIN_CORS: ${ADMIN_CORS:-http://localhost:7001,http://localhost:3000,http://localhost:9000,https://cartunez.in,https://shop.cartunez.in}
       SMTP_HOST: ${SMTP_HOST:-}

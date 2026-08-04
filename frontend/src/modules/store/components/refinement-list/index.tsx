@@ -8,7 +8,6 @@ import {
   OPTION_VALUE_QUERY_KEY,
   parseOptionValueIds,
 } from "@lib/util/product-option-filters"
-import OptionsPicker from "./options-picker"
 import SortProducts, { SortOptions } from "./sort-products"
 
 const FILTER_KEYS = [
@@ -24,13 +23,11 @@ const FILTER_KEYS = [
 type RefinementListProps = {
   sortBy: SortOptions
   search?: boolean
-  hideOptionsPicker?: boolean
   "data-testid"?: string
 }
 
 const RefinementList = ({
   sortBy,
-  hideOptionsPicker = false,
   "data-testid": dataTestId,
 }: RefinementListProps) => {
   const router = useRouter()
@@ -334,14 +331,6 @@ const RefinementList = ({
         </section>
       )}
 
-      {!hideOptionsPicker && (
-        <section>
-          <OptionsPicker
-            selectedValueIds={selectedOptionValueIds}
-            setOptionValueIds={setOptionValueIds}
-          />
-        </section>
-      )}
     </aside>
   )
 }

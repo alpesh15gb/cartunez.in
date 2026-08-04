@@ -70,13 +70,13 @@ const StoreTemplate = ({
             Filters and sorting
             <span aria-hidden="true" className="text-brand transition-transform group-open:rotate-180">⌄</span>
           </summary>
-          <div className="border-t border-gray-200 p-5"><RefinementList sortBy={sort} hideOptionsPicker /></div>
+          <div className="border-t border-gray-200 p-5"><RefinementList sortBy={sort} /></div>
         </details>
         <aside className="hidden w-72 shrink-0 lg:block" aria-label="Product filters">
           <div className="sticky top-28 space-y-6">
             <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-4">Filters</h3>
-              <RefinementList sortBy={sort} hideOptionsPicker />
+              <RefinementList sortBy={sort} />
             </div>
           </div>
         </aside>

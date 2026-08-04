@@ -20,9 +20,11 @@ export const retrieveVariant = async (
     ...(await getCacheOptions("variants")),
   }
 
+  // Medusa v1 exposes variants at /store/variants/:id (the
+  // /store/product-variants/:id path is v2-only and 404s on v1).
   return await commerceClient
     .fetch<{ variant: HttpTypes.StoreProductVariant }>(
-      `/store/product-variants/${variant_id}`,
+      `/store/variants/${variant_id}`,
       {
         method: "GET",
         query: { expand: "images,product" },

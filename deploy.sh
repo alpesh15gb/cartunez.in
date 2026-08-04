@@ -2,6 +2,10 @@
 # ─── Cartunez VPS Deployment Script ─────────────────────────────────────────────
 # Usage: chmod +x deploy.sh && ./deploy.sh
 # Run from repo root on your VPS after cloning
+#
+# All services (postgres, redis, meilisearch, medusa, fastapi, frontend) are
+# deployed through docker compose. nginx (backend/nginx/*.conf) proxies to the
+# published host ports: frontend 3001, medusa 9000, fastapi 8005.
 
 set -e
 
@@ -17,18 +21,26 @@ echo "Backend:    $BACKEND_DIR"
 echo "Frontend:   $FRONTEND_DIR"
 
 # 0. Preflight checks
-if [ ! -f "$REPO_DIR/.env" ]; then
-    echo "ERROR: .env file not found. Copy .env.example to .env and fill in your values."
-    exit 1
+# docker compose reads backend/.env for variable substitution.
+if [ ! -f "$BACKEND_DIR/.env" ]; then
+    if [ -f "$REPO_DIR/.env" ]; then
+        cp "$REPO_DIR/.env" "$BACKEND_DIR/.env"
+        echo "Copied .env -> backend/.env"
+    else
+        echo "ERROR: backend/.env file not found."
+        echo "Create it with at least JWT_SECRET and COOKIE_SECRET (32+ random chars each),"
+        echo "plus POSTGRES_PASSWORD, REDIS_PASSWORD, MEILI_MASTER_KEY as needed."
+        exit 1
+    fi
 fi
 
 # 1. System dependencies
-echo "[1/9] Installing system dependencies..."
+echo "[1/7] Installing system dependencies..."
 apt-get update -qq
 apt-get install -y -qq nginx certbot python3-certbot-nginx curl git
 
 # 2. Docker
-echo "[2/9] Ensuring Docker is installed..."
+echo "[2/7] Ensuring Docker is installed..."
 if ! command -v docker &> /dev/null; then
     curl -fsSL https://get.docker.com | sh
 fi
@@ -36,29 +48,22 @@ if ! docker compose version &> /dev/null; then
     apt-get install -y -qq docker-compose-plugin
 fi
 
-# 3. Build frontend
-echo "[3/9] Building frontend..."
-cd "$FRONTEND_DIR"
-npm install --silent
-if [ ! -f .env.local ]; then
-    cat > .env.local <<EOF
-NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=pk_01KVBSWHFD53JWKRBEHS43FDBJ
-NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://cartunez.in
-NEXT_PUBLIC_API_URL=https://cartunez.in
-NEXT_PUBLIC_BASE_URL=https://cartunez.in
-NEXT_PUBLIC_DEFAULT_REGION=in
-EOF
-fi
-NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://cartunez.in NEXT_PUBLIC_API_URL=https://cartunez.in npm run build
+# 3. Build and start all services (frontend is built inside its image)
+echo "[3/7] Building and starting Docker services..."
+cd "$BACKEND_DIR"
+docker compose build
+# --wait blocks until every service is healthy/running (medusa /health is
+# asserted by its healthcheck), so the frontend (depends_on healthy) is up
+# before we continue.
+docker compose up -d --wait --wait-timeout 300
 
-# 4. Restart Next.js frontend server
-echo "[4/9] Restarting Next.js frontend server via PM2..."
-if ! command -v pm2 &> /dev/null; then
-    npm install -g pm2 --silent
-fi
-pm2 restart cartunez-storefront || pm2 start "npm run start" --name "cartunez-storefront"
+# 4. Run migrations
+echo "[4/7] Running database migrations..."
+docker compose exec -T medusa node migrate.js || echo "Medusa migration skipped or already applied"
+docker compose exec -T fastapi alembic upgrade head || echo "FastAPI migration skipped or already applied"
+
 # 5. Install HTTP-only nginx config first (no SSL yet)
-echo "[5/9] Configuring nginx (HTTP-only for certbot)..."
+echo "[5/7] Configuring nginx (HTTP-only for certbot)..."
 mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled /var/www/certbot
 
 # Remove old cartunez configs if they reference missing SSL certs
@@ -66,7 +71,7 @@ rm -f /etc/nginx/sites-enabled/cartunez.conf /etc/nginx/sites-enabled/cartunez
 rm -f /etc/nginx/sites-enabled/api /etc/nginx/sites-enabled/search
 rm -f /etc/nginx/sites-enabled/commerce /etc/nginx/sites-enabled/shop
 
-# Write HTTP-only config for initial setup
+# Write HTTP-only config for initial setup (frontend runs on 3001 via docker)
 cat > /etc/nginx/sites-available/cartunez <<'NGINX'
 server {
     listen 80;
@@ -162,7 +167,7 @@ server {
     }
 
     location / {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:3001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -178,19 +183,8 @@ NGINX
 ln -sf /etc/nginx/sites-available/cartunez /etc/nginx/sites-enabled/cartunez
 nginx -t && systemctl reload nginx
 
-# 6. Start backend services
-echo "[6/9] Starting Docker services..."
-cd "$BACKEND_DIR"
-docker compose up -d --build
-
-# 7. Run migrations
-echo "[7/9] Running database migrations..."
-sleep 15
-docker compose exec medusa node migrate.js || echo "Medusa migration skipped or already applied"
-docker compose exec fastapi alembic upgrade head || echo "FastAPI migration skipped or already applied"
-
-# 8. SSL (Let's Encrypt)
-echo "[8/9] Setting up SSL..."
+# 6. SSL (Let's Encrypt)
+echo "[6/7] Setting up SSL..."
 read -p "Do you want to set up SSL now? (y/n): " setup_ssl
 if [ "$setup_ssl" = "y" ]; then
     certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --email "adnan@$DOMAIN" --redirect
@@ -201,8 +195,8 @@ else
     echo "Skipping SSL. Run later: certbot --nginx -d $DOMAIN -d www.$DOMAIN"
 fi
 
-# 9. Install full nginx configs (with SSL references) if certs exist
-echo "[9/9] Installing full nginx configs..."
+# 7. Install full nginx configs (with SSL references) if certs exist
+echo "[7/7] Installing full nginx configs..."
 CERT_DIR="/etc/letsencrypt/live/$DOMAIN"
 if [ ! -f "$CERT_DIR/fullchain.pem" ] && [ -d "${CERT_DIR}-0001" ]; then
     CERT_DIR="${CERT_DIR}-0001"

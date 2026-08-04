@@ -126,7 +126,7 @@ export default function CategoryTemplate({
           <div className="sticky top-32 space-y-6">
             <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-4">Filters</h3>
-              <RefinementList sortBy={sort} data-testid="sort-by-container" hideOptionsPicker />
+              <RefinementList sortBy={sort} data-testid="sort-by-container" />
             </div>
           </div>
         </div>

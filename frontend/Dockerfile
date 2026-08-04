@@ -10,7 +10,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ARG NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://shop.cartunez.in
+ARG NEXT_PUBLIC_MEDUSA_BACKEND_URL=https://commerce.cartunez.in
 ARG NEXT_PUBLIC_DEFAULT_REGION=in
 ARG NEXT_PUBLIC_BASE_URL=https://cartunez.in
 ARG NEXT_PUBLIC_API_URL=https://api.cartunez.in

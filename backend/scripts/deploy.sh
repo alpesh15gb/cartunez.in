@@ -47,10 +47,7 @@ docker compose exec -T fastapi alembic upgrade head 2>/dev/null || echo "FastAPI
 echo "Running health checks..."
 sleep 5
 
-for service in postgres redis meilisearch medusa fastapi website storefront; do
-    STATUS=$(docker compose ps --format json | grep -o "\"$service\"[^}]*" | grep -o '"status":"[^"]*"' | head -1)
-    echo "  $service: $STATUS"
-done
+docker compose ps
 
 echo ""
 echo "=== Deployment Complete ==="
