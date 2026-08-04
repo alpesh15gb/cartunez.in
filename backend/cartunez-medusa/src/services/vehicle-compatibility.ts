@@ -1,4 +1,4 @@
-import { Product, TransactionBaseService } from "@medusajs/medusa";
+import { Product, ProductStatus, TransactionBaseService } from "@medusajs/medusa";
 import { EntityManager } from "typeorm";
 import { ProductVehicleCompatibility, VehicleVariant } from "../models/vehicle";
 
@@ -88,7 +88,7 @@ export class VehicleCompatibilityService extends TransactionBaseService {
 
       const all = await productRepo.find({
         select: ["id"],
-        where: { status: "published" },
+        where: { status: ProductStatus.PUBLISHED },
       });
       return all.filter((p) => !linkedSet.has(p.id)).map((p) => p.id);
     });
