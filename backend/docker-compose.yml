@@ -181,6 +181,10 @@ services:
       API_ADMIN_KEY: ${API_ADMIN_KEY:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OMNIROUTE_URL: ${OMNIROUTE_URL:-}
+      OMNIROUTE_API_KEY: ${OMNIROUTE_API_KEY:-}
+      OMNIROUTE_CHAT_MODEL: ${OMNIROUTE_CHAT_MODEL:-auto/fast}
+      OMNIROUTE_IMAGE_MODEL: ${OMNIROUTE_IMAGE_MODEL:-antigravity/gemini-3.1-flash-image}
       CORS_ORIGINS: '["https://cartunez.in","https://www.cartunez.in","http://localhost:3000","http://localhost:3001","http://localhost:5173"]'
       RATE_LIMIT_PER_MINUTE: 60
       DEBUG: "false"

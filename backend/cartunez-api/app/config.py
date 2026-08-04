@@ -40,6 +40,15 @@ class Settings(BaseSettings):
     OPENAI_CHAT_MODEL: str = "gpt-4o-mini"
     OPENAI_IMAGE_MODEL: str = "gpt-image-1"
 
+    # Omniroute — multi-AI-provider gateway (OpenAI-compatible, preferred when set)
+    OMNIROUTE_URL: str = ""          # e.g. http://host:20128/v1
+    OMNIROUTE_API_KEY: str = ""
+    # auto/fast is the low-latency Omniroute combo pool (auto/chat can pick
+    # slow providers — measured 66s vs 8s for auto/fast). Can also be a
+    # provider/model, e.g. anthropic/claude-3-5-sonnet.
+    OMNIROUTE_CHAT_MODEL: str = "auto/fast"
+    OMNIROUTE_IMAGE_MODEL: str = "antigravity/gemini-3.1-flash-image"   # verified working on the user's gateway
+
     # JWT
     JWT_SECRET_KEY: str = ""
     JWT_ALGORITHM: str = "HS256"

@@ -1,7 +1,8 @@
-"""Chatbot API routes — OpenAI-powered shopping assistant.
+"""Chatbot API routes — AI shopping assistant.
 
-Primary brain: OpenAI (chat + vision + image mockups + tool calling).
-Fallbacks (in order): Groq LLM, then keyword-based catalogue matching.
+Primary brain: Omniroute (multi-AI-provider gateway, preferred when configured),
+then OpenAI (chat + vision + image mockups + tool calling), then Groq LLM,
+then keyword-based catalogue matching.
 
 Capabilities:
   * Product search with REAL Medusa results (tool calling, no hallucination)
@@ -193,17 +194,79 @@ def _format_medusa_products(data: dict) -> List[ProductCard]:
     return products
 
 
+def _safe_singularize(word: str) -> str:
+    """Strip a trailing 's' only when it's almost certainly a plural
+    (word > 3 chars, not ending in ss/us/is/os: glass, bus, focus...)."""
+    if (
+        len(word) > 3
+        and word.endswith("s")
+        and not word.endswith(("ss", "us", "is", "os"))
+    ):
+        return word[:-1]
+    return word
+
+
 async def _search_medusa(query: str, limit: int = 5) -> List[ProductCard]:
+    """Search Medusa, retrying with simpler terms (Medusa's search is fuzzy
+    and misses plurals — 'wheels' returns 0 while 'wheel' returns 74).
+
+    Candidate ladder: full query, singularized phrase, then the singularized
+    LAST word ("alloy wheels" -> "wheel"), which carries the product type.
+    """
+    words = query.strip().split()
+    candidates = [query.strip()]
+    if len(words) > 1:
+        full_singular = " ".join(_safe_singularize(w) for w in words)
+        if full_singular not in candidates:
+            candidates.append(full_singular)
+        last_word = _safe_singularize(words[-1])
+        if last_word not in candidates:
+            candidates.append(last_word)
+        if words[-1] not in candidates:
+            candidates.append(words[-1])
+    elif words:
+        singular = _safe_singularize(words[0])
+        if singular not in candidates:
+            candidates.append(singular)
+
+    for q in candidates:
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get(
+                    f"{settings.MEDUSA_URL}/store/products",
+                    params={"q": q, "limit": limit},
+                )
+                resp.raise_for_status()
+                products = _format_medusa_products(resp.json())
+                if products:
+                    return products
+        except (httpx.HTTPError, ValueError):
+            continue
+    return []
+
+
+async def _fetch_medusa_product(handle: str) -> Optional[dict]:
+    """Fetch one product's full details by handle (for the model's follow-up tool)."""
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(
                 f"{settings.MEDUSA_URL}/store/products",
-                params={"q": query, "limit": limit},
+                params={"handle": handle, "limit": 1},
             )
             resp.raise_for_status()
-            return _format_medusa_products(resp.json())
+            products = _format_medusa_products(resp.json())
+            if not products:
+                return None
+            p = products[0]
+            return {
+                "title": p.title,
+                "handle": p.handle,
+                "price": p.price,
+                "description": p.description,
+                "thumbnail": p.thumbnail,
+            }
     except (httpx.HTTPError, ValueError):
-        return []
+        return None
 
 
 def _build_suggestions(category: Optional[str], vehicle: Optional[str]) -> List[str]:
@@ -288,7 +351,57 @@ async def _push_history(session_id: str, entries: list) -> None:
         return
 
 
-# ─── OpenAI Integration ───────────────────────────────────────────────────────
+# ─── Provider Resolution (Omniroute preferred, OpenAI fallback) ──────────────
+
+# Omniroute is an OpenAI-compatible multi-AI-provider gateway: the same wire
+# format works against it, and its `auto` model routes to the best available
+# provider with automatic fallback on 429s/errors.
+
+
+def _resolve_chat_provider() -> Optional[dict]:
+    """Return the chat provider config to use (Omniroute preferred, else OpenAI)."""
+    if settings.OMNIROUTE_URL:
+        return {
+            "base_url": settings.OMNIROUTE_URL.rstrip("/"),
+            "api_key": settings.OMNIROUTE_API_KEY or "auto",
+            "model": settings.OMNIROUTE_CHAT_MODEL or "auto",
+            "name": "omniroute",
+        }
+    if settings.OPENAI_API_KEY:
+        return {
+            "base_url": "https://api.openai.com/v1",
+            "api_key": settings.OPENAI_API_KEY,
+            "model": settings.OPENAI_CHAT_MODEL,
+            "name": "openai",
+        }
+    return None
+
+
+def _resolve_image_provider() -> Optional[dict]:
+    """Provider used for image mockup generation.
+
+    Omniroute is preferred (the user's gateway has working image models, e.g.
+    antigravity/gemini-3.1-flash-image); OpenAI is the fallback when no
+    Omniroute is configured.
+    """
+    if settings.OMNIROUTE_URL:
+        return {
+            "base_url": settings.OMNIROUTE_URL.rstrip("/"),
+            "api_key": settings.OMNIROUTE_API_KEY or "auto",
+            "model": settings.OMNIROUTE_IMAGE_MODEL or "auto",
+            "name": "omniroute",
+        }
+    if settings.OPENAI_API_KEY:
+        return {
+            "base_url": "https://api.openai.com/v1",
+            "api_key": settings.OPENAI_API_KEY,
+            "model": settings.OPENAI_IMAGE_MODEL,
+            "name": "openai",
+        }
+    return None
+
+
+# ─── OpenAI-compatible Integration ────────────────────────────────────────────
 
 OPENAI_SYSTEM_PROMPT = """You are CarTunez's smart shopping assistant for an Indian car accessories store (cartunez.in).
 
@@ -297,11 +410,12 @@ Your store sells: Floor Mats, LED Lights, Seat Covers, Dash Cameras, Android/Inf
 How to help customers:
 1. Understand what they need (category, car model, budget, whether they uploaded a car photo).
 2. Use the search_products tool with a concise query to fetch REAL products from the store. Always search before recommending specific items — never invent product names, prices, or links.
-3. Reply in friendly, concise Hinglish-friendly English (1-3 sentences).
-4. If the customer asks how a product would look on their car, call generate_mockup with a clear description of the product to visualize.
-5. If you cannot help (order status, refunds, complaints, or the customer is unhappy and asks for a human), call escalate_to_human with a short reason.
-6. If the customer just says hi, greet them warmly and suggest categories.
-7. If the customer names a car (e.g. "Maruti Swift"), tailor recommendations and mention the site's vehicle fitment selector.
+3. After search_products returns, the product cards are shown to the customer automatically — so name those specific products (title + price) directly in your reply instead of pointing them to the search bar.
+4. Reply in friendly, concise Hinglish-friendly English (1-3 sentences).
+5. If the customer asks how a product would look on their car, call generate_mockup with a clear description of the product to visualize.
+6. If you cannot help (order status, refunds, complaints, or the customer is unhappy and asks for a human), call escalate_to_human with a short reason.
+7. If the customer just says hi, greet them warmly and suggest categories.
+8. If the customer names a car (e.g. "Maruti Swift"), tailor recommendations and mention the site's vehicle fitment selector.
 
 Be helpful, never pushy. Keep replies short."""
 
@@ -317,6 +431,20 @@ OPENAI_TOOLS = [
                     "query": {"type": "string", "description": "Short product search query, e.g. 'android car stereo'"}
                 },
                 "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "fetch_product_by_handle",
+            "description": "Get full details (description, price) for a specific product by its handle.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "handle": {"type": "string", "description": "The product handle (URL slug), e.g. 'onkyo-stereo'"}
+                },
+                "required": ["handle"],
             },
         },
     },
@@ -358,25 +486,27 @@ def _build_user_content(message: str, image_data_url: Optional[str]) -> list:
     return content
 
 
-async def _openai_chat_completion(messages: list, tools: Optional[list] = None, max_tokens: int = 500) -> Optional[dict]:
-    """One OpenAI chat completion call (supports vision + tools)."""
-    api_key = settings.OPENAI_API_KEY
-    if not api_key:
-        return None
+async def _llm_chat_completion(provider: dict, messages: list, tools: Optional[list] = None, max_tokens: int = 500) -> Optional[dict]:
+    """One chat completion call against any OpenAI-compatible endpoint."""
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        # Fast connect timeout so a configured-but-down gateway fails over in
+        # seconds; generous read timeout for cold auto-route first calls.
+        async with httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=5.0, read=45.0)) as client:
             payload: dict = {
-                "model": settings.OPENAI_CHAT_MODEL,
+                "model": provider["model"],
                 "messages": messages,
                 "temperature": 0.6,
                 "max_tokens": max_tokens,
+                # Some gateways (Omniroute) default to SSE streaming; our client
+                # expects a single JSON response.
+                "stream": False,
             }
             if tools:
                 payload["tools"] = tools
                 payload["tool_choice"] = "auto"
             resp = await client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                f"{provider['base_url']}/chat/completions",
+                headers={"Authorization": f"Bearer {provider['api_key']}", "Content-Type": "application/json"},
                 json=payload,
             )
             resp.raise_for_status()
@@ -385,63 +515,88 @@ async def _openai_chat_completion(messages: list, tools: Optional[list] = None, 
         return None
 
 
-async def _openai_generate_mockup(subject: str, car_image: Optional[bytes]) -> Optional[str]:
-    """Generate (or edit) an image. Returns a URL, or None on failure."""
-    api_key = settings.OPENAI_API_KEY
-    if not api_key:
-        return None
-    try:
-        prompt = (
-            f"Photorealistic image: {subject}. "
-            "Show it installed on a modern car with natural lighting, high detail, product catalog style."
-        )
-        async with httpx.AsyncClient(timeout=45.0) as client:
-            headers = {"Authorization": f"Bearer {api_key}"}
-            # gpt-image-1 returns b64_json (response_format is a dall-e-2/3
-            # param and would be rejected), so request b64 and convert to a
-            # data URL for the client. Works for dall-e-3 too.
-            if car_image:
-                # Image editing: put the product on the customer's uploaded car photo
-                resp = await client.post(
-                    "https://api.openai.com/v1/images/edits",
-                    headers=headers,
-                    files={"image": ("car.jpg", car_image, "image/jpeg")},
-                    data={
-                        "model": settings.OPENAI_IMAGE_MODEL,
-                        "prompt": prompt,
-                        "n": "1",
-                        "size": "1024x1024",
-                        "response_format": "b64_json",
-                    },
-                )
-            else:
-                resp = await client.post(
-                    "https://api.openai.com/v1/images/generations",
-                    headers={**headers, "Content-Type": "application/json"},
-                    json={
-                        "model": settings.OPENAI_IMAGE_MODEL,
-                        "prompt": prompt,
-                        "n": 1,
-                        "size": "1024x1024",
-                        "response_format": "b64_json",
-                    },
-                )
+async def _llm_generate_mockup(provider: dict, subject: str, car_image: Optional[bytes]) -> Optional[str]:
+    """Generate (or edit) an image via an OpenAI-compatible images endpoint.
+
+    Image editing (customer's uploaded photo) is only supported by some
+    providers (adobe-firefly, chatgpt-web, codex...). If the gateway rejects
+    edits, we fall back to plain generation so the mockup feature still works.
+    """
+    prompt = (
+        f"Photorealistic image: {subject}. "
+        "Show it installed on a modern car with natural lighting, high detail, product catalog style."
+    )
+    headers = {"Authorization": f"Bearer {provider['api_key']}"}
+
+    async def _request_images():
+        """One images/generations call (text-to-image)."""
+        async with httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=5.0, read=60.0)) as client:
+            resp = await client.post(
+                f"{provider['base_url']}/images/generations",
+                headers={**headers, "Content-Type": "application/json"},
+                json={
+                    "model": provider["model"],
+                    "prompt": prompt,
+                    "n": 1,
+                    "size": "1024x1024",
+                    "response_format": "b64_json",
+                },
+            )
             resp.raise_for_status()
-            data = resp.json()
-            items = data.get("data") or []
-            b64 = items[0].get("b64_json") if items else None
-            if b64:
-                return f"data:image/png;base64,{b64}"
-            url = items[0].get("url") if items else None
-            if url:
-                return url
+            return resp.json()
+
+    async def _request_edits():
+        """One images/edits call (put the product on the uploaded car photo)."""
+        async with httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=5.0, read=60.0)) as client:
+            resp = await client.post(
+                f"{provider['base_url']}/images/edits",
+                headers=headers,
+                files={"image": ("car.jpg", car_image, "image/jpeg")},
+                data={
+                    "model": provider["model"],
+                    "prompt": prompt,
+                    "n": "1",
+                    "size": "1024x1024",
+                    "response_format": "b64_json",
+                },
+            )
+            resp.raise_for_status()
+            return resp.json()
+
+    def _extract(data: dict) -> Optional[str]:
+        items = data.get("data") or []
+        if not items:
             return None
+        b64 = items[0].get("b64_json")
+        if b64:
+            return f"data:image/png;base64,{b64}"
+        return items[0].get("url")
+
+    try:
+        if car_image:
+            try:
+                return _extract(await _request_edits())
+            except Exception:
+                # Edits unsupported on this provider/gateway — fall back to a
+                # text-to-image mockup so the customer still gets a visual.
+                pass
+        return _extract(await _request_images())
     except Exception:
         return None
 
 
-async def _llm_chat_openai(message: str, image_data_url: Optional[str], session_id: str) -> Optional[dict]:
-    """Two-step OpenAI loop with tool calling. Returns normalized result dict."""
+async def _llm_chat_provider(
+    provider: dict,
+    message: str,
+    image_data_url: Optional[str],
+    session_id: str,
+) -> Optional[dict]:
+    """Iterative tool-calling loop against an OpenAI-compatible provider.
+
+    Runs completions, executes requested tools, feeds results back, and repeats
+    until the model replies with plain text (capped to avoid infinite loops).
+    Returns a normalized result dict, or None if the provider is unreachable.
+    """
     try:
         messages = [{"role": "system", "content": OPENAI_SYSTEM_PROMPT}]
         # Conversation memory: replay recent turns so "this car" / "that speaker"
@@ -451,53 +606,62 @@ async def _llm_chat_openai(message: str, image_data_url: Optional[str], session_
             messages.append(turn)
         messages.append({"role": "user", "content": _build_user_content(message, image_data_url)})
 
-        # Step 1: let the model decide what it needs (search / mockup / handoff)
-        first = await _openai_chat_completion(messages, tools=OPENAI_TOOLS)
-        if not first:
-            return None
-
-        msg = first["choices"][0]["message"]
-        tool_calls = msg.get("tool_calls") or []
-
+        # Iterative tool loop: run a completion, execute any requested tools,
+        # feed the results back, and repeat until the model answers in plain
+        # text (capped so a tool-happy model can't spin forever).
+        MAX_TOOL_ROUNDS = 2
         search_query: Optional[str] = None
         mockup_subject: Optional[str] = None
         handoff_reason: Optional[str] = None
         handoff: bool = False
+        last_products: List[ProductCard] = []
+        reply_text = ""
 
-        for tc in tool_calls:
-            try:
-                args = json.loads(tc["function"].get("arguments") or "{}")
-            except json.JSONDecodeError:
-                args = {}
-            name = tc["function"].get("name", "")
-            if name == "search_products":
-                search_query = args.get("query") or message
-            elif name == "generate_mockup":
-                mockup_subject = args.get("subject") or message
-            elif name == "escalate_to_human":
-                handoff = True
-                handoff_reason = args.get("reason") or "Customer requested human support"
+        for round_index in range(MAX_TOOL_ROUNDS + 1):
+            # After the first two tool rounds, drop the tools so the model MUST
+            # answer in plain text instead of looping tool calls forever.
+            tools = OPENAI_TOOLS if round_index < MAX_TOOL_ROUNDS else None
+            resp = await _llm_chat_completion(provider, messages, tools=tools)
+            if not resp:
+                return None
+            msg = resp["choices"][0]["message"]
+            tool_calls = msg.get("tool_calls") or []
+            if not tool_calls:
+                reply_text = (msg.get("content") or "").strip()
+                break
 
-        # Step 2: give the model the tool results and get the final reply
-        if tool_calls:
             for tc in tool_calls:
+                try:
+                    args = json.loads(tc["function"].get("arguments") or "{}")
+                except json.JSONDecodeError:
+                    args = {}
                 name = tc["function"].get("name", "")
                 result: dict = {}
                 if name == "search_products":
-                    q = search_query or message
-                    products = await _search_medusa(q, limit=5)
+                    q = args.get("query") or message
+                    search_query = q
+                    last_products = await _search_medusa(q, limit=5)
                     result = {
                         "products": [
                             {"title": p.title, "handle": p.handle, "price": p.price, "thumbnail": p.thumbnail}
-                            for p in products
+                            for p in last_products
                         ],
-                        "count": len(products),
+                        "count": len(last_products),
                         "note": "If the list is empty, tell the customer honestly and suggest alternatives.",
                     }
+                elif name == "fetch_product_by_handle":
+                    detail = await _fetch_medusa_product(args.get("handle", ""))
+                    result = detail or {"error": "product not found"}
                 elif name == "generate_mockup":
-                    result = {"status": "image_generation_started", "subject": mockup_subject or message}
+                    mockup_subject = args.get("subject") or message
+                    result = {"status": "image_generation_started", "subject": mockup_subject}
                 elif name == "escalate_to_human":
+                    handoff = True
+                    handoff_reason = args.get("reason") or "Customer requested human support"
                     result = {"status": "handoff_confirmed"}
+                else:
+                    # Model invented a tool we don't have: tell it it's unavailable
+                    result = {"status": "unavailable", "note": "This tool is not available in this store."}
 
                 messages.append(
                     {
@@ -506,27 +670,32 @@ async def _llm_chat_openai(message: str, image_data_url: Optional[str], session_
                         "content": json.dumps(result),
                     }
                 )
+        # The final (no-tools) round always breaks with a reply; the fallbacks
+        # below cover empty/garbage text just in case.
 
-            final = await _openai_chat_completion(messages, max_tokens=400)
-            if not final:
-                return None
-            final_msg = final["choices"][0]["message"]
-            reply_text = (final_msg.get("content") or "").strip()
-        else:
-            reply_text = (msg.get("content") or "").strip()
+        # Some auto-routed models emit template artifacts (<|start|>, <|channel|>…)
+        # or empty content instead of a real sentence — build a clean reply from
+        # the products we actually found.
+        if "<|" in reply_text or not reply_text:
+            if last_products:
+                names = ", ".join(p.title for p in last_products[:3])
+                reply_text = f"Here are {len(last_products)} options: {names}."
+            else:
+                reply_text = "Here's what I found:"
 
         # Generate mockup image if requested (or if the user clearly asked for a visual)
         image_url: Optional[str] = None
-        if mockup_subject or (not tool_calls and _wants_mockup(message)):
+        if mockup_subject or _wants_mockup(message):
             car_image = _decode_image(image_data_url) if image_data_url else None
-            image_url = await _openai_generate_mockup(mockup_subject or message, car_image)
+            image_provider = _resolve_image_provider()
+            if image_provider:
+                image_url = await _llm_generate_mockup(image_provider, mockup_subject or message, car_image)
 
-        # Fall back to keyword search if the model never searched
-        products: List[ProductCard] = []
-        if search_query:
-            products = await _search_medusa(search_query, limit=5)
-        elif not tool_calls:
-            products = await _search_medusa(message, limit=5)
+        # Product cards for the UI: reuse the last search, else keyword fallback
+        products: List[ProductCard] = last_products
+        if not products:
+            q = search_query or message
+            products = await _search_medusa(q, limit=5)
             if not products:
                 category = _extract_category(message)
                 if category:
@@ -638,8 +807,25 @@ async def chat_message(
 
     handoff = _wants_handoff(message)
 
-    # 1) OpenAI (primary)
-    llm_result = await _llm_chat_openai(message, image_data_url, body.session_id)
+    # 1) Omniroute (primary multi-provider gateway), then OpenAI, then Groq
+    llm_result = None
+    provider = _resolve_chat_provider()
+    if provider:
+        llm_result = await _llm_chat_provider(provider, message, image_data_url, body.session_id)
+
+    if not llm_result and provider and provider["name"] == "omniroute" and settings.OPENAI_API_KEY:
+        # Omniroute unreachable -> fall back to OpenAI directly
+        llm_result = await _llm_chat_provider(
+            {
+                "base_url": "https://api.openai.com/v1",
+                "api_key": settings.OPENAI_API_KEY,
+                "model": settings.OPENAI_CHAT_MODEL,
+                "name": "openai",
+            },
+            message,
+            image_data_url,
+            body.session_id,
+        )
 
     # 2) Groq (fallback)
     if not llm_result:
