@@ -114,20 +114,35 @@ export default function VehicleCompatibility({ product }: VehicleCompatibilityPr
     setCompatibility("idle")
   }, [selectedModel])
 
-  const checkCompatibility = () => {
+  const checkCompatibility = async () => {
     if (!selectedMake || !selectedModel || !selectedYear) return
 
-    const makeName = makes.find((m) => m.id === selectedMake)?.name || ""
-    const modelName = models.find((m) => m.id === selectedModel)?.name || ""
+    const makeId = selectedMake
+    const modelId = selectedModel
+    const yearId = selectedYear
 
-    const searchStr = (product.title + " " + (product.description || "") + " " + (product.subtitle || "")).toLowerCase()
+    try {
+      const res = await fetch(
+        `/api/vehicle-compatibility?product_id=${encodeURIComponent(product.id)}&make_id=${encodeURIComponent(makeId)}&model_id=${encodeURIComponent(modelId)}&year_id=${encodeURIComponent(yearId)}`
+      )
+      if (!res.ok) {
+        setCompatibility("unknown")
+        return
+      }
+      const data = (await res.json()) as {
+        found: boolean
+        specific: boolean
+        universal: boolean
+      }
 
-    const isCompatible =
-      searchStr.includes(makeName.toLowerCase()) ||
-      searchStr.includes(modelName.toLowerCase()) ||
-      product.tags?.some((t) => t.value?.toLowerCase() === modelName.toLowerCase())
-
-    setCompatibility(isCompatible ? "compatible" : "unknown")
+      // Specifically listed for this vehicle, or a universal accessory -> fits
+      setCompatibility(
+        data.found && (data.specific || data.universal) ? "compatible" : "unknown"
+      )
+    } catch (err) {
+      console.error("Fitment check failed:", err)
+      setCompatibility("unknown")
+    }
   }
 
   useEffect(() => {

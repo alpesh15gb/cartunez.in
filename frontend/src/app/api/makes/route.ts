@@ -4,7 +4,7 @@ const FASTAPI_URL = process.env.FASTAPI_BACKEND_URL || process.env.NEXT_PUBLIC_A
 
 export async function GET(_request: NextRequest) {
   try {
-    const response = await fetch(`${FASTAPI_URL}/api/v1/vehicles/makes?limit=12`, {
+    const response = await fetch(`${FASTAPI_URL}/api/v1/vehicles/makes?limit=100`, {
       headers: { 'Content-Type': 'application/json' },
     })
 
@@ -13,7 +13,7 @@ export async function GET(_request: NextRequest) {
     }
 
     const data = await response.json()
-    return NextResponse.json(data)
+    return NextResponse.json({ makes: Array.isArray(data) ? data : data.makes || [] })
   } catch (error) {
     console.error('[API] Makes error:', error)
     return NextResponse.json({ makes: [] }, { status: 200 })

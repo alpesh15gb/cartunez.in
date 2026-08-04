@@ -31,6 +31,9 @@ export default async function PaginatedProducts({
   make,
   model,
   year,
+  makeId,
+  modelId,
+  yearId,
 }: {
   sortBy?: SortOptions
   page: number
@@ -45,6 +48,9 @@ export default async function PaginatedProducts({
   make?: string
   model?: string
   year?: string
+  makeId?: string
+  modelId?: string
+  yearId?: string
 }) {
   const queryParams: PaginatedProductsParams = {
     limit: 12,
@@ -94,6 +100,9 @@ export default async function PaginatedProducts({
     make,
     model,
     year,
+    makeId,
+    modelId,
+    yearId,
   }).catch((error) => {
     console.error("[PaginatedProducts] Failed to load products:", error)
     return { response: { products: [], count: 0 }, nextPage: null }

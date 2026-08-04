@@ -19,6 +19,9 @@ const StoreTemplate = ({
   make,
   model,
   year,
+  makeId,
+  modelId,
+  yearId,
 }: {
   sortBy?: SortOptions
   page?: string
@@ -30,6 +33,9 @@ const StoreTemplate = ({
   make?: string
   model?: string
   year?: string
+  makeId?: string
+  modelId?: string
+  yearId?: string
 }) => {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
@@ -93,6 +99,9 @@ const StoreTemplate = ({
               make={make}
               model={model}
               year={year}
+              makeId={makeId}
+              modelId={modelId}
+              yearId={yearId}
             />
           </Suspense>
         </div>

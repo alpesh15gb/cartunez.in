@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json()
-    return NextResponse.json(data)
+    return NextResponse.json({ years: Array.isArray(data) ? data : data.years || [] })
   } catch (error) {
     console.error('[API] Years error:', error)
     return NextResponse.json({ years: [] }, { status: 200 })

@@ -229,6 +229,95 @@ async def create_variant(
 
 # â”€â”€â”€ Search (public) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+@router.get("/resolve")
+async def resolve_vehicle(
+    make: Optional[str] = None,
+    model: Optional[str] = None,
+    year: Optional[int] = None,
+    make_id: Optional[UUID] = None,
+    model_id: Optional[UUID] = None,
+    year_id: Optional[UUID] = None,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Resolve a make/model/year into its vehicle year + variant IDs.
+
+    Used by the storefront fitment flow: the frontend passes either the
+    catalog IDs (from /api/makes, /api/models, /api/years) or the display
+    names, and receives the year_id + variant_ids it needs to query the
+    Medusa product_vehicle_compatibility table for compatible products.
+    """
+    year_obj = None
+    make_obj = None
+    model_obj = None
+
+    if year_id:
+        result = await db.execute(
+            select(VehicleYear).where(VehicleYear.id == year_id)
+        )
+        year_obj = result.scalar_one_or_none()
+        if year_obj:
+            model_result = await db.execute(
+                select(VehicleModel).where(VehicleModel.id == year_obj.model_id)
+            )
+            model_obj = model_result.scalar_one_or_none()
+            if model_obj:
+                make_result = await db.execute(
+                    select(VehicleMake).where(VehicleMake.id == model_obj.make_id)
+                )
+                make_obj = make_result.scalar_one_or_none()
+    elif model_id and year:
+        result = await db.execute(
+            select(VehicleYear).where(
+                VehicleYear.model_id == model_id,
+                VehicleYear.year == year,
+            )
+        )
+        year_obj = result.scalar_one_or_none()
+        if year_obj:
+            model_result = await db.execute(
+                select(VehicleModel).where(VehicleModel.id == model_id)
+            )
+            model_obj = model_result.scalar_one_or_none()
+            if model_obj:
+                make_result = await db.execute(
+                    select(VehicleMake).where(VehicleMake.id == model_obj.make_id)
+                )
+                make_obj = make_result.scalar_one_or_none()
+    elif make or model or year:
+        query = (
+            select(VehicleMake, VehicleModel, VehicleYear)
+            .join(VehicleModel, VehicleMake.id == VehicleModel.make_id)
+            .join(VehicleYear, VehicleModel.id == VehicleYear.model_id)
+        )
+        if make:
+            query = query.where(VehicleMake.name.ilike(f"%{_escape_like(make)}%"))
+        if model:
+            query = query.where(VehicleModel.name.ilike(f"%{_escape_like(model)}%"))
+        if year:
+            query = query.where(VehicleYear.year == year)
+        result = await db.execute(query.limit(5))
+        row = result.first()
+        if row:
+            make_obj, model_obj, year_obj = row
+
+    if not year_obj:
+        return {"found": False}
+
+    variant_result = await db.execute(
+        select(VehicleVariant).where(VehicleVariant.vehicle_year_id == year_obj.id)
+    )
+    variant_ids = [str(v.id) for v in variant_result.scalars().all()]
+
+    return {
+        "found": True,
+        "make": {"id": str(make_obj.id), "name": make_obj.name, "slug": make_obj.slug} if make_obj else None,
+        "model": {"id": str(model_obj.id), "name": model_obj.name, "slug": model_obj.slug} if model_obj else None,
+        "year": {"id": str(year_obj.id), "year": year_obj.year},
+        "year_id": str(year_obj.id),
+        "variant_ids": variant_ids,
+    }
+
+
 @router.get("/search")
 async def search_vehicles(
     make: Optional[str] = None,

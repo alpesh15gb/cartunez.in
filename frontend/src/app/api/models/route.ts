@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ models: [] })
     }
 
-    const response = await fetch(`${FASTAPI_URL}/api/v1/vehicles/models?make_id=${encodeURIComponent(makeId)}`, {
+    const response = await fetch(`${FASTAPI_URL}/api/v1/vehicles/models?make_id=${encodeURIComponent(makeId)}&limit=100`, {
       headers: { 'Content-Type': 'application/json' },
     })
 
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json()
-    return NextResponse.json(data)
+    return NextResponse.json({ models: Array.isArray(data) ? data : data.models || [] })
   } catch (error) {
     console.error('[API] Models error:', error)
     return NextResponse.json({ models: [] }, { status: 200 })

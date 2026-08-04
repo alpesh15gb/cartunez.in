@@ -39,7 +39,8 @@ export default (rootDirectory: string) => {
       const vehicleCompatibilityService = req.scope.resolve("vehicleCompatibilityService");
       const { yearId } = req.params;
       const products = await vehicleCompatibilityService.getProductsForYear(yearId);
-      res.json({ products });
+      const universal_product_ids = await vehicleCompatibilityService.getUniversalProductIds();
+      res.json({ products, universal_product_ids });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch products for year" });
     }

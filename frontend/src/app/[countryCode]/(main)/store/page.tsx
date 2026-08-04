@@ -27,7 +27,7 @@ type Params = {
 export default async function StorePage(props: Params) {
   const params = await props.params;
   const searchParams = await props.searchParams;
-  const { sortBy, page, minPrice, maxPrice, brand, make, model, year } = searchParams
+  const { sortBy, page, minPrice, maxPrice, brand, make, model, year, make_id, model_id, year_id } = searchParams
   const optionValueIds = parseOptionValueIds(searchParams)
 
   const minPriceNum = typeof minPrice === "string" ? parseFloat(minPrice) : undefined
@@ -45,6 +45,9 @@ export default async function StorePage(props: Params) {
       make={typeof make === "string" ? make : undefined}
       model={typeof model === "string" ? model : undefined}
       year={typeof year === "string" ? year : undefined}
+      makeId={typeof make_id === "string" ? make_id : undefined}
+      modelId={typeof model_id === "string" ? model_id : undefined}
+      yearId={typeof year_id === "string" ? year_id : undefined}
     />
   )
 }

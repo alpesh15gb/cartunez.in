@@ -119,9 +119,18 @@ export default function VehicleFinder() {
     const yearObj = years.find((y) => y.id === selectedYear)
 
     const params = new URLSearchParams()
-    if (makeObj) params.set("make", makeObj.name)
-    if (modelObj) params.set("model", modelObj.name)
-    if (yearObj) params.set("year", String(yearObj.year))
+    if (makeObj) {
+      params.set("make", makeObj.name)
+      params.set("make_id", makeObj.id)
+    }
+    if (modelObj) {
+      params.set("model", modelObj.name)
+      params.set("model_id", modelObj.id)
+    }
+    if (yearObj) {
+      params.set("year", String(yearObj.year))
+      params.set("year_id", yearObj.id)
+    }
 
     router.push(`/store?${params.toString()}`)
   }

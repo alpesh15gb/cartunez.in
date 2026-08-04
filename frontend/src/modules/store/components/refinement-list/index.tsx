@@ -17,6 +17,9 @@ const FILTER_KEYS = [
   "make",
   "model",
   "year",
+  "make_id",
+  "model_id",
+  "year_id",
   OPTION_VALUE_QUERY_KEY,
 ] as const
 
@@ -131,6 +134,9 @@ const RefinementList = ({
             params.delete("make")
             params.delete("model")
             params.delete("year")
+            params.delete("make_id")
+            params.delete("model_id")
+            params.delete("year_id")
           }),
       })
     } else if (make) {
@@ -141,6 +147,9 @@ const RefinementList = ({
             params.delete("make")
             params.delete("model")
             params.delete("year")
+            params.delete("make_id")
+            params.delete("model_id")
+            params.delete("year_id")
           }),
       })
     }
@@ -320,6 +329,9 @@ const RefinementList = ({
                 params.delete("make")
                 params.delete("model")
                 params.delete("year")
+                params.delete("make_id")
+                params.delete("model_id")
+                params.delete("year_id")
               })
             }}
             className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-brand transition-colors hover:text-brand-dark"

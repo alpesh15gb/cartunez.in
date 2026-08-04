@@ -1,4 +1,4 @@
-import { TransactionBaseService } from "@medusajs/medusa";
+import { Product, TransactionBaseService } from "@medusajs/medusa";
 import { EntityManager } from "typeorm";
 import { ProductVehicleCompatibility, VehicleVariant } from "../models/vehicle";
 
@@ -67,6 +67,30 @@ export class VehicleCompatibilityService extends TransactionBaseService {
         .getMany();
 
       return results;
+    });
+  }
+
+  /**
+   * Products with NO compatibility records are treated as universal
+   * (fit every vehicle). Returns their IDs.
+   */
+  async getUniversalProductIds(): Promise<string[]> {
+    return await this.atomicPhase_(async (manager) => {
+      const compatRepo = manager.getRepository(ProductVehicleCompatibility);
+      const productRepo = manager.getRepository(Product);
+
+      const linked = await compatRepo
+        .createQueryBuilder("pvc")
+        .select("DISTINCT pvc.product_id", "product_id")
+        .getRawMany();
+
+      const linkedSet = new Set(linked.map((row: any) => row.product_id));
+
+      const all = await productRepo.find({
+        select: ["id"],
+        where: { status: "published" },
+      });
+      return all.filter((p) => !linkedSet.has(p.id)).map((p) => p.id);
     });
   }
 }

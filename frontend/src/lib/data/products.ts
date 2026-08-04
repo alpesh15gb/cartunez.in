@@ -7,6 +7,7 @@ import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { getRegion, retrieveRegion } from "./regions"
+import { getVehicleProductIds } from "./vehicle-compatibility"
 
 type ProductListQueryParams = (HttpTypes.FindParams &
   HttpTypes.StoreProductListParams) & {
@@ -109,6 +110,9 @@ export const listProductsWithSort = async ({
   make,
   model,
   year,
+  makeId,
+  modelId,
+  yearId,
 }: {
   page?: number
   queryParams?: ProductListQueryParams
@@ -121,6 +125,9 @@ export const listProductsWithSort = async ({
   make?: string
   model?: string
   year?: string
+  makeId?: string
+  modelId?: string
+  yearId?: string
 }): Promise<{
   response: { products: HttpTypes.StoreProduct[]; count: number }
   nextPage: number | null
@@ -166,14 +173,33 @@ export const listProductsWithSort = async ({
     })
   }
 
-  // Filter by vehicle make, model, year
-  if (make || model || year) {
-    filteredProducts = filteredProducts.filter((p) => {
-      const searchStr = `${p.title} ${p.description || ""} ${p.subtitle || ""}`.toLowerCase()
-      const matchMake = make ? searchStr.includes(make.toLowerCase()) : true
-      const matchModel = model ? searchStr.includes(model.toLowerCase()) : true
-      return matchMake && matchModel
-    })
+  // Filter by vehicle fitment (real compatibility resolution)
+  if (make || model || year || makeId || modelId || yearId) {
+    try {
+      const fit = await getVehicleProductIds({
+        make,
+        model,
+        year,
+        make_id: makeId,
+        model_id: modelId,
+        year_id: yearId,
+      })
+
+      if (fit && fit.found === false) {
+        // Vehicle not in the catalog -> nothing can fit it
+        filteredProducts = []
+      } else if (fit) {
+        const allowed = new Set([
+          ...fit.product_ids,
+          ...fit.universal_product_ids,
+        ])
+        filteredProducts = filteredProducts.filter((p) => allowed.has(p.id))
+      }
+    } catch (error) {
+      // Resolution failed (backend hiccup) -> fall back to unfiltered so the
+      // store still renders; the product pages still show honest fitment.
+      console.error("[listProductsWithSort] Fitment resolution failed:", error)
+    }
   }
 
   const sortedProducts = sortProducts(filteredProducts, sortBy)

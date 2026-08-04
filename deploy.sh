@@ -150,6 +150,21 @@ server {
         proxy_set_header Host $host;
     }
 
+    # Medusa vehicle fitment read API (products-by-year, compatibility).
+    # Read-only at the edge: writes (POST) are denied so the public
+    # compatibility data cannot be tampered with.
+    location /vehicle/ {
+        limit_except GET {
+            deny all;
+        }
+        proxy_pass http://127.0.0.1:9000/vehicle/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+    }
+
     # Only /api/v1/* and /api/health belong to FastAPI; other /api/*
     # paths (e.g. /api/makes) are Next.js server routes on the frontend.
     location = /api/health {
