@@ -6,8 +6,11 @@ import IntegrationService from "../../../services/integration-service";
 export default () => {
   const router = Router();
 
-  // All integration admin routes require authentication
-  router.use(authenticate());
+  // All integration admin routes require authentication. Scope to the
+  // /admin/integrations prefix: this router is mounted at "/" via
+  // src/api/index.ts, so an unscoped use() would run authenticate() for
+  // every request and 401 the whole store API.
+  router.use("/admin/integrations", authenticate());
 
   // ─── App Definitions ────────────────────────────────────────────────────
 

@@ -4,7 +4,9 @@ import authenticate from "@medusajs/medusa/dist/api/middlewares/authenticate";
 
 export default () => {
   const router = Router();
-  router.use(authenticate());
+  // Scope to the admin path: an unscoped use() would run authenticate()
+  // for every request if this router is ever mounted at "/".
+  router.use("/admin/integrations", authenticate());
 
   router.get("/admin/integrations/ui", (_req: MedusaRequest, res: MedusaResponse) => {
     res.setHeader("Content-Type", "text/html");
