@@ -34,8 +34,11 @@ class Settings(BaseSettings):
     # Medusa
     MEDUSA_URL: str = "http://medusa:9000"
 
-    # Groq LLM (for chatbot)
+    # LLM providers (for chatbot)
     GROQ_API_KEY: str = ""
+    OPENAI_API_KEY: str = ""
+    OPENAI_CHAT_MODEL: str = "gpt-4o-mini"
+    OPENAI_IMAGE_MODEL: str = "gpt-image-1"
 
     # JWT
     JWT_SECRET_KEY: str = ""

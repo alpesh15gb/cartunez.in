@@ -167,6 +167,43 @@ export async function createSupportTicket(data: {
   return apiFetch<{ id: string }>("/api/v1/support/tickets", { method: "POST", body: JSON.stringify(data) })
 }
 
+// ─── Chatbot (AI shopping assistant) ──────────────────────────────────────────
+
+export interface ChatProductCard {
+  id: string
+  title: string
+  handle: string
+  thumbnail?: string | null
+  price?: string | null
+  description?: string | null
+}
+
+export interface ChatAction {
+  label: string
+  type: string
+  value: string
+}
+
+export interface ChatReply {
+  reply: string
+  products: ChatProductCard[]
+  actions: ChatAction[]
+  image_url?: string | null
+  handoff: boolean
+  handoff_reason?: string | null
+}
+
+export async function sendChatMessage(data: {
+  message: string
+  session_id: string
+  image?: string | null
+}): Promise<ChatReply> {
+  return apiFetch<ChatReply>("/api/v1/chatbot/message", {
+    method: "POST",
+    body: JSON.stringify(data),
+  })
+}
+
 // ─── Installation Booking ────────────────────────────────────────────────────
 
 export async function bookInstallation(data: {
