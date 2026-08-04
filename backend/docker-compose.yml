@@ -75,6 +75,7 @@ services:
       NODE_ENV: production
       MEDUSA_BACKEND_URL: http://medusa:9000
       FASTAPI_BACKEND_URL: http://fastapi:8000
+      API_ADMIN_KEY: ${API_ADMIN_KEY:-}
     depends_on:
       medusa:
         condition: service_healthy
@@ -118,8 +119,10 @@ services:
       dockerfile: Dockerfile
     container_name: cartunez-medusa
     restart: unless-stopped
+    # Loopback-only: host nginx reaches Medusa at 127.0.0.1:9000. Never expose
+    # the raw port publicly — the /vehicle/* write routes rely on edge isolation.
     ports:
-      - "9000:9000"
+      - "127.0.0.1:9000:9000"
     volumes:
       - ./uploads:/app/uploads
     environment:
