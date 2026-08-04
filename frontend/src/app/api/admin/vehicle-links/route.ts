@@ -17,6 +17,13 @@ import { NextRequest, NextResponse } from 'next/server'
 const MEDUSA_URL = (process.env.MEDUSA_BACKEND_URL || process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'http://localhost:9000').replace(/\/$/, '')
 const ADMIN_KEY = process.env.API_ADMIN_KEY || ''
 
+interface SearchProduct {
+  id: string
+  title: string
+  handle: string
+  thumbnail?: string | null
+}
+
 interface CompatRow {
   id: string
   product_id: string
@@ -73,9 +80,9 @@ export async function GET(request: NextRequest) {
       if (!response.ok) {
         return NextResponse.json({ error: 'Product search failed' }, { status: 502 })
       }
-      const data = await response.json()
+      const data = (await response.json()) as { products?: SearchProduct[] }
       return NextResponse.json({
-        products: (data.products || []).map((p: any) => ({
+        products: (data.products || []).map((p) => ({
           id: p.id,
           title: p.title,
           handle: p.handle,
@@ -95,7 +102,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       return NextResponse.json({ error: 'Failed to load compatibility' }, { status: 502 })
     }
-    const data = await response.json()
+    const data = (await response.json()) as { compatibility?: CompatRow[] }
     return NextResponse.json({ links: flatLinks(data.compatibility || []) })
   } catch (error) {
     console.error('[Admin] vehicle-links GET error:', error)
@@ -131,7 +138,7 @@ export async function POST(request: NextRequest) {
       console.error('[Admin] vehicle-links POST failed:', response.status, text)
       return NextResponse.json({ error: `Medusa returned ${response.status}` }, { status: 502 })
     }
-    const data = await response.json()
+    const data = (await response.json()) as { compatibility?: CompatRow[] }
     return NextResponse.json({ ok: true, compatibility: data.compatibility || [] })
   } catch (error) {
     console.error('[Admin] vehicle-links POST error:', error)
