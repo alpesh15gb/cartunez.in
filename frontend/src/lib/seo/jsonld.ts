@@ -41,7 +41,7 @@ export const defaultOrganization: OrganizationSchema = {
     addressCountry: "IN",
   },
   contactPoint: {
-    telephone: "+91-XXXXXXXXXX",
+    telephone: "+91-9949695030",
     contactType: "customer service",
   },
 }

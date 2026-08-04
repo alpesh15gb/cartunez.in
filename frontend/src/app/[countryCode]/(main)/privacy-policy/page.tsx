@@ -76,7 +76,7 @@ export default function PrivacyPolicyPage() {
             <li>Request a copy of your data in a portable format</li>
             <li>Lodge a complaint with the relevant data protection authority</li>
           </ul>
-          <p>To exercise these rights, contact us at <strong>support@cartunez.in</strong>.</p>
+          <p>To exercise these rights, contact us at <strong>adnan@cartunez.in</strong>.</p>
 
           <h2 className="text-xl font-display font-bold text-gray-900 uppercase tracking-wide">8. Third-Party Links</h2>
           <p>
@@ -98,7 +98,7 @@ export default function PrivacyPolicyPage() {
             If you have any questions, concerns, or requests regarding this Privacy Policy, please contact us:
           </p>
           <p>
-            Email: <strong>support@cartunez.in</strong><br />
+            Email: <strong>adnan@cartunez.in</strong><br />
             Address: Cartunez, Hyderabad, India
           </p>
         </div>

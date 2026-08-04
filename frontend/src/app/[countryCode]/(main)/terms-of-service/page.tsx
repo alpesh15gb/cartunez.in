@@ -79,7 +79,7 @@ export default function TermsOfServicePage() {
 
           <h2 className="text-xl font-display font-bold text-gray-900 uppercase tracking-wide">12. Contact</h2>
           <p>
-            For questions about these Terms, please contact us at <strong>support@cartunez.in</strong>.
+            For questions about these Terms, please contact us at <strong>adnan@cartunez.in</strong>.
           </p>
         </div>
       </div>

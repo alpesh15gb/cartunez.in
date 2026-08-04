@@ -34,7 +34,7 @@ export default function ReturnsPage() {
 
           <h2 className="text-xl font-display font-bold text-gray-900 uppercase tracking-wide">4. How to Initiate a Return</h2>
           <ol className="list-decimal pl-6 space-y-2">
-            <li>Email us at <strong>support@cartunez.in</strong> within 7 days of delivery with your order number and reason for return.</li>
+            <li>Email us at <strong>adnan@cartunez.in</strong> within 7 days of delivery with your order number and reason for return.</li>
             <li>Our team will review your request and provide a Return Merchandise Authorization (RMA) number within 24-48 hours.</li>
             <li>Pack the item securely in its original packaging, including all accessories.</li>
             <li>Ship the item to the address provided in the RMA email. You are responsible for return shipping costs unless the item is defective or incorrect.</li>
@@ -47,7 +47,7 @@ export default function ReturnsPage() {
 
           <h2 className="text-xl font-display font-bold text-gray-900 uppercase tracking-wide">6. Exchanges</h2>
           <p>
-            If you received a defective, damaged, or incorrect item, we will arrange a free replacement. Please contact us at <strong>support@cartunez.in</strong> with photographic evidence for a quick resolution.
+            If you received a defective, damaged, or incorrect item, we will arrange a free replacement. Please contact us at <strong>adnan@cartunez.in</strong> with photographic evidence for a quick resolution.
           </p>
 
           <h2 className="text-xl font-display font-bold text-gray-900 uppercase tracking-wide">7. Warranty</h2>
@@ -57,7 +57,7 @@ export default function ReturnsPage() {
 
           <h2 className="text-xl font-display font-bold text-gray-900 uppercase tracking-wide">8. Cancellation Policy</h2>
           <p>
-            Orders can be cancelled within <strong>24 hours</strong> of placement at no charge. After 24 hours, if the order has been processed or shipped, cancellation may not be possible. Please contact us immediately at <strong>support@cartunez.in</strong> for cancellation requests.
+            Orders can be cancelled within <strong>24 hours</strong> of placement at no charge. After 24 hours, if the order has been processed or shipped, cancellation may not be possible. Please contact us immediately at <strong>adnan@cartunez.in</strong> for cancellation requests.
           </p>
 
           <h2 className="text-xl font-display font-bold text-gray-900 uppercase tracking-wide">9. Contact Us</h2>
@@ -65,8 +65,8 @@ export default function ReturnsPage() {
             For any questions regarding this policy, please reach out to us:
           </p>
           <p>
-            Email: <strong>support@cartunez.in</strong><br />
-            Phone: <strong>+91-XXXXXXXXXX</strong><br />
+            Email: <strong>adnan@cartunez.in</strong><br />
+            Phone: <strong>+91 9949695030</strong><br />
             Address: Cartunez, Hyderabad, India
           </p>
         </div>

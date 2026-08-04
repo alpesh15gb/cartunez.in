@@ -216,11 +216,11 @@ export default async function Footer() {
                 </li>
                 <li className="text-xs text-gray-500 leading-relaxed">
                   <span className="block text-white/60 font-medium mb-1">Phone</span>
-                  +91 8919298808
+                  +91 9949695030
                 </li>
                 <li className="text-xs text-gray-500 leading-relaxed">
                   <span className="block text-white/60 font-medium mb-1">Email</span>
-                  support@cartunez.in
+                  adnan@cartunez.in
                 </li>
               </ul>
             </div>
@@ -235,7 +235,7 @@ export default async function Footer() {
             <span className="text-[9px] font-bold text-gray-600 uppercase tracking-[0.15em] font-[var(--font-display)]">
               We Accept
             </span>
-            <div className="flex items-center gap-2.5">
+            <div className="flex flex-wrap items-center justify-center gap-2.5">
               {paymentMethods.map((pm) => (
                 <PaymentBadge key={pm} label={pm} />
               ))}
