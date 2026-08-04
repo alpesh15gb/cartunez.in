@@ -37,7 +37,7 @@ export function Pagination({
     <button
       key={p}
       className={clx(
-        "relative inline-flex items-center justify-center min-w-[40px] h-10 rounded-[var(--radius-full)] text-xs font-bold uppercase tracking-[0.08em] transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/15",
+        "relative inline-flex items-center justify-center min-w-[36px] h-9 sm:min-w-[40px] sm:h-10 rounded-[var(--radius-full)] text-xs font-bold uppercase tracking-[0.08em] transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/15",
         isCurrent
           ? "bg-[var(--color-brand)] text-white shadow-md hover:bg-[var(--color-brand-dark)]"
           : "bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-900 border border-gray-200"
@@ -53,7 +53,7 @@ export function Pagination({
   const renderEllipsis = (key: string) => (
     <span
       key={key}
-      className="inline-flex items-center justify-center w-10 h-10 text-xs font-bold text-gray-300 cursor-default select-none"
+      className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 text-xs font-bold text-gray-300 cursor-default select-none"
     >
       ...
     </span>
@@ -112,13 +112,13 @@ export function Pagination({
   // Render the component
   return (
     <div className="flex justify-center w-full mt-12" data-testid={dataTestid}>
-      <nav className="flex items-center gap-2" aria-label="Pagination">
+      <nav className="flex items-center justify-center gap-1.5 sm:gap-2 max-w-full" aria-label="Pagination">
         {/* Previous button */}
         <button
           onClick={() => handlePageChange(page - 1)}
           disabled={page <= 1}
           className={clx(
-            "inline-flex items-center justify-center w-10 h-10 rounded-[var(--radius-full)] text-xs font-bold uppercase tracking-[0.08em] transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/15",
+            "inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-[var(--radius-full)] text-xs font-bold uppercase tracking-[0.08em] transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/15",
             page <= 1
               ? "text-gray-300 cursor-not-allowed bg-transparent"
               : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 border border-gray-200"
@@ -128,14 +128,14 @@ export function Pagination({
           <ChevronLeft className="w-4 h-4" />
         </button>
 
-        <div className="flex items-center gap-2">{renderPageButtons()}</div>
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap max-w-full">{renderPageButtons()}</div>
 
         {/* Next button */}
         <button
           onClick={() => handlePageChange(page + 1)}
           disabled={page >= totalPages}
           className={clx(
-            "inline-flex items-center justify-center w-10 h-10 rounded-[var(--radius-full)] text-xs font-bold uppercase tracking-[0.08em] transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/15",
+            "inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-[var(--radius-full)] text-xs font-bold uppercase tracking-[0.08em] transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--color-brand)]/15",
             page >= totalPages
               ? "text-gray-300 cursor-not-allowed bg-transparent"
               : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 border border-gray-200"

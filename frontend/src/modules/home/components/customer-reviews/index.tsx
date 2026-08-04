@@ -58,31 +58,10 @@ const CustomerReviews = () => {
           }))
         setReviews(recentReviews)
       } catch (error) {
+        // Never fabricate testimonials: fall back to the empty state so
+        // visitors are never shown reviews that do not exist.
         console.error("Failed to load reviews:", error)
-        // Show placeholder reviews on error
-        setReviews([
-          {
-            id: "1",
-            name: "Rajesh Kumar",
-            avatar: "RK",
-            rating: 5,
-            text: "Amazing quality and perfect fit. The installation was smooth and the customer service was excellent!",
-          },
-          {
-            id: "2",
-            name: "Priya Singh",
-            avatar: "PS",
-            rating: 5,
-            text: "Best car accessories I've purchased. The durability is outstanding and the design looks premium.",
-          },
-          {
-            id: "3",
-            name: "Amit Patel",
-            avatar: "AP",
-            rating: 4,
-            text: "Great products and fast shipping. Highly recommend Cartunez for all your automotive needs.",
-          },
-        ])
+        setReviews([])
       } finally {
         setIsLoading(false)
       }

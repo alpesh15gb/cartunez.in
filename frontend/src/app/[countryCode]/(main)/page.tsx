@@ -3,10 +3,10 @@ import { Suspense } from "react"
 import type * as HttpTypes from "@lib/commerce/medusa-v1/types"
 
 import Hero from "@modules/home/components/hero"
+import TrustBar from "@modules/home/components/trust-bar"
 import FeaturedCategories from "@modules/home/components/featured-categories"
 import FeaturedProducts from "@modules/home/components/featured-products"
 import VehicleFinder from "@modules/home/components/vehicle-finder"
-import FeaturedBrands from "@modules/home/components/featured-brands"
 import PromoBanner from "@modules/home/components/promo-banner"
 import RecentlyAdded from "@modules/home/components/recently-added"
 import WhyChooseUs from "@modules/home/components/why-choose-us"
@@ -63,6 +63,7 @@ export default async function Home(props: {
   return (
     <main>
       <Hero />
+      <TrustBar />
       <FeaturedCategories />
       
       {collections && region ? (
@@ -83,7 +84,6 @@ export default async function Home(props: {
       )}
       
       <VehicleFinder />
-      <FeaturedBrands />
       <PromoBanner />
       
       {region ? (

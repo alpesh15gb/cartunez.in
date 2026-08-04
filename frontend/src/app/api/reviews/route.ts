@@ -2,12 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const FASTAPI_URL = process.env.FASTAPI_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'https://cartunez.in'
 
-const fallbackReviews = [
-  { id: '1', customer_name: 'Rajesh Kumar', rating: 5, is_approved: true, content: 'Amazing quality and perfect fit. The installation was smooth and the customer service was excellent!', created_at: new Date().toISOString() },
-  { id: '2', customer_name: 'Priya Singh', rating: 5, is_approved: true, content: 'Best car accessories I\'ve purchased. The durability is outstanding and the design looks premium.', created_at: new Date().toISOString() },
-  { id: '3', customer_name: 'Amit Patel', rating: 4, is_approved: true, content: 'Great products and fast shipping. Highly recommend Cartunez for all your automotive needs.', created_at: new Date().toISOString() },
-]
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -22,14 +16,15 @@ export async function GET(request: NextRequest) {
     })
 
     if (!response.ok) {
-      return NextResponse.json({ reviews: fallbackReviews })
+      // Never fabricate reviews: return an empty list on failure.
+      return NextResponse.json({ reviews: [] })
     }
 
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
     console.error('[API] Reviews error:', error)
-    return NextResponse.json({ reviews: fallbackReviews }, { status: 200 })
+    return NextResponse.json({ reviews: [] })
   }
 }
 
@@ -55,8 +50,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[API] Create review error:', error)
     return NextResponse.json(
-      { id: 'temp-' + Date.now(), ...(await request.json().catch(() => ({}))) },
-      { status: 201 }
+      { error: 'Failed to create review. Please try again.' },
+      { status: 500 }
     )
   }
 }
