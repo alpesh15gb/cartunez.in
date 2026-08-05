@@ -206,6 +206,74 @@ def _safe_singularize(word: str) -> str:
     return word
 
 
+def _price_to_int(price: Optional[str]) -> Optional[int]:
+    """Parse a formatted price ('₹11,900') back to rupees, or None."""
+    if not price:
+        return None
+    try:
+        return int(price.replace("₹", "").replace(",", "").strip())
+    except ValueError:
+        return None
+
+
+def _extract_budget(message: str) -> Optional[int]:
+    """Parse a budget (in rupees) from the customer's message, or None.
+
+    Handles 'under 10000', 'within 15k', 'budget 20000', '10k tak',
+    '₹12,000 ke andar', '1.5 lakh', '8000 me', or a bare 'give me 10000'.
+    Year-like numbers (1950-2100) are ignored so '2022 swift' isn't read as
+    a ₹2,022 budget.
+    """
+    lower = re.sub(r"[₹,]|\brs\.?", "", message.lower())
+
+    def _val(num_str: str, suffix: str = "") -> Optional[int]:
+        try:
+            num = float(num_str)
+        except ValueError:
+            return None
+        s = (suffix or "").lower()
+        if s.startswith("k") or s.startswith("t"):
+            return int(num * 1000)
+        if s.startswith("l"):
+            return int(num * 100_000)
+        return int(num)
+
+    hits: list[int] = []
+
+    # 1) number with k/lakh suffix: "10k", "1.5 lakh", "10 thousand"
+    for m in re.finditer(r"(\d+(?:\.\d+)?)\s*(k|lakh|lacs|lac|thousand)\b", lower):
+        v = _val(m.group(1), m.group(2))
+        if v is not None and v >= 500:
+            hits.append(v)
+
+    # 2) budget word BEFORE the number: "under 10000", "within 15k", "budget 20000"
+    for m in re.finditer(
+        r"(under|below|within|upto|up to|less than|max(?:imum)?|around|budget|approximately|approx)\s*(?:rs\.?)?\s*(\d+(?:\.\d+)?)\s*(k|lakh|lacs|lac|thousand)?",
+        lower,
+    ):
+        v = _val(m.group(2), m.group(3) or "")
+        if v is not None and v >= 500:
+            hits.append(v)
+
+    # 3) number BEFORE a trailing budget word: "10000 tak", "15000 ke andar", "20000 me", "8000 ka"
+    for m in re.finditer(
+        r"(\d+(?:\.\d+)?)\s*(?:rs\.?)?\s*(tak|se kam|se niche|ke andar|ke liye|mein|me|ka|ki)\b",
+        lower,
+    ):
+        v = _val(m.group(1))
+        if v is not None and v >= 500 and not (1950 <= v <= 2100):
+            hits.append(v)
+
+    # 4) bare 4-6 digit amount ("give me 10000") — never a year, never inside
+    #    a longer digit run like a phone number
+    for m in re.finditer(r"(?<!\d)(\d{4,6})(?!\d)", lower):
+        v = _val(m.group(1))
+        if v is not None and v >= 500 and not (1950 <= v <= 2100):
+            hits.append(v)
+
+    return max(hits) if hits else None
+
+
 # Words to drop from a search query so Medusa matches the PRODUCT, not the car
 # ("speaker for my Maruti Swift" -> "speaker") or generic filler words.
 _VEHICLE_TOKENS = {
@@ -233,7 +301,8 @@ _FILLER_WORDS = {
     "kya", "chahiye", "mere", "meri", "apne", "apni", "hai", "batao", "wali",
     "wale", "mein", "se", "kaise", "kitne", "mujhe", "main", "aapke", "aapki",
     "popular", "trending", "recommended", "top", "hot", "all", "available",
-    "kuch", "aur",
+    "kuch", "aur", "below", "within", "upto", "around", "less", "tak",
+    "andar", "kam", "niche", "hisab", "upar",
 }
 
 
@@ -245,7 +314,16 @@ def _clean_query(query: str) -> str:
     request in _search_medusa.
     """
     words = query.lower().split()
-    kept = [w for w in words if w not in _FILLER_WORDS and w not in _VEHICLE_TOKENS]
+    kept = [
+        w
+        for w in words
+        if w not in _FILLER_WORDS
+        and w not in _VEHICLE_TOKENS
+        # Drop standalone numbers / budget amounts ("15000", "15k") — the
+        # model often copies the budget into the search query, and the strict
+        # title filter would then demand the number appear in a title.
+        and not re.fullmatch(r"\d+(?:\.\d+)?k?", w)
+    ]
     return " ".join(kept)
 
 
@@ -314,13 +392,14 @@ def _title_mentioned(reply: str, title: str) -> bool:
     return len(hits) >= 2 or any(len(w) >= 5 for w in hits)
 
 
-async def _search_medusa(query: str, limit: int = 5) -> List[ProductCard]:
+async def _search_medusa(query: str, limit: int = 5, max_price: Optional[int] = None) -> List[ProductCard]:
     """Search Medusa for RELEVANT products.
 
     Medusa's fuzzy search misses plurals ('wheels' -> 0, 'wheel' -> 74) and
     returns broad matches, so we (1) strip car brand/model + filler words from
     the query, (2) try a ladder of candidates, and (3) re-rank by how well the
     product title matches the search words. Only relevant titles make the cut.
+    When max_price is set, only products at or under that budget are returned.
     """
     cleaned = _clean_query(query)
     words = cleaned.split()
@@ -330,10 +409,13 @@ async def _search_medusa(query: str, limit: int = 5) -> List[ProductCard]:
             async with httpx.AsyncClient(timeout=10.0) as client:
                 resp = await client.get(
                     f"{settings.MEDUSA_URL}/store/products",
-                    params={"limit": limit, "order": "-created_at"},
+                    params={"limit": 30, "order": "-created_at"},
                 )
                 resp.raise_for_status()
-                return _format_medusa_products(resp.json())[:limit]
+                batch = _format_medusa_products(resp.json())
+                if max_price:
+                    batch = [p for p in batch if p.price is None or (_price_to_int(p.price) or 0) <= max_price]
+                return batch[:limit]
         except (httpx.HTTPError, ValueError):
             return []
 
@@ -359,6 +441,9 @@ async def _search_medusa(query: str, limit: int = 5) -> List[ProductCard]:
     # ('wheel' -> steering wheels, fog lamps), so anything that doesn't fully
     # match is dropped — an honest empty result beats showing wrong products.
     scored_seen: dict[str, ProductCard] = {}
+    # Fetch a wider window when a budget filter is applied so cheaper matches
+    # aren't crowded out before filtering.
+    target = limit * 3 if max_price else limit
     for q in candidates:
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
@@ -375,9 +460,12 @@ async def _search_medusa(query: str, limit: int = 5) -> List[ProductCard]:
         for p in batch:
             if _score_product(p.title, query_words) >= len(query_words):
                 scored_seen.setdefault(p.id, p)
-        if len(scored_seen) >= limit:
+        if len(scored_seen) >= target:
             break
-    return list(scored_seen.values())[:limit]
+    matched = list(scored_seen.values())
+    if max_price:
+        matched = [p for p in matched if p.price is None or (_price_to_int(p.price) or 0) <= max_price]
+    return matched[:limit]
 
 
 async def _fetch_medusa_product(handle: str) -> Optional[dict]:
@@ -552,7 +640,7 @@ HOW TO HELP:
 1. Understand exactly what they need (product type, car model, budget). If the request is vague, ask ONE short clarifying question (e.g. "Kis budget me chahiye?" or "Stereo, speaker ya amplifier — kya chahiye?"). If it's clear, search right away — don't over-ask.
 2. Use the search_products tool with the EXACT product type the customer named (e.g. "bluetooth speaker", "alloy wheels", "dash camera"). NEVER widen to a whole category like "accessories", and NEVER include the car model in the query — the product is what matters.
 3. Always search before recommending — never invent product names, prices, or links.
-4. After search_products returns, the product cards are shown to the customer automatically. Recommend the specific products by name (title + price) directly in your reply. NEVER invent or guess product names, prices, or stock — only mention what the search actually returned. If there is no exact match (empty results), say honestly that the item isn't available right now and suggest 2-3 alternative categories or ask them to rephrase. It is strictly forbidden to describe products that were not in the search results.
+4. After search_products returns, the product cards are shown to the customer automatically. Recommend the specific products by name (title + price) directly in your reply. NEVER invent or guess product names, prices, or stock — only mention what the search actually returned. If the customer gave a budget (e.g. 'under 10000', '10k', '15k tak'), only mention products priced within it — never suggest anything above their budget. If there is no exact match or nothing fits the budget (empty results), say honestly that the item isn't available within that price and mention the cheapest option if any, or suggest 2-3 alternative categories. It is strictly forbidden to describe products that were not in the search results.
 5. If the customer asks how a product would look on their car (with or without a photo), call generate_mockup with a clear description of the product to visualize.
 6. If you cannot help (order status, refunds, complaints, or the customer is unhappy and wants a human), call escalate_to_human with a short reason.
 7. For a greeting, welcome them warmly in Hinglish and suggest 2-3 popular categories.
@@ -780,6 +868,7 @@ async def _llm_chat_provider(
         handoff: bool = False
         last_products: List[ProductCard] = []
         fetched: dict[str, ProductCard] = {}
+        budget = _extract_budget(message)
         reply_text = ""
 
         for round_index in range(MAX_TOOL_ROUNDS + 1):
@@ -810,7 +899,7 @@ async def _llm_chat_provider(
                 if name == "search_products":
                     q = args.get("query") or message
                     search_query = q
-                    last_products = await _search_medusa(q, limit=5)
+                    last_products = await _search_medusa(q, limit=5, max_price=budget)
                     result = {
                         "products": [
                             {"title": p.title, "handle": p.handle, "price": p.price, "thumbnail": p.thumbnail}
@@ -819,6 +908,11 @@ async def _llm_chat_provider(
                         "count": len(last_products),
                         "note": "If the list is empty, tell the customer honestly and suggest alternatives.",
                     }
+                    if budget:
+                        result["budget_note"] = (
+                            f"The customer's budget is ₹{budget:,}. Only recommend products priced at or below "
+                            "that — if none fit, say honestly that nothing is available within that budget."
+                        )
                 elif name == "fetch_product_by_handle":
                     handle = args.get("handle", "")
                     detail = await _fetch_medusa_product(handle)
@@ -859,14 +953,11 @@ async def _llm_chat_provider(
         # trailing tool-call talk.
         reply_text = re.sub(r"tool call:?\s*[a-z_0-9]+\s*\([^)]*\)", "", reply_text, flags=re.IGNORECASE)
         m = re.search(
-            r"(?i)(\*\*call|call (the )?(search_products|fetch_product_by_handle|generate_mockup|escalate_to_human)|(search_products|fetch_product_by_handle)\()",
+            r"(?i)(\*\*call|call (the )?(search_products|fetch_product_by_handle|generate_mockup|escalate_to_human)|(search_products|fetch_product_by_handle)\(|call_[a-z_0-9]*|(action|tool|search(?:es|ing)?\s+(?:products?|items?))\s*:|\*\s*(searches?|searching|fetches?|finding|generates?))",
             reply_text,
         )
         if m:
-            reply_text = reply_text[: m.start()].rstrip(" ,.!:;")
-        m2 = re.search(r"\bcall_[a-z_0-9]*", reply_text)
-        if m2:
-            reply_text = reply_text[: m2.start()].rstrip(" ,.!:;")
+            reply_text = reply_text[: m.start()].rstrip(" ,.!:;*")
         # Collapse stutter/restating, then exact duplicates and stray artifacts.
         reply_text = _dedupe_sentences(reply_text)
         # If the customer wrote in Latin script, drop any Devanagari sentences
@@ -890,12 +981,10 @@ async def _llm_chat_provider(
         # Product cards for the UI: reuse the last search, else keyword fallback
         products: List[ProductCard] = list(last_products)
         if not products:
+            # Re-run the search directly (never widen to a whole category — that
+            # dumps unrelated products like screen activators for 'subwoofer').
             q = search_query or message
-            products = await _search_medusa(q, limit=5)
-            if not products:
-                category = _extract_category(message)
-                if category:
-                    products = await _search_medusa(category, limit=5)
+            products = await _search_medusa(q, limit=5, max_price=budget)
 
         # If the reply names specific products (fetched by handle), put those
         # cards first so the list always matches the text.
@@ -914,6 +1003,22 @@ async def _llm_chat_provider(
                 reply_text = f"Yahan {len(products)} options hain: {names}."
             else:
                 reply_text = "Abhi store me iska exact match nahi mila. Koi aur product batao — jaise stereo, seat covers ya LED lights — ya human se baat karo."
+        elif budget and not products:
+            # Budget given but nothing fits: say so honestly and quote the
+            # cheapest option (always above the budget here, since any within-
+            # budget match would already be in `products`).
+            cheapest = await _search_medusa(search_query or message, limit=5)
+            cheapest_price = min(
+                (v for p in cheapest if (v := _price_to_int(p.price)) is not None),
+                default=None,
+            )
+            if cheapest_price is not None:
+                reply_text = (
+                    f"Bhai, ₹{budget:,} ke andar iska kuch nahi mila. "
+                    f"Sabse sasta option ₹{cheapest_price:,} ka hai — budget thoda upar karein ya koi aur product batao?"
+                )
+            else:
+                reply_text = f"Bhai, ₹{budget:,} ke andar kuch nahi mila. Koi aur product batao, main wahan dekh leta hoon."
         elif not products:
             lower_reply = reply_text.lower()
             # The model sometimes HALLUCINATES products with fake prices when
@@ -1039,6 +1144,7 @@ async def chat_message(
         raise HTTPException(status_code=400, detail="Image is too large or invalid (max 5 MB)")
 
     category = _extract_category(message)
+    budget = _extract_budget(message)
 
     # Greeting — no LLM needed
     if _is_greeting(message):
@@ -1078,20 +1184,21 @@ async def chat_message(
                 reply_text = groq_result.get("reply", "Here's what I found:")
                 search_query = groq_result.get("search_query", message)
                 category = category or groq_result.get("category")
-                products = await _search_medusa(search_query, limit=5)
+                products = await _search_medusa(search_query, limit=5, max_price=budget)
                 if not products:
-                    products = await _search_medusa("car accessories", limit=5)
+                    products = await _search_medusa("car accessories", limit=5, max_price=budget)
                     reply_text += " Here are some popular items to browse."
                 llm_result = {"reply": reply_text, "products": products, "handoff": handoff}
 
     # 3) Keyword fallback
     if not llm_result:
         search_query = message
-        products = await _search_medusa(search_query, limit=5)
-        if not products and category:
-            products = await _search_medusa(category, limit=5)
+        products = await _search_medusa(search_query, limit=5, max_price=budget)
         if not products:
-            reply_text = random.choice(FALLBACK_RESPONSES)
+            if budget:
+                reply_text = f"Bhai, ₹{budget:,} ke andar abhi kuch nahi mila. Koi aur product ya thoda higher budget batao?"
+            else:
+                reply_text = random.choice(FALLBACK_RESPONSES)
             products = []  # honest empty — no dumping unrelated products
         else:
             count = len(products)
