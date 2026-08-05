@@ -43,10 +43,11 @@ class Settings(BaseSettings):
     # Omniroute — multi-AI-provider gateway (OpenAI-compatible, preferred when set)
     OMNIROUTE_URL: str = ""          # e.g. http://host:20128/v1
     OMNIROUTE_API_KEY: str = ""
-    # auto/fast is the low-latency Omniroute combo pool (auto/chat can pick
-    # slow providers — measured 66s vs 8s for auto/fast). Can also be a
-    # provider/model, e.g. anthropic/claude-3-5-sonnet.
-    OMNIROUTE_CHAT_MODEL: str = "auto/fast"
+    # auto/claude-sonnet verified on the user's gateway: fast (~4-10s), clean
+    # Roman-script Hinglish, reliable tool calling (auto/fast routed to gemini
+    # which wrote Devanagari, stuttered, and over-promised). Can be overridden
+    # per-env or pinned to a specific provider/model.
+    OMNIROUTE_CHAT_MODEL: str = "auto/claude-sonnet"
     OMNIROUTE_IMAGE_MODEL: str = "antigravity/gemini-3.1-flash-image"   # verified working on the user's gateway
 
     # JWT
