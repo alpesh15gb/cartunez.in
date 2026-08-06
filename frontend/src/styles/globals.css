@@ -183,4 +183,11 @@
   .text-gradient-brand {
     @apply bg-gradient-to-r from-brand to-brand-dark bg-clip-text text-transparent;
   }
+
+}
+
+/* Infinite marquee (homepage brand strip) — top-level so the CSS pipeline keeps it */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }

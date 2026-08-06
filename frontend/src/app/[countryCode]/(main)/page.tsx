@@ -7,6 +7,8 @@ import TrustBar from "@modules/home/components/trust-bar"
 import FeaturedCategories from "@modules/home/components/featured-categories"
 import FeaturedProducts from "@modules/home/components/featured-products"
 import VehicleFinder from "@modules/home/components/vehicle-finder"
+import TrendingCategories from "@modules/home/components/trending-categories"
+import BrandStrip from "@modules/home/components/brand-strip"
 import PromoBanner from "@modules/home/components/promo-banner"
 import RecentlyAdded from "@modules/home/components/recently-added"
 import WhyChooseUs from "@modules/home/components/why-choose-us"
@@ -62,9 +64,16 @@ export default async function Home(props: {
   // Even if API fails, show loading placeholders so page isn't blank
   return (
     <main>
+      {/* Hero immediately paired with the vehicle finder — the "Shop Your
+          Ride" fitment-first pattern every major auto parts store leads with. */}
       <Hero />
+      <VehicleFinder />
       <TrustBar />
       <FeaturedCategories />
+
+      <Suspense fallback={null}>
+        <TrendingCategories />
+      </Suspense>
       
       {collections && region ? (
         <Suspense fallback={<div className="bg-white py-12"><div className="content-container"><div className="h-96 bg-gray-50 animate-pulse rounded-[var(--radius-lg)]" /></div></div>}>
@@ -83,7 +92,7 @@ export default async function Home(props: {
         </div>
       )}
       
-      <VehicleFinder />
+      <BrandStrip />
       <PromoBanner />
       
       {region ? (

@@ -8,19 +8,21 @@ const categories = [
   {
     name: "Interior",
     description: "Cabin upgrades, mats, lighting, seat comfort and daily-use accessories.",
-    href: "/store?category=interior",
+    href: "/categories/floor-mats",
     image: "/images/categories/interior.jpg",
   },
   {
     name: "Exterior",
     description: "Lighting, styling, protection and road-ready exterior enhancements.",
-    href: "/store?category=exterior",
+    href: "/categories/headlights",
     image: "/images/categories/exterior.jpg",
   },
   {
     name: "Wheels",
     description: "Alloy wheels, fitment-led upgrades and premium stance products.",
-    href: "/store?category=wheels",
+    // alloy-wheels category has no products yet — point to the full store so
+    // the CTA never lands on an empty page
+    href: "/store",
     image: "/images/categories/wheels.jpg",
   },
 ]

@@ -25,6 +25,9 @@ interface VehicleYear {
   year: number
 }
 
+// Persisted "garage" storage key — module scope so it isn't recreated per render
+const GARAGE_KEY = "cartunez_garage"
+
 export default function VehicleFinder() {
   const [makes, setMakes] = useState<VehicleMake[]>([])
   const [models, setModels] = useState<VehicleModel[]>([])
@@ -36,6 +39,11 @@ export default function VehicleFinder() {
 
   const [loading, setLoading] = useState({ makes: false, models: false, years: false })
   const [error, setError] = useState("")
+
+  // Persisted "garage" — the last car the visitor searched, remembered across
+  // visits (the standard fitment-store pattern: AutoZone / CarParts garage).
+  const [garage, setGarage] = useState<{ make?: string; model?: string; year?: number } | null>(null)
+
   const router = useRouter()
   const routeParams = useParams()
   const countryCode = (routeParams.countryCode as string) || "in"
@@ -48,6 +56,18 @@ export default function VehicleFinder() {
     if (!res.ok) throw new Error(`API ${res.status}: ${res.statusText}`)
     return res.json()
   }
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(GARAGE_KEY)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (parsed && (parsed.make || parsed.model)) setGarage(parsed)
+      }
+    } catch {
+      /* ignore corrupted garage data */
+    }
+  }, [])
 
   useEffect(() => {
     const loadMakes = async () => {
@@ -134,6 +154,19 @@ export default function VehicleFinder() {
       params.set("year_id", yearObj.id)
     }
 
+    // Remember this car as the visitor's garage
+    const savedGarage = {
+      make: makeObj?.name,
+      model: modelObj?.name,
+      year: yearObj?.year,
+    }
+    try {
+      window.localStorage.setItem(GARAGE_KEY, JSON.stringify(savedGarage))
+      setGarage(savedGarage)
+    } catch {
+      /* storage may be unavailable */
+    }
+
     router.push(`/${countryCode}/store?${params.toString()}`)
   }
 
@@ -178,6 +211,30 @@ export default function VehicleFinder() {
             <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-[var(--radius-md)] p-4 mb-6 text-sm text-red-600 font-medium">
               <span className="mt-0.5 shrink-0">⚠</span>
               <span>{error}</span>
+            </div>
+          )}
+
+          {garage && (garage.make || garage.model) && (
+            <div className="mb-6 flex flex-wrap items-center gap-3 rounded-[var(--radius-md)] border border-brand/15 bg-brand/5 px-4 py-3">
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand">My Garage</span>
+              <span className="text-sm font-bold text-gray-900">
+                {[garage.make, garage.model, garage.year].filter(Boolean).join(" ")}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    window.localStorage.removeItem(GARAGE_KEY)
+                  } catch {
+                    /* ignore */
+                  }
+                  setGarage(null)
+                }}
+                className="ml-auto inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.12em] text-gray-400 transition-colors hover:text-brand"
+              >
+                <span>✕</span>
+                <span>Clear</span>
+              </button>
             </div>
           )}
 
