@@ -9,19 +9,19 @@ const categories = [
     name: "Interior",
     description: "Cabin upgrades, mats, lighting, seat comfort and daily-use accessories.",
     href: "/store?category=interior",
-    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1400&auto=format&fit=crop",
+    image: "/images/categories/interior.jpg",
   },
   {
     name: "Exterior",
     description: "Lighting, styling, protection and road-ready exterior enhancements.",
     href: "/store?category=exterior",
-    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1400&auto=format&fit=crop",
+    image: "/images/categories/exterior.jpg",
   },
   {
     name: "Wheels",
     description: "Alloy wheels, fitment-led upgrades and premium stance products.",
     href: "/store?category=wheels",
-    image: "https://images.unsplash.com/photo-1617814076668-9d7cc7e8ca43?q=80&w=1400&auto=format&fit=crop",
+    image: "/images/categories/wheels.jpg",
   },
 ]
 
