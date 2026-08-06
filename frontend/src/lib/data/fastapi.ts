@@ -191,12 +191,17 @@ export interface ChatReply {
   image_url?: string | null
   handoff: boolean
   handoff_reason?: string | null
+  // Assistant-built cart / order state
+  cart_id?: string | null
+  checkout_url?: string | null
+  order_id?: string | null
 }
 
 export async function sendChatMessage(data: {
   message: string
   session_id: string
   image?: string | null
+  customer_id?: string | null
 }): Promise<ChatReply> {
   return apiFetch<ChatReply>("/api/v1/chatbot/message", {
     method: "POST",

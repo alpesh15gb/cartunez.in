@@ -43,7 +43,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
       {props.children}
       <Footer />
       <MobileBottomNav />
-      <ChatWidget />
+      <ChatWidget customerId={customer?.id ?? null} />
     </>
   )
 }

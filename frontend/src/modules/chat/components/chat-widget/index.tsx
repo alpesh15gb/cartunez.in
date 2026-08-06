@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   ArrowUp,
   Bot,
@@ -25,6 +25,9 @@ interface ChatMessageItem {
   image_url?: string | null
   uploaded_image?: string | null
   handoff?: boolean
+  cart_id?: string | null
+  checkout_url?: string | null
+  order_id?: string | null
 }
 
 const SUGGESTIONS = [
@@ -40,17 +43,31 @@ const CONTACTS = [
   { label: "Email adnan@cartunez.in", href: "mailto:adnan@cartunez.in" },
 ]
 
-export default function ChatWidget() {
+export default function ChatWidget({
+  customerId,
+}: {
+  customerId?: string | null
+}) {
   const router = useRouter()
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessageItem[]>([])
   const [input, setInput] = useState("")
   const [busy, setBusy] = useState(false)
-  const [sessionId] = useState(() =>
-    typeof window !== "undefined"
-      ? window.crypto?.randomUUID?.() || `chat-${Date.now()}`
-      : `chat-${Date.now()}`
-  )
+  // Persist the anonymous session id so conversation memory survives page
+  // loads; signed-in customers are remembered via customer_id on the backend.
+  const [sessionId] = useState(() => {
+    if (typeof window === "undefined") return `chat-${Date.now()}`
+    try {
+      const existing = window.localStorage.getItem("chat_session_id")
+      if (existing) return existing
+      const id = window.crypto?.randomUUID?.() || `chat-${Date.now()}`
+      window.localStorage.setItem("chat_session_id", id)
+      return id
+    } catch {
+      return window.crypto?.randomUUID?.() || `chat-${Date.now()}`
+    }
+  })
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -82,6 +99,7 @@ export default function ChatWidget() {
         message: text,
         session_id: sessionId,
         image: uploadedImage || null,
+        customer_id: customerId || null,
       })
       const assistantMsg: ChatMessageItem = {
         role: "assistant",
@@ -90,6 +108,9 @@ export default function ChatWidget() {
         actions: reply.actions,
         image_url: reply.image_url,
         handoff: reply.handoff,
+        cart_id: reply.cart_id,
+        checkout_url: reply.checkout_url,
+        order_id: reply.order_id,
       }
       setMessages((prev) => [...prev, assistantMsg])
     } catch (err) {
@@ -125,7 +146,27 @@ export default function ChatWidget() {
     reader.readAsDataURL(file)
   }
 
+  // Adopt a bot-created cart into the storefront's cart cookie, then head to checkout.
+  const handleCheckout = async (cartId?: string | null) => {
+    if (!cartId) return
+    try {
+      await fetch("/api/cart/adopt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart_id: cartId }),
+      })
+    } catch (err) {
+      console.error("[ChatWidget] adopt cart failed:", err)
+    }
+    const countryCode = pathname.split("/")[1] || "in"
+    router.push(`/${countryCode}/checkout`)
+  }
+
   const runAction = (action: ChatAction) => {
+    if (action.type === "checkout") {
+      handleCheckout(action.value)
+      return
+    }
     if (action.type === "link") {
       if (action.value.startsWith("http")) {
         window.open(action.value, "_blank")
@@ -276,6 +317,25 @@ export default function ChatWidget() {
                           {a.label}
                         </button>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Bot-built cart → checkout */}
+                  {m.checkout_url && m.cart_id && (
+                    <button
+                      onClick={() => handleCheckout(m.cart_id)}
+                      className="mt-2 flex w-full items-center justify-center gap-2 rounded-[var(--radius-md)] bg-gradient-to-br from-brand to-brand-dark px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-brand/25 transition-all duration-200 hover:shadow-lg"
+                    >
+                      🛒 Proceed to Checkout
+                    </button>
+                  )}
+
+                  {/* Order placed confirmation */}
+                  {m.order_id && (
+                    <div className="mt-2 rounded-[var(--radius-md)] border border-emerald-200 bg-emerald-50 p-3 text-center">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+                        Order placed 🎉
+                      </p>
                     </div>
                   )}
 

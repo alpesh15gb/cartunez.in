@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     # Medusa
     MEDUSA_URL: str = "http://medusa:9000"
 
+    # Self URL — FastAPI calling its own public endpoints (e.g. vehicle /resolve)
+    SELF_API_URL: str = "http://fastapi:8000"
+
     # LLM providers (for chatbot)
     GROQ_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
