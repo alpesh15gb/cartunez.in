@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Loader2, ArrowRight, Search } from "lucide-react"
 interface VehicleMake {
   id: string
@@ -37,6 +37,8 @@ export default function VehicleFinder() {
   const [loading, setLoading] = useState({ makes: false, models: false, years: false })
   const [error, setError] = useState("")
   const router = useRouter()
+  const routeParams = useParams()
+  const countryCode = (routeParams.countryCode as string) || "in"
 
   const apiFetch = async (url: string) => {
     const res = await fetch(url, {
@@ -132,7 +134,7 @@ export default function VehicleFinder() {
       params.set("year_id", yearObj.id)
     }
 
-    router.push(`/store?${params.toString()}`)
+    router.push(`/${countryCode}/store?${params.toString()}`)
   }
 
   const selectClasses = [

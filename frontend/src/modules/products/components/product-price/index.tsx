@@ -68,7 +68,7 @@ export default function ProductPrice({
       )}
       {!isSale && (
         <p className="text-xs text-gray-400 font-medium">
-          Inclusive of all taxes &bull; Free shipping above ?999
+          Inclusive of all taxes &bull; Free shipping above ₹999
         </p>
       )}
     </div>

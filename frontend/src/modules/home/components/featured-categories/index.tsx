@@ -31,7 +31,7 @@ const quickCategories = [
   { name: "Floor Mats", href: "/categories/floor-mats" },
   { name: "LED Lights", href: "/categories/led-lights" },
   { name: "Seat Covers", href: "/categories/seat-covers" },
-  { name: "Steering Wheels", href: "/categories/steering-wheels" },
+  { name: "Steering Covers", href: "/categories/steering-covers" },
 ]
 
 const FeaturedCategories = () => {

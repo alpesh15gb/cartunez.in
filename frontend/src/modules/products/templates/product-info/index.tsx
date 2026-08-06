@@ -53,7 +53,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
       <div className="flex flex-wrap gap-3 pt-2">
         <div className="inline-flex items-center gap-1.5 text-[10px] font-medium text-gray-500">
           <Truck className="w-3.5 h-3.5 text-gray-400" />
-          Free shipping on orders over ?999
+          Free shipping on orders over ₹999
         </div>
         <div className="inline-flex items-center gap-1.5 text-[10px] font-medium text-gray-500">
           <BadgeCheck className="w-3.5 h-3.5 text-gray-400" />
