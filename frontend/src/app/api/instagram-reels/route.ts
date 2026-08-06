@@ -6,6 +6,7 @@ export async function GET(_request: NextRequest) {
   try {
     const response = await fetch(`${FASTAPI_URL}/api/v1/social/instagram/reels?limit=8`, {
       headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
     })
 
     if (!response.ok) {
