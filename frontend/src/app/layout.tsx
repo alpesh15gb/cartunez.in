@@ -4,7 +4,14 @@ import {
   organizationJsonLd,
   websiteJsonLd,
 } from "@lib/seo/jsonld"
+import { Inter } from "next/font/google"
 import "styles/globals.css"
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
@@ -78,7 +85,7 @@ const jsonLd = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <head>
         <script
           type="application/ld+json"
