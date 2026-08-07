@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.middleware.auth import require_api_key
+from app.middleware.rate_limit import rate_limit
 from app.models.lead import Lead
 from app.schemas.lead import LeadCreate, LeadResponse
 
@@ -53,6 +54,7 @@ async def get_lead(
 async def create_lead(
     data: LeadCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(rate_limit(max_requests=10, window_seconds=60)),
 ) -> Lead:
     """Create a new lead. Public endpoint (form submissions)."""
     lead = Lead(**data.model_dump())

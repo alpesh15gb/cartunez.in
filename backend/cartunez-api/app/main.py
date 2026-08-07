@@ -79,7 +79,21 @@ app.include_router(chatbot_router, prefix="/api/v1")
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Catch-all exception handler."""
+    """Catch-all exception handler.
+
+    In DEBUG mode, surfaces the exception type for easier troubleshooting.
+    In production, returns a generic message to avoid leaking internals.
+    """
+    import logging
+
+    logger = logging.getLogger(__name__)
+    logger.error("Unhandled exception on %s %s: %s", request.method, request.url, exc, exc_info=True)
+
+    if settings.DEBUG:
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error", "error": type(exc).__name__},
+        )
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal server error"},
@@ -91,13 +105,21 @@ async def not_found_handler(request: Request, exc) -> JSONResponse:
     """404 not found handler."""
     return JSONResponse(
         status_code=404,
-        content={"detail": "Resource not found"},
+        content={"detail": "Resource not found", "path": str(request.url.path)},
     )
 
 
 @app.exception_handler(422)
 async def validation_error_handler(request: Request, exc) -> JSONResponse:
     """422 validation error handler."""
+    from fastapi.exceptions import RequestValidationError
+
+    if isinstance(exc, RequestValidationError):
+        # Preserve validation details — safe to surface field-level errors
+        return JSONResponse(
+            status_code=422,
+            content={"detail": exc.errors(), "body": exc.body},
+        )
     return JSONResponse(
         status_code=422,
         content={"detail": "Validation error"},

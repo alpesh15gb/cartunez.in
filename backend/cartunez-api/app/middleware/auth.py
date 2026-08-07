@@ -1,11 +1,10 @@
 """API key authentication for admin endpoints."""
 
-import os
-
-from fastapi import Depends, HTTPException, Security
+from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import APIKeyHeader
 
-API_KEY = os.getenv("API_ADMIN_KEY", "")
+from app.config import settings
+
 API_KEY_HEADER = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 
@@ -13,14 +12,15 @@ async def require_api_key(
     api_key: str | None = Security(API_KEY_HEADER),
 ) -> str:
     """Require a valid API key for admin endpoints."""
-    if not API_KEY:
+    configured_key = settings.API_ADMIN_KEY or ""
+    if not configured_key:
         raise HTTPException(
-            status_code=503,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Admin API is not configured",
         )
-    if not api_key or api_key != API_KEY:
+    if not api_key or api_key != configured_key:
         raise HTTPException(
-            status_code=401,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or missing API key",
         )
     return api_key

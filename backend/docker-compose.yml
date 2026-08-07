@@ -169,8 +169,10 @@ services:
       dockerfile: Dockerfile
     container_name: cartunez-fastapi
     restart: unless-stopped
+    # Loopback-only: FastAPI is reached via nginx /api/. Do not expose
+    # the raw port publicly.
     ports:
-      - "8005:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       ENVIRONMENT: production
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-cartunez}
@@ -190,6 +192,8 @@ services:
       CORS_ORIGINS: '["https://cartunez.in","https://www.cartunez.in","http://localhost:3000","http://localhost:3001","http://localhost:5173"]'
       RATE_LIMIT_PER_MINUTE: 60
       DEBUG: "false"
+      WORKERS: "4"
+      LOG_LEVEL: "info"
     depends_on:
       postgres:
         condition: service_healthy

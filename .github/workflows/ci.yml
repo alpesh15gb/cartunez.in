@@ -1,0 +1,255 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: 20
+  PYTHON_VERSION: 3.12
+
+jobs:
+  # ═══════════════════════════════════════════════════════
+  # Lint & Type-check
+  # ═══════════════════════════════════════════════════════
+  lint-and-typecheck:
+    name: Lint & Type-check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/cartunez-medusa/package-lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # --- Medusa: TypeScript typecheck ---
+      - name: Medusa typecheck
+        working-directory: backend/cartunez-medusa
+        run: npm run typecheck
+
+      # --- Medusa: Lint ---
+      - name: Medusa lint
+        working-directory: backend/cartunez-medusa
+        run: npm run lint
+
+      # --- FastAPI: Import check ---
+      - name: FastAPI import check
+        working-directory: backend/cartunez-api
+        run: |
+          pip install -r requirements.txt
+          python -c "import app.main; print('FastAPI import OK')"
+
+      # --- Frontend: TypeScript typecheck ---
+      - name: Frontend typecheck
+        working-directory: frontend
+        run: npx tsc --noEmit
+
+      # --- Frontend: Lint ---
+      - name: Frontend lint
+        working-directory: frontend
+        run: npm run lint
+
+  # ═══════════════════════════════════════════════════════
+  # Tests
+  # ═══════════════════════════════════════════════════════
+  test:
+    name: Tests
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: test_cartunez
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_cartunez
+      REDIS_URL: redis://localhost:6379/0
+      JWT_SECRET_KEY: test-secret-key-for-ci-only
+      API_ADMIN_KEY: test-api-key-12345
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/cartunez-medusa/package-lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # --- Medusa tests ---
+      - name: Medusa test dependencies
+        working-directory: backend/cartunez-medusa
+        run: npm ci
+
+      - name: Medusa tests
+        working-directory: backend/cartunez-medusa
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_cartunez
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-secret-key-for-ci
+          COOKIE_SECRET: test-cookie-secret-for-ci
+        run: npm test
+
+      # --- FastAPI tests ---
+      - name: FastAPI test dependencies
+        working-directory: backend/cartunez-api
+        run: |
+          pip install -r requirements-test.txt
+
+      - name: FastAPI tests
+        working-directory: backend/cartunez-api
+        env:
+          TESTING: "true"
+        run: pytest -xvs
+
+      # --- Frontend tests ---
+      - name: Frontend test dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Frontend tests
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://localhost:9000
+          NEXT_PUBLIC_BASE_URL: http://localhost:3000
+        run: npm test
+
+  # ═══════════════════════════════════════════════════════
+  # Security Audit
+  # ═══════════════════════════════════════════════════════
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/cartunez-medusa/package-lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Node.js audit (Medusa)
+        working-directory: backend/cartunez-medusa
+        run: npm audit --audit-level=high
+
+      - name: Node.js audit (Frontend)
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+      - name: Python audit (FastAPI)
+        working-directory: backend/cartunez-api
+        run: |
+          pip install -r requirements.txt
+          pip install pip-audit
+          pip-audit -r requirements.txt --severity high
+
+  # ═══════════════════════════════════════════════════════
+  # Docker Build
+  # ═══════════════════════════════════════════════════════
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-22.04
+    needs: [lint-and-typecheck, test, security-audit]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build Medusa image
+        uses: docker/build-push-action@v5
+        with:
+          context: backend/cartunez-medusa
+          file: backend/cartunez-medusa/Dockerfile
+          platforms: linux/amd64
+          tags: cartunez-medusa:latest
+          load: true
+
+      - name: Build FastAPI image
+        uses: docker/build-push-action@v5
+        with:
+          context: backend/cartunez-api
+          file: backend/cartunez-api/Dockerfile
+          platforms: linux/amd64
+          tags: cartunez-fastapi:latest
+          load: true
+
+      - name: Build Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: frontend
+          file: frontend/Dockerfile
+          platforms: linux/amd64
+          tags: cartunez-frontend:latest
+          load: true
+
+  # ═══════════════════════════════════════════════════════
+  # Deploy (tagged releases only)
+  # ═══════════════════════════════════════════════════════
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-22.04
+    needs: [docker-build]
+    if: startsWith(github.ref, 'refs/tags/')
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying tagged release ${{ github.ref_name }}"
+          # Actual deployment handled by external CD hook or manual step
+          # This job gates on CI passing and confirms deploy readiness
+          echo "CI gate passed — deployment can proceed"

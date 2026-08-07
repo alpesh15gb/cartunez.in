@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.middleware.auth import require_api_key
+from app.middleware.rate_limit import rate_limit
 from app.models.review import Review
 from app.schemas.review import ReviewCreate, ReviewPublicResponse, ReviewResponse
 
@@ -49,6 +50,7 @@ async def get_review(
 async def create_review(
     data: ReviewCreate,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(rate_limit(max_requests=10, window_seconds=60)),
 ) -> Review:
     """Submit a new product review."""
     review = Review(**data.model_dump())

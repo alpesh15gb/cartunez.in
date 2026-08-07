@@ -64,6 +64,9 @@ class Settings(BaseSettings):
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 60
 
+    # Admin API Key
+    API_ADMIN_KEY: str = ""
+
     def model_post_init(self, __context) -> None:
         # Parse CORS_ORIGINS if it comes as a JSON string from env
         if isinstance(self.CORS_ORIGINS, str):
