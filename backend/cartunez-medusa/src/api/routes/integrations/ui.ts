@@ -384,7 +384,7 @@ async function openDetail(id) {
     <table class="log-table">
       <thead><tr><th>Event Type</th><th>Status</th><th>Response</th><th>Time</th></tr></thead>
       <tbody>
-        \${logs.map(l => \`<tr><td>\${l.event_type}</td><td><span class="badge \${l.status}\">\${l.status}</span></td><td>\${l.response_status || '-'}</td><td style="font-size:11px;color:var(--text-secondary)">\${new Date(l.created_at).toLocaleString()}</td></tr>\`).join('')}
+        \${logs.map(l => \`<tr><td>\${l.event_type}</td><td><span class="badge \${l.status}">\${l.status}</span></td><td>\${l.response_status || '-'}</td><td style="font-size:11px;color:var(--text-secondary)">\${new Date(l.created_at).toLocaleString()}</td></tr>\`).join('')}
       </tbody>
     </table>\`}
   \`;
