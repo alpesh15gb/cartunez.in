@@ -1,5 +1,6 @@
 """SQLAlchemy models for the Cartunez platform."""
 
+from app.models.base import Base
 from app.models.analytics import ConversionEvent, PageView
 from app.models.blog import Blog, BlogAuthor, BlogCategory, BlogTag
 from app.models.bulk_enquiry import BulkEnquiry
@@ -17,6 +18,7 @@ from app.models.vehicle import (
 )
 
 __all__ = [
+    "Base",
     "VehicleMake",
     "VehicleModel",
     "VehicleYear",
