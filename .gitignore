@@ -41,3 +41,9 @@ uploads/
 
 # misc
 *.log
+
+# local databases
+.freebuff/
+*.db
+*.db-shm
+*.db-wal
