@@ -10,6 +10,7 @@ node_modules/
 # Next.js
 /.next/
 /out/
+/public/_cand/
 
 # Production
 /build
