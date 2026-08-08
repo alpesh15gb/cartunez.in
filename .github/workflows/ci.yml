@@ -34,6 +34,11 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      # --- Install Medusa dependencies ---
+      - name: Install Medusa dependencies
+        working-directory: backend/cartunez-medusa
+        run: npm ci
+
       # --- Medusa: TypeScript typecheck ---
       - name: Medusa typecheck
         working-directory: backend/cartunez-medusa
@@ -50,6 +55,11 @@ jobs:
         run: |
           pip install -r requirements.txt
           python -c "import app.main; print('FastAPI import OK')"
+
+      # --- Frontend: Install dependencies ---
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
 
       # --- Frontend: TypeScript typecheck ---
       - name: Frontend typecheck
