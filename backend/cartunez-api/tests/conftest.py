@@ -12,7 +12,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 # Set test environment variables BEFORE importing the app, so that settings
 # and database engine are configured for testing.
 os.environ.setdefault("TESTING", "true")
-os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+# Always use SQLite for tests — overrides any DATABASE_URL from CI env
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
 os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-for-ci-only-32chars!")
 os.environ.setdefault("API_ADMIN_KEY", "test-api-key-12345")
