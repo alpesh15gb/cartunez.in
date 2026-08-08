@@ -10,12 +10,15 @@ from sqlalchemy.ext.asyncio import (
 
 from app.config import settings
 
+# SQLite in-memory/testing mode doesn't support pool_size/max_overflow
+# and uses StaticPool; only apply pool settings for PostgreSQL
+_is_sqlite = settings.DATABASE_URL.startswith("sqlite")
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DATABASE_ECHO,
-    pool_size=20,
-    max_overflow=10,
-    pool_pre_ping=True,
+    pool_size=20 if not _is_sqlite else None,
+    max_overflow=10 if not _is_sqlite else None,
+    pool_pre_ping=True if not _is_sqlite else None,
 )
 
 async_session_factory = async_sessionmaker(
