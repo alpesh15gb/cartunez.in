@@ -5,7 +5,6 @@ import os
 from typing import AsyncGenerator
 
 import pytest
-import pytest_asyncio
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -36,7 +35,7 @@ TestSessionLocal = async_sessionmaker(
 )
 
 
-@pytest_asyncio.fixture
+@pytest.fixture
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create all tables, provide a session, then drop tables for each test."""
     async with _test_engine.begin() as conn:
@@ -49,8 +48,8 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
         await conn.run_sync(Base.metadata.drop_all)
 
 
-@pytest_asyncio.fixture
-async def api_client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
+@pytest.fixture
+async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """FastAPI test client with database dependency overridden."""
     from app.main import app
     from app.database import get_db
